@@ -275,7 +275,7 @@ void EndTacticalBattleForEnemy()
 	// Clear enemies in battle for all mobile groups in the sector
 	CFOR_EACH_ENEMY_GROUP(i)
 	{
-		GROUP const& g = *i;
+		GROUP_JA2 const& g = *i;
 		if (g.fVehicle)       continue;
 		if (g.ubSector != gWorldSector) continue;
 
@@ -321,7 +321,7 @@ void PrepareEnemyForSectorBattle()
 		return;
 	}
 
-	GROUP* const bg = gpBattleGroup;
+	GROUP_JA2* const bg = gpBattleGroup;
 	if (bg && !bg->fPlayer)
 	{ /* The enemy has instigated the battle which means they are the ones
 		 * entering the conflict. The player was actually in the sector first, and
@@ -599,7 +599,7 @@ void ProcessQueenCmdImplicationsOfDeath(const SOLDIERTYPE* const pSoldier)
 	//we are recording an enemy death
 	if( pSoldier->ubGroupID )
 	{ //The enemy was in a mobile group
-		GROUP *pGroup;
+		GROUP_JA2 *pGroup;
 		pGroup = GetGroup( pSoldier->ubGroupID );
 		if( !pGroup )
 		{
@@ -908,7 +908,7 @@ void ProcessQueenCmdImplicationsOfDeath(const SOLDIERTYPE* const pSoldier)
 }
 
 
-static void AddEnemiesToBattle(GROUP const&, UINT8 strategic_insertion_code, UINT8 n_admins, UINT8 n_troops, UINT8 n_elites);
+static void AddEnemiesToBattle(GROUP_JA2 const&, UINT8 strategic_insertion_code, UINT8 n_admins, UINT8 n_troops, UINT8 n_elites);
 
 
 /* Rarely, there will be more enemies than supported by the engine. In this
@@ -931,7 +931,7 @@ void AddPossiblePendingEnemiesToBattle()
 	{
 		if (n_slots == 0) break;
 
-		GROUP const& g = *i;
+		GROUP_JA2 const& g = *i;
 		if (g.fVehicle)                   continue;
 		if (gWorldSector.z != 0)          continue;
 		if (g.ubSector != gWorldSector) continue;
@@ -1005,7 +1005,7 @@ void AddPossiblePendingEnemiesToBattle()
 }
 
 
-static void AddEnemiesToBattle(GROUP const& g, UINT8 const strategic_insertion_code, UINT8 n_admins, UINT8 n_troops, UINT8 n_elites)
+static void AddEnemiesToBattle(GROUP_JA2 const& g, UINT8 const strategic_insertion_code, UINT8 n_admins, UINT8 n_troops, UINT8 n_elites)
 {
 	SLOGD("Enemy reinforcements have arrived! ({} admins, {} troops, {} elite)",
 				n_admins, n_troops, n_elites);

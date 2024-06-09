@@ -12,6 +12,10 @@
 #include "Overhead_Types.h"
 #include "Item_Types.h"
 #include "Timer_Control.h"
+#include "GameSettings.h"
+#include "ReplicaManager3.h"
+
+using namespace RakNet;
 
 #include <string_theory/string>
 #include <optional>
@@ -323,8 +327,2087 @@ using SoldierID = UINT8;
 #define SOLDIERTYPE_NAME_LENGTH 10
 
 
-struct SOLDIERTYPE
+struct SOLDIERTYPE : public Replica3
 {
+	SOLDIERTYPE()
+	{
+		ubID = 0;
+
+		ubBodyType = 0;
+		bActionPoints = 0;
+		bInitialActionPoints = 0;
+
+		uiStatusFlags = 0;
+
+		//for (int i = 0; i < NUM_INV_SLOTS; i++)
+		//	inv[i] = 0; // FIXME: Initialize
+		pTempObject = NULL;
+		pKeyRing = NULL;
+
+		bOldLife = 0; // life at end of last turn, recorded for monster AI
+		// attributes
+		bInSector = 0;
+		bFlashPortraitFrame = 0;
+		sFractLife = 0; // fraction of life pts (in hundreths)
+		bBleeding = 0; // blood loss control variable
+		bBreath = 0; // current breath value
+		bBreathMax = 0; // max breath, affected by fatigue/sleep
+		bStealthMode = 0;
+
+		sBreathRed = 0; // current breath value
+		fDelayedMovement = 0;
+
+		ubWaitActionToDo = 0;
+		ubInsertionDirection = 0;
+		// skills
+		opponent = NULL;
+		bLastRenderVisibleValue = 0;
+		ubAttackingHand = 0;
+		// traits
+		sWeightCarriedAtTurnStart = 0;
+		//name = NULL; // FIXME: Initialize
+
+		bVisible = 0; // to render or not to render...
+
+
+		bActive = 0;
+
+		bTeam = 0; // Team identifier
+
+		//NEW MOVEMENT INFORMATION for Strategic Movement
+		ubGroupID = 0; //the movement group the merc is currently part of.
+		fBetweenSectors = 0; //set when the group isn't actually in a sector.
+		//sSectorX and sSectorY will reflect the sector the
+		//merc was at last.
+
+		ubMovementNoiseHeard = 0;// 8 flags by direction
+
+		// WORLD POSITION STUFF
+		dXPos = 0;
+		dYPos = 0;
+		sInitialGridNo = 0;
+		sGridNo = 0;
+		bDirection = 0;
+		sHeightAdjustment = 0;
+		sDesiredHeight = 0;
+		sTempNewGridNo = 0; // New grid no for advanced animations
+		bOverTerrainType = 0;
+
+		bCollapsed = 0; // collapsed due to being out of APs
+		bBreathCollapsed = 0; // collapsed due to being out of APs
+
+		ubDesiredHeight = 0;
+		usPendingAnimation = 0;
+		ubPendingStanceChange = 0;
+		usAnimState = 0;
+		fNoAPToFinishMove = 0;
+		fPausedMove = 0;
+		fUIdeadMerc = 0; // UI Flags for removing a newly dead merc
+		fUICloseMerc = 0; // UI Flags for closing panels
+
+		// FIXME: Initialize
+		//UpdateCounter = NULL;
+		//DamageCounter = NULL;
+		//AICounter = NULL;
+		//FadeCounter = NULL;
+
+		ubSkillTrait1 = 0;
+		ubSkillTrait2 = 0;
+
+		bDexterity = 0; // dexterity (hand coord) value
+		bWisdom = 0;
+		attacker = NULL;
+		previous_attacker = NULL;
+		next_to_previous_attacker = NULL;
+		fTurnInProgress = 0;
+
+		fIntendedTarget = 0; // intentionally shot?
+		fPauseAllAnimation = 0;
+
+		bExpLevel = 0; // general experience level
+		sInsertionGridNo = 0;
+
+		fContinueMoveAfterStanceChange = 0;
+
+		//AnimCache = NULL; // FIXME: Initialize
+
+		bLife = 0; // current life (hit points or health)
+		bSide = 0;
+		bNewOppCnt = 0;
+
+		usAniCode = 0;
+		usAniFrame = 0;
+		sAniDelay = 0;
+
+		// MOVEMENT TO NEXT TILE HANDLING STUFF
+		bAgility = 0; // agility (speed) value
+		sDelayedMovementCauseGridNo = 0;
+		sReservedMovementGridNo = 0;
+
+		bStrength = 0;
+
+		// Weapon Stuff
+		sTargetGridNo = 0;
+		bTargetLevel = 0;
+		bTargetCubeLevel = 0;
+		sLastTarget = 0;
+		bTilesMoved = 0;
+		bLeadership = 0;
+		dNextBleed = 0;
+		fWarnedAboutBleeding = 0;
+		fDyingComment = 0;
+
+		ubTilesMovedPerRTBreathUpdate = 0;
+		usLastMovementAnimPerRTBreathUpdate = 0;
+
+		fTurningToShoot = 0;
+		fTurningUntilDone = 0;
+		fGettingHit = 0;
+		fInNonintAnim = 0;
+		fFlashLocator = 0;
+		sLocatorFrame = 0;
+		fShowLocator = 0;
+		fFlashPortrait = 0;
+		bMechanical = 0;
+		bLifeMax = 0; // maximum life for this merc
+
+		face = NULL;
+
+
+		// PALETTE MANAGEMENT STUFF
+		// FIXME: Initialize
+		//HeadPal = NULL;
+		//PantsPal = NULL;
+		//VestPal = NULL;
+		//SkinPal = NULL;
+
+		for (int i = 0; i < NUM_SOLDIER_SHADES; i++)
+			pShades[i] = NULL;
+		for (int i = 0; i < 20; i++)
+			pGlowShades[i] = NULL;
+		bMedical = 0;
+		fBeginFade = 0;
+		ubFadeLevel = 0;
+		ubServiceCount = 0;
+		service_partner = NULL;
+		bMarksmanship = 0;
+		bExplosive = 0;
+		pThrowParams = NULL;
+		fTurningFromPronePosition = 0;
+		bReverse = 0;
+		pLevelNode = NULL;
+
+		// WALKING STUFF
+		bDesiredDirection = 0;
+		sDestXPos = 0;
+		sDestYPos = 0;
+		sDestination = 0;
+		sFinalDestination = 0;
+		bLevel = 0;
+
+		// PATH STUFF
+		for (int i = 0; i < MAX_PATH_LIST_SIZE; i++)
+			ubPathingData[i] = 0;
+		ubPathDataSize = 0;
+		ubPathIndex = 0;
+		sBlackList = 0;
+		bAimTime = 0;
+		bShownAimTime = 0;
+		bPathStored = 0; // good for AI to reduct redundancy
+		bHasKeys = 0; // allows AI controlled dudes to open locked doors
+
+		ubStrategicInsertionCode = 0;
+		usStrategicInsertionData = 0;
+
+		light = NULL;
+		muzzle_flash = NULL;
+		bMuzFlashCount = 0;
+
+		sX = 0;
+		sY = 0;
+
+		usOldAniState = 0;
+		sOldAniCode = 0;
+
+		bBulletsLeft = 0;
+		ubSuppressionPoints = 0;
+
+		// STUFF FOR RANDOM ANIMATIONS
+		uiTimeOfLastRandomAction = 0;
+
+		// AI STUFF
+		for (int i = 0; i < MAX_NUM_SOLDIERS; i++)
+			bOppList[i] = 0;
+		bLastAction = 0;
+		bAction = 0;
+		usActionData = 0;
+		bNextAction = 0;
+		usNextActionData = 0;
+		bActionInProgress = 0;
+		bAlertStatus = 0;
+		bOppCnt = 0;
+		bNeutral = 0;
+		bNewSituation = 0;
+		bNextTargetLevel = 0;
+		bOrders = 0;
+		bAttitude = 0;
+		bUnderFire = 0;
+		bShock = 0;
+		bBypassToGreen = 0;
+		bDominantDir = 0; // AI main direction to face...
+		bPatrolCnt = 0; // number of patrol gridnos
+		bNextPatrolPnt = 0; // index to next patrol gridno
+		for (int i = 0; i < MAXPATROLGRIDS; i++)
+			usPatrolGrid[i] = 0;
+		sNoiseGridno = 0;
+		ubNoiseVolume = 0;
+		bLastAttackHit = 0;
+		xrayed_by = NULL;
+		dHeightAdjustment = 0;
+		bMorale = 0;
+		bTeamMoraleMod = 0;
+		bTacticalMoraleMod = 0;
+		bStrategicMoraleMod = 0;
+		bAIMorale = 0;
+		ubPendingAction = 0;
+		ubPendingActionAnimCount = 0;
+		uiPendingActionData1 = 0;
+		sPendingActionData2 = 0;
+		bPendingActionData3 = 0;
+		ubDoorHandleCode = 0;
+		uiPendingActionData4 = 0;
+		bInterruptDuelPts = 0;
+		bPassedLastInterrupt = 0;
+		bIntStartAPs = 0;
+		bMoved = 0;
+		bHunting = 0;
+		ubCaller = 0;
+		sCallerGridNo = 0;
+		bCallPriority = 0;
+		bCallActedUpon = 0;
+		bFrenzied = 0;
+		bNormalSmell = 0;
+		bMonsterSmell = 0;
+		bMobility = 0;
+		fAIFlags = 0;
+
+		fDontChargeReadyAPs = 0;
+		usAnimSurface = 0;
+		sZLevel = 0;
+		fPrevInWater = 0;
+		fGoBackToAimAfterHit = 0;
+
+		sWalkToAttackGridNo = 0;
+		sWalkToAttackWalkToCost = 0;
+
+		fForceShade = 0;
+		pForcedShade = NULL;
+
+		bDisplayDamageCount = 0;
+		fDisplayDamage = 0;
+		sDamage = 0;
+		sDamageX = 0;
+		sDamageY = 0;
+		bDoBurst = 0;
+		usUIMovementMode = 0;
+		fUIMovementFast = 0;
+
+		//BlinkSelCounter = 0;
+		//PortraitFlashCounter = 0;
+		fDeadSoundPlayed = 0;
+		ubProfile = 0;
+		ubQuoteRecord = 0;
+		ubQuoteActionID = 0;
+		ubBattleSoundID = 0;
+
+		fClosePanel = 0;
+		fClosePanelToDie = 0;
+		ubClosePanelFrame = 0;
+		fDeadPanel = 0;
+		ubDeadPanelFrame = 0;
+
+		sPanelFaceX = 0;
+		sPanelFaceY = 0;
+
+		// QUOTE STUFF
+		bNumHitsThisTurn = 0;
+		usQuoteSaidFlags = 0;
+		fCloseCall = 0;
+		bLastSkillCheck = 0;
+		ubSkillCheckAttempts = 0;
+
+		bStartFallDir = 0;
+		fTryingToFall = 0;
+
+		ubPendingDirection = 0;
+		uiAnimSubFlags = 0;
+
+		bAimShotLocation = 0;
+		ubHitLocation = 0;
+
+		effect_shade = NULL; // Shading table for effects
+
+		for (int i = 0; i < 6; i++)
+			sSpreadLocations[i] = 0;
+		fDoSpread = 0;
+		sStartGridNo = 0;
+		sEndGridNo = 0;
+		sForcastGridno = 0;
+		sZLevelOverride = 0;
+		bMovedPriorToInterrupt = 0;
+		iEndofContractTime = 0; // time, in global time(resolution, minutes) that merc will leave, or if its a M.E.R.C. merc it will be set to -1. -2 for NPC and player generated
+		iStartContractTime = 0;
+		iTotalContractLength = 0; // total time of AIM mercs contract or the time since last paid for a M.E.R.C. merc
+		iNextActionSpecialData = 0; // AI special action data record for the next action
+		ubWhatKindOfMercAmI = 0; //Set to the type of character it is
+		bAssignment = 0; // soldiers current assignment
+		fForcedToStayAwake = 0; // forced by player to stay awake, reset to false, the moment they are set to rest or sleep
+		bTrainStat = 0; // current stat soldier is training
+		sSector = 0; // position on the Stategic Map
+		iVehicleId = 0; // the id of the vehicle the char is in
+		pMercPath = NULL; // Path Structure
+		fHitByGasFlags = 0; // flags
+		usMedicalDeposit = 0; // is there a medical deposit on merc
+		usLifeInsurance = 0; // is there life insurance taken out on merc
+
+		iStartOfInsuranceContract = 0;
+		uiLastAssignmentChangeMin = 0; // timestamp of last assignment change in minutes
+		iTotalLengthOfInsuranceContract = 0;
+
+		ubSoldierClass = 0; //admin, elite, troop (creature types?)
+		ubAPsLostToSuppression = 0;
+		fChangingStanceDueToSuppression = 0;
+		suppressor = NULL;
+
+		ubCivilianGroup = 0;
+
+		uiChangeLevelTime = 0;
+		uiChangeHealthTime = 0;
+		uiChangeStrengthTime = 0;
+		uiChangeDexterityTime = 0;
+		uiChangeAgilityTime = 0;
+		uiChangeWisdomTime = 0;
+		uiChangeLeadershipTime = 0;
+		uiChangeMarksmanshipTime = 0;
+		uiChangeExplosivesTime = 0;
+		uiChangeMedicalTime = 0;
+		uiChangeMechanicalTime = 0;
+
+		uiUniqueSoldierIdValue = 0; // the unique value every instance of a soldier gets - 1 is the first valid value
+		bBeingAttackedCount = 0; // Being attacked counter
+
+		for (int i = 0; i < NUM_INV_SLOTS; i++) {
+			bNewItemCount[i] = 0;
+			bNewItemCycleCount[i] = 0;
+		}
+		fCheckForNewlyAddedItems = 0;
+		bEndDoorOpenCode = 0;
+
+		ubScheduleID = 0;
+		sEndDoorOpenCodeData = 0;
+		//NextTileCounter = 0;
+		fBlockedByAnotherMerc = 0;
+		bBlockedByAnotherMercDirection = 0;
+		usAttackingWeapon = 0;
+		target = NULL;
+		//bWeaponMode = 0;
+		bAIScheduleProgress = 0;
+		sOffWorldGridNo = 0;
+		pAniTile = NULL;
+		bCamo = 0;
+		sAbsoluteFinalDestination = 0;
+		ubHiResDirection = 0;
+		ubLastFootPrintSound = 0;
+		bVehicleID = 0;
+		fPastXDest = 0;
+		fPastYDest = 0;
+		bMovementDirection = 0;
+		sOldGridNo = 0;
+		usDontUpdateNewGridNoOnMoveAnimChange = 0;
+		sBoundingBoxWidth = 0;
+		sBoundingBoxHeight = 0;
+		sBoundingBoxOffsetX = 0;
+		sBoundingBoxOffsetY = 0;
+		uiTimeSameBattleSndDone = 0;
+		//bOldBattleSnd = 0;
+		fContractPriceHasIncreased = 0;
+		uiBurstSoundID = 0;
+		fFixingSAMSite = 0;
+		fFixingRobot = 0;
+		bSlotItemTakenFrom = 0;
+		fSignedAnotherContract = 0;
+		fDontChargeTurningAPs = 0;
+		auto_bandaging_medic = NULL;
+		robot_remote_holder = NULL;
+		uiTimeOfLastContractUpdate = 0;
+		bTypeOfLastContract = 0;
+		bTurnsCollapsed = 0;
+		bSleepDrugCounter = 0;
+		ubMilitiaKills = 0;
+
+		for (int i = 0; i < 2; i++) {
+			bFutureDrugEffect[i] = 0;
+			bDrugEffectRate[i] = 0;
+			bDrugEffect[i] = 0;
+			bDrugSideEffectRate[i] = 0;
+			bDrugSideEffect[i] = 0;
+		}
+
+
+		bBlindedCounter = 0;
+		fMercCollapsedFlag = 0;
+		fDoneAssignmentAndNothingToDoFlag = 0;
+		fMercAsleep = 0;
+		fDontChargeAPsForStanceChange = 0;
+
+		ubTurnsUntilCanSayHeardNoise = 0;
+		usQuoteSaidExtFlags = 0;
+
+		sContPathLocation = 0;
+		bGoodContPath = 0;
+		bNoiseLevel = 0;
+		bRegenerationCounter = 0;
+		bRegenBoostersUsedToday = 0;
+		bNumPelletsHitBy = 0;
+		sSkillCheckGridNo = 0;
+		ubLastEnemyCycledID = 0;
+
+		ubPrevSectorID = 0;
+		ubNumTilesMovesSinceLastForget = 0;
+		bTurningIncrement = 0;
+		uiBattleSoundID = 0;
+
+		fSoldierWasMoving = 0;
+		fSayAmmoQuotePending = 0;
+		usValueGoneUp = 0;
+
+		ubNumLocateCycles = 0;
+		ubDelayedMovementFlags = 0;
+		fMuzzleFlash = 0;
+		CTGTTarget = NULL;
+
+		//PanelAnimateCounter = NULL;
+
+		bCurrentCivQuote = 0;
+		bCurrentCivQuoteDelta = 0;
+		ubMiscSoldierFlags = 0;
+		ubReasonCantFinishMove = 0;
+
+		sLocationOfFadeStart = 0;
+		bUseExitGridForReentryDirection = 0;
+
+		uiTimeSinceLastSpoke = 0;
+		ubContractRenewalQuoteCode = 0;
+		sPreTraversalGridNo = 0;
+		uiXRayActivatedTime = 0;
+		bTurningFromUI = 0;
+		bPendingActionData5 = 0;
+
+		bDelayedStrategicMoraleMod = 0;
+		ubDoorOpeningNoise = 0;
+
+		ubLeaveHistoryCode = 0;
+		fDontUnsetLastTargetFromTurn = 0;
+		bOverrideMoveSpeed = 0;
+		fUseMoverrideMoveSpeed = 0;
+
+		uiTimeSoldierWillArrive = 0;
+		fUseLandingZoneForArrival = 0;
+		fFallClockwise = 0;
+		bVehicleUnderRepairID = 0;
+		iTimeCanSignElsewhere = 0;
+		bHospitalPriceModifier = 0;
+		uiStartTimeOfInsuranceContract = 0;
+		fRTInNonintAnim = 0;
+		fDoingExternalDeath = 0;
+		bCorpseQuoteTolerance = 0;
+		iPositionSndID = 0;
+		uiTuringSoundID = 0;
+		ubLastDamageReason = 0;
+		fComplainedThatTired = 0;
+		for (int i = 0; i < 2; i++)
+			sLastTwoLocations[i] = 0;
+		uiTimeSinceLastBleedGrunt = 0;
+	}
+
+	~SOLDIERTYPE()
+	{
+	}
+
+	SOLDIERTYPE& SOLDIERTYPE::operator =(const SOLDIERTYPE& other)
+	{
+		ubID = other.ubID;
+
+		ubBodyType = other.ubBodyType;
+		bActionPoints = other.bActionPoints;
+		bInitialActionPoints = other.bInitialActionPoints;
+
+		uiStatusFlags = other.uiStatusFlags;
+
+		for (int i = 0; i < NUM_INV_SLOTS; i++)
+			inv[i] = other.inv[i];
+		pTempObject = other.pTempObject;
+		pKeyRing = other.pKeyRing;
+
+		bOldLife = other.bOldLife; // life at end of last turn, recorded for monster AI
+		// attributes
+		bInSector = other.bInSector;
+		bFlashPortraitFrame = other.bFlashPortraitFrame;
+		sFractLife = other.sFractLife; // fraction of life pts (in hundreths)
+		bBleeding = other.bBleeding; // blood loss control variable
+		bBreath = other.bBreath; // current breath value
+		bBreathMax = other.bBreathMax; // max breath, affected by fatigue/sleep
+		bStealthMode = other.bStealthMode;
+
+		sBreathRed = other.sBreathRed; // current breath value
+		fDelayedMovement = other.fDelayedMovement;
+
+		ubWaitActionToDo = other.ubWaitActionToDo;
+		ubInsertionDirection = other.ubInsertionDirection;
+		// skills
+		opponent = other.opponent;
+		bLastRenderVisibleValue = other.bLastRenderVisibleValue;
+		ubAttackingHand = other.ubAttackingHand;
+		// traits
+		sWeightCarriedAtTurnStart = other.sWeightCarriedAtTurnStart;
+		//name = other.name;
+		name = other.name.c_str(); // Instead of direct assignment to avoid exception
+
+		bVisible = other.bVisible; // to render or not to render...
+
+
+		bActive = other.bActive;
+
+		bTeam = other.bTeam; // Team identifier
+
+		//NEW MOVEMENT INFORMATION for Strategic Movement
+		ubGroupID = other.ubGroupID; //the movement group the merc is currently part of.
+		fBetweenSectors = other.fBetweenSectors; //set when the group isn't actually in a sector.
+		//sSectorX and sSectorY will reflect the sector the
+		//merc was at last.
+
+		ubMovementNoiseHeard = other.ubMovementNoiseHeard;// 8 flags by direction
+
+		// WORLD POSITION STUFF
+		dXPos = other.dXPos;
+		dYPos = other.dYPos;
+		sInitialGridNo = other.sInitialGridNo;
+		sGridNo = other.sGridNo;
+		bDirection = other.bDirection;
+		sHeightAdjustment = other.sHeightAdjustment;
+		sDesiredHeight = other.sDesiredHeight;
+		sTempNewGridNo = other.sTempNewGridNo; // New grid no for advanced animations
+		bOverTerrainType = other.bOverTerrainType;
+
+		bCollapsed = other.bCollapsed; // collapsed due to being out of APs
+		bBreathCollapsed = other.bBreathCollapsed; // collapsed due to being out of APs
+
+		ubDesiredHeight = other.ubDesiredHeight;
+		usPendingAnimation = other.usPendingAnimation;
+		ubPendingStanceChange = other.ubPendingStanceChange;
+		usAnimState = other.usAnimState;
+		fNoAPToFinishMove = other.fNoAPToFinishMove;
+		fPausedMove = other.fPausedMove;
+		fUIdeadMerc = other.fUIdeadMerc; // UI Flags for removing a newly dead merc
+		fUICloseMerc = other.fUICloseMerc; // UI Flags for closing panels
+
+		UpdateCounter = other.UpdateCounter;
+		DamageCounter = other.DamageCounter;
+		AICounter = other.AICounter;
+		FadeCounter = other.FadeCounter;
+
+		ubSkillTrait1 = other.ubSkillTrait1;
+		ubSkillTrait2 = other.ubSkillTrait2;
+
+		bDexterity = other.bDexterity; // dexterity (hand coord) value
+		bWisdom = other.bWisdom;
+		attacker = other.attacker;
+		previous_attacker = other.previous_attacker;
+		next_to_previous_attacker = other.next_to_previous_attacker;
+		fTurnInProgress = other.fTurnInProgress;
+
+		fIntendedTarget = other.fIntendedTarget; // intentionally shot?
+		fPauseAllAnimation = other.fPauseAllAnimation;
+
+		bExpLevel = other.bExpLevel; // general experience level
+		sInsertionGridNo = other.sInsertionGridNo;
+
+		fContinueMoveAfterStanceChange = other.fContinueMoveAfterStanceChange;
+
+		AnimCache = other.AnimCache;
+
+		bLife = other.bLife; // current life (hit points or health)
+		bSide = other.bSide;
+		bNewOppCnt = other.bNewOppCnt;
+
+		usAniCode = other.usAniCode;
+		usAniFrame = other.usAniFrame;
+		sAniDelay = other.sAniDelay;
+
+		// MOVEMENT TO NEXT TILE HANDLING STUFF
+		bAgility = other.bAgility; // agility (speed) value
+		sDelayedMovementCauseGridNo = other.sDelayedMovementCauseGridNo;
+		sReservedMovementGridNo = other.sReservedMovementGridNo;
+
+		bStrength = other.bStrength;
+
+		// Weapon Stuff
+		sTargetGridNo = other.sTargetGridNo;
+		bTargetLevel = other.bTargetLevel;
+		bTargetCubeLevel = other.bTargetCubeLevel;
+		sLastTarget = other.sLastTarget;
+		bTilesMoved = other.bTilesMoved;
+		bLeadership = other.bLeadership;
+		dNextBleed = other.dNextBleed;
+		fWarnedAboutBleeding = other.fWarnedAboutBleeding;
+		fDyingComment = other.fDyingComment;
+
+		ubTilesMovedPerRTBreathUpdate = other.ubTilesMovedPerRTBreathUpdate;
+		usLastMovementAnimPerRTBreathUpdate = other.usLastMovementAnimPerRTBreathUpdate;
+
+		fTurningToShoot = other.fTurningToShoot;
+		fTurningUntilDone = other.fTurningUntilDone;
+		fGettingHit = other.fGettingHit;
+		fInNonintAnim = other.fInNonintAnim;
+		fFlashLocator = other.fFlashLocator;
+		sLocatorFrame = other.sLocatorFrame;
+		fShowLocator = other.fShowLocator;
+		fFlashPortrait = other.fFlashPortrait;
+		bMechanical = other.bMechanical;
+		bLifeMax = other.bLifeMax; // maximum life for this merc
+
+		face = other.face;
+
+
+		// PALETTE MANAGEMENT STUFF
+		//HeadPal = other.HeadPal;
+		//PantsPal = other.PantsPal;
+		//VestPal = other.VestPal;
+		//SkinPal = other.SkinPal;
+		HeadPal = other.HeadPal.c_str(); // Instead of direct assignment to avoid exception
+		PantsPal = other.PantsPal.c_str(); // Instead of direct assignment to avoid exception
+		VestPal = other.VestPal.c_str(); // Instead of direct assignment to avoid exception
+		SkinPal = other.SkinPal.c_str(); // Instead of direct assignment to avoid exception
+
+		for (int i = 0; i < NUM_SOLDIER_SHADES; i++)
+			pShades[i] = other.pShades[i];
+		for (int i = 0; i < 20; i++)
+			pGlowShades[i] = other.pGlowShades[i];
+		bMedical = other.bMedical;
+		fBeginFade = other.fBeginFade;
+		ubFadeLevel = other.ubFadeLevel;
+		ubServiceCount = other.ubServiceCount;
+		service_partner = other.service_partner;
+		bMarksmanship = other.bMarksmanship;
+		bExplosive = other.bExplosive;
+		pThrowParams = other.pThrowParams;
+		fTurningFromPronePosition = other.fTurningFromPronePosition;
+		bReverse = other.bReverse;
+		pLevelNode = other.pLevelNode;
+
+		// WALKING STUFF
+		bDesiredDirection = other.bDesiredDirection;
+		sDestXPos = other.sDestXPos;
+		sDestYPos = other.sDestYPos;
+		sDestination = other.sDestination;
+		sFinalDestination = other.sFinalDestination;
+		bLevel = other.bLevel;
+
+		// PATH STUFF
+		for (int i = 0; i < MAX_PATH_LIST_SIZE; i++)
+			ubPathingData[i] = other.ubPathingData[i];
+		ubPathDataSize = other.ubPathDataSize;
+		ubPathIndex = other.ubPathIndex;
+		sBlackList = other.sBlackList;
+		bAimTime = other.bAimTime;
+		bShownAimTime = other.bShownAimTime;
+		bPathStored = other.bPathStored; // good for AI to reduct redundancy
+		bHasKeys = other.bHasKeys; // allows AI controlled dudes to open locked doors
+
+		ubStrategicInsertionCode = other.ubStrategicInsertionCode;
+		usStrategicInsertionData = other.usStrategicInsertionData;
+
+		light = other.light;
+		muzzle_flash = other.muzzle_flash;
+		bMuzFlashCount = other.bMuzFlashCount;
+
+		sX = other.sX;
+		sY = other.sY;
+
+		usOldAniState = other.usOldAniState;
+		sOldAniCode = other.sOldAniCode;
+
+		bBulletsLeft = other.bBulletsLeft;
+		ubSuppressionPoints = other.ubSuppressionPoints;
+
+		// STUFF FOR RANDOM ANIMATIONS
+		uiTimeOfLastRandomAction = other.uiTimeOfLastRandomAction;
+
+		// AI STUFF
+		for (int i = 0; i < MAX_NUM_SOLDIERS; i++)
+			bOppList[i] = other.bOppList[i];
+		bLastAction = other.bLastAction;
+		bAction = other.bAction;
+		usActionData = other.usActionData;
+		bNextAction = other.bNextAction;
+		usNextActionData = other.usNextActionData;
+		bActionInProgress = other.bActionInProgress;
+		bAlertStatus = other.bAlertStatus;
+		bOppCnt = other.bOppCnt;
+		bNeutral = other.bNeutral;
+		bNewSituation = other.bNewSituation;
+		bNextTargetLevel = other.bNextTargetLevel;
+		bOrders = other.bOrders;
+		bAttitude = other.bAttitude;
+		bUnderFire = other.bUnderFire;
+		bShock = other.bShock;
+		bBypassToGreen = other.bBypassToGreen;
+		bDominantDir = other.bDominantDir; // AI main direction to face...
+		bPatrolCnt = other.bPatrolCnt; // number of patrol gridnos
+		bNextPatrolPnt = other.bNextPatrolPnt; // index to next patrol gridno
+		for (int i = 0; i < MAXPATROLGRIDS; i++)
+			usPatrolGrid[i] = other.usPatrolGrid[i];
+		sNoiseGridno = other.sNoiseGridno;
+		ubNoiseVolume = other.ubNoiseVolume;
+		bLastAttackHit = other.bLastAttackHit;
+		xrayed_by = other.xrayed_by;
+		dHeightAdjustment = other.dHeightAdjustment;
+		bMorale = other.bMorale;
+		bTeamMoraleMod = other.bTeamMoraleMod;
+		bTacticalMoraleMod = other.bTacticalMoraleMod;
+		bStrategicMoraleMod = other.bStrategicMoraleMod;
+		bAIMorale = other.bAIMorale;
+		ubPendingAction = other.ubPendingAction;
+		ubPendingActionAnimCount = other.ubPendingActionAnimCount;
+		uiPendingActionData1 = other.uiPendingActionData1;
+		sPendingActionData2 = other.sPendingActionData2;
+		bPendingActionData3 = other.bPendingActionData3;
+		ubDoorHandleCode = other.ubDoorHandleCode;
+		uiPendingActionData4 = other.uiPendingActionData4;
+		bInterruptDuelPts = other.bInterruptDuelPts;
+		bPassedLastInterrupt = other.bPassedLastInterrupt;
+		bIntStartAPs = other.bIntStartAPs;
+		bMoved = other.bMoved;
+		bHunting = other.bHunting;
+		ubCaller = other.ubCaller;
+		sCallerGridNo = other.sCallerGridNo;
+		bCallPriority = other.bCallPriority;
+		bCallActedUpon = other.bCallActedUpon;
+		bFrenzied = other.bFrenzied;
+		bNormalSmell = other.bNormalSmell;
+		bMonsterSmell = other.bMonsterSmell;
+		bMobility = other.bMobility;
+		fAIFlags = other.fAIFlags;
+
+		fDontChargeReadyAPs = other.fDontChargeReadyAPs;
+		usAnimSurface = other.usAnimSurface;
+		sZLevel = other.sZLevel;
+		fPrevInWater = other.fPrevInWater;
+		fGoBackToAimAfterHit = other.fGoBackToAimAfterHit;
+
+		sWalkToAttackGridNo = other.sWalkToAttackGridNo;
+		sWalkToAttackWalkToCost = other.sWalkToAttackWalkToCost;
+
+		fForceShade = other.fForceShade;
+		pForcedShade = other.pForcedShade;
+
+		bDisplayDamageCount = other.bDisplayDamageCount;
+		fDisplayDamage = other.fDisplayDamage;
+		sDamage = other.sDamage;
+		sDamageX = other.sDamageX;
+		sDamageY = other.sDamageY;
+		bDoBurst = other.bDoBurst;
+		usUIMovementMode = other.usUIMovementMode;
+		fUIMovementFast = other.fUIMovementFast;
+
+		BlinkSelCounter = other.BlinkSelCounter;
+		PortraitFlashCounter = other.PortraitFlashCounter;
+		fDeadSoundPlayed = other.fDeadSoundPlayed;
+		ubProfile = other.ubProfile;
+		ubQuoteRecord = other.ubQuoteRecord;
+		ubQuoteActionID = other.ubQuoteActionID;
+		ubBattleSoundID = other.ubBattleSoundID;
+
+		fClosePanel = other.fClosePanel;
+		fClosePanelToDie = other.fClosePanelToDie;
+		ubClosePanelFrame = other.ubClosePanelFrame;
+		fDeadPanel = other.fDeadPanel;
+		ubDeadPanelFrame = other.ubDeadPanelFrame;
+
+		sPanelFaceX = other.sPanelFaceX;
+		sPanelFaceY = other.sPanelFaceY;
+
+		// QUOTE STUFF
+		bNumHitsThisTurn = other.bNumHitsThisTurn;
+		usQuoteSaidFlags = other.usQuoteSaidFlags;
+		fCloseCall = other.fCloseCall;
+		bLastSkillCheck = other.bLastSkillCheck;
+		ubSkillCheckAttempts = other.ubSkillCheckAttempts;
+
+		bStartFallDir = other.bStartFallDir;
+		fTryingToFall = other.fTryingToFall;
+
+		ubPendingDirection = other.ubPendingDirection;
+		uiAnimSubFlags = other.uiAnimSubFlags;
+
+		bAimShotLocation = other.bAimShotLocation;
+		ubHitLocation = other.ubHitLocation;
+
+		effect_shade = other.effect_shade; // Shading table for effects
+
+		for (int i = 0; i < 6; i++)
+			sSpreadLocations[i] = other.sSpreadLocations[i];
+		fDoSpread = other.fDoSpread;
+		sStartGridNo = other.sStartGridNo;
+		sEndGridNo = other.sEndGridNo;
+		sForcastGridno = other.sForcastGridno;
+		sZLevelOverride = other.sZLevelOverride;
+		bMovedPriorToInterrupt = other.bMovedPriorToInterrupt;
+		iEndofContractTime = other.iEndofContractTime; // time, in global time(resolution, minutes) that merc will leave, or if its a M.E.R.C. merc it will be set to -1. -2 for NPC and player generated
+		iStartContractTime = other.iStartContractTime;
+		iTotalContractLength = other.iTotalContractLength; // total time of AIM mercs contract or the time since last paid for a M.E.R.C. merc
+		iNextActionSpecialData = other.iNextActionSpecialData; // AI special action data record for the next action
+		ubWhatKindOfMercAmI = other.ubWhatKindOfMercAmI; //Set to the type of character it is
+		bAssignment = other.bAssignment; // soldiers current assignment
+		fForcedToStayAwake = other.fForcedToStayAwake; // forced by player to stay awake, reset to false, the moment they are set to rest or sleep
+		bTrainStat = other.bTrainStat; // current stat soldier is training
+		sSector = other.sSector; // position on the Stategic Map
+		iVehicleId = other.iVehicleId; // the id of the vehicle the char is in
+		pMercPath = other.pMercPath; // Path Structure
+		fHitByGasFlags = other.fHitByGasFlags; // flags
+		usMedicalDeposit = other.usMedicalDeposit; // is there a medical deposit on merc
+		usLifeInsurance = other.usLifeInsurance; // is there life insurance taken out on merc
+
+		iStartOfInsuranceContract = other.iStartOfInsuranceContract;
+		uiLastAssignmentChangeMin = other.uiLastAssignmentChangeMin; // timestamp of last assignment change in minutes
+		iTotalLengthOfInsuranceContract = other.iTotalLengthOfInsuranceContract;
+
+		ubSoldierClass = other.ubSoldierClass; //admin, elite, troop (creature types?)
+		ubAPsLostToSuppression = other.ubAPsLostToSuppression;
+		fChangingStanceDueToSuppression = other.fChangingStanceDueToSuppression;
+		suppressor = other.suppressor;
+
+		ubCivilianGroup = other.ubCivilianGroup;
+
+		uiChangeLevelTime = other.uiChangeLevelTime;
+		uiChangeHealthTime = other.uiChangeHealthTime;
+		uiChangeStrengthTime = other.uiChangeStrengthTime;
+		uiChangeDexterityTime = other.uiChangeDexterityTime;
+		uiChangeAgilityTime = other.uiChangeAgilityTime;
+		uiChangeWisdomTime = other.uiChangeWisdomTime;
+		uiChangeLeadershipTime = other.uiChangeLeadershipTime;
+		uiChangeMarksmanshipTime = other.uiChangeMarksmanshipTime;
+		uiChangeExplosivesTime = other.uiChangeExplosivesTime;
+		uiChangeMedicalTime = other.uiChangeMedicalTime;
+		uiChangeMechanicalTime = other.uiChangeMechanicalTime;
+
+		uiUniqueSoldierIdValue = other.uiUniqueSoldierIdValue; // the unique value every instance of a soldier gets - 1 is the first valid value
+		bBeingAttackedCount = other.bBeingAttackedCount; // Being attacked counter
+
+		for (int i = 0; i < NUM_INV_SLOTS; i++) {
+			bNewItemCount[i] = other.bNewItemCount[i];
+			bNewItemCycleCount[i] = other.bNewItemCycleCount[i];
+		}
+		fCheckForNewlyAddedItems = other.fCheckForNewlyAddedItems;
+		bEndDoorOpenCode = other.bEndDoorOpenCode;
+
+		ubScheduleID = other.ubScheduleID;
+		sEndDoorOpenCodeData = other.sEndDoorOpenCodeData;
+		NextTileCounter = other.NextTileCounter;
+		fBlockedByAnotherMerc = other.fBlockedByAnotherMerc;
+		bBlockedByAnotherMercDirection = other.bBlockedByAnotherMercDirection;
+		usAttackingWeapon = other.usAttackingWeapon;
+		target = other.target;
+		bWeaponMode = other.bWeaponMode;
+		bAIScheduleProgress = other.bAIScheduleProgress;
+		sOffWorldGridNo = other.sOffWorldGridNo;
+		pAniTile = other.pAniTile;
+		bCamo = other.bCamo;
+		sAbsoluteFinalDestination = other.sAbsoluteFinalDestination;
+		ubHiResDirection = other.ubHiResDirection;
+		ubLastFootPrintSound = other.ubLastFootPrintSound;
+		bVehicleID = other.bVehicleID;
+		fPastXDest = other.fPastXDest;
+		fPastYDest = other.fPastYDest;
+		bMovementDirection = other.bMovementDirection;
+		sOldGridNo = other.sOldGridNo;
+		usDontUpdateNewGridNoOnMoveAnimChange = other.usDontUpdateNewGridNoOnMoveAnimChange;
+		sBoundingBoxWidth = other.sBoundingBoxWidth;
+		sBoundingBoxHeight = other.sBoundingBoxHeight;
+		sBoundingBoxOffsetX = other.sBoundingBoxOffsetX;
+		sBoundingBoxOffsetY = other.sBoundingBoxOffsetY;
+		uiTimeSameBattleSndDone = other.uiTimeSameBattleSndDone;
+		bOldBattleSnd = other.bOldBattleSnd;
+		fContractPriceHasIncreased = other.fContractPriceHasIncreased;
+		uiBurstSoundID = other.uiBurstSoundID;
+		fFixingSAMSite = other.fFixingSAMSite;
+		fFixingRobot = other.fFixingRobot;
+		bSlotItemTakenFrom = other.bSlotItemTakenFrom;
+		fSignedAnotherContract = other.fSignedAnotherContract;
+		fDontChargeTurningAPs = other.fDontChargeTurningAPs;
+		auto_bandaging_medic = other.auto_bandaging_medic;
+		robot_remote_holder = other.robot_remote_holder;
+		uiTimeOfLastContractUpdate = other.uiTimeOfLastContractUpdate;
+		bTypeOfLastContract = other.bTypeOfLastContract;
+		bTurnsCollapsed = other.bTurnsCollapsed;
+		bSleepDrugCounter = other.bSleepDrugCounter;
+		ubMilitiaKills = other.ubMilitiaKills;
+
+		for (int i = 0; i < 2; i++) {
+			bFutureDrugEffect[i] = other.bFutureDrugEffect[i];
+			bDrugEffectRate[i] = other.bDrugEffectRate[i];
+			bDrugEffect[i] = other.bDrugEffect[i];
+			bDrugSideEffectRate[i] = other.bDrugSideEffectRate[i];
+			bDrugSideEffect[i] = other.bDrugSideEffect[i];
+		}
+
+
+		bBlindedCounter = other.bBlindedCounter;
+		fMercCollapsedFlag = other.fMercCollapsedFlag;
+		fDoneAssignmentAndNothingToDoFlag = other.fDoneAssignmentAndNothingToDoFlag;
+		fMercAsleep = other.fMercAsleep;
+		fDontChargeAPsForStanceChange = other.fDontChargeAPsForStanceChange;
+
+		ubTurnsUntilCanSayHeardNoise = other.ubTurnsUntilCanSayHeardNoise;
+		usQuoteSaidExtFlags = other.usQuoteSaidExtFlags;
+
+		sContPathLocation = other.sContPathLocation;
+		bGoodContPath = other.bGoodContPath;
+		bNoiseLevel = other.bNoiseLevel;
+		bRegenerationCounter = other.bRegenerationCounter;
+		bRegenBoostersUsedToday = other.bRegenBoostersUsedToday;
+		bNumPelletsHitBy = other.bNumPelletsHitBy;
+		sSkillCheckGridNo = other.sSkillCheckGridNo;
+		ubLastEnemyCycledID = other.ubLastEnemyCycledID;
+
+		ubPrevSectorID = other.ubPrevSectorID;
+		ubNumTilesMovesSinceLastForget = other.ubNumTilesMovesSinceLastForget;
+		bTurningIncrement = other.bTurningIncrement;
+		uiBattleSoundID = other.uiBattleSoundID;
+
+		fSoldierWasMoving = other.fSoldierWasMoving;
+		fSayAmmoQuotePending = other.fSayAmmoQuotePending;
+		usValueGoneUp = other.usValueGoneUp;
+
+		ubNumLocateCycles = other.ubNumLocateCycles;
+		ubDelayedMovementFlags = other.ubDelayedMovementFlags;
+		fMuzzleFlash = other.fMuzzleFlash;
+		CTGTTarget = other.CTGTTarget;
+
+		PanelAnimateCounter = other.PanelAnimateCounter;
+
+		bCurrentCivQuote = other.bCurrentCivQuote;
+		bCurrentCivQuoteDelta = other.bCurrentCivQuoteDelta;
+		ubMiscSoldierFlags = other.ubMiscSoldierFlags;
+		ubReasonCantFinishMove = other.ubReasonCantFinishMove;
+
+		sLocationOfFadeStart = other.sLocationOfFadeStart;
+		bUseExitGridForReentryDirection = other.bUseExitGridForReentryDirection;
+
+		uiTimeSinceLastSpoke = other.uiTimeSinceLastSpoke;
+		ubContractRenewalQuoteCode = other.ubContractRenewalQuoteCode;
+		sPreTraversalGridNo = other.sPreTraversalGridNo;
+		uiXRayActivatedTime = other.uiXRayActivatedTime;
+		bTurningFromUI = other.bTurningFromUI;
+		bPendingActionData5 = other.bPendingActionData5;
+
+		bDelayedStrategicMoraleMod = other.bDelayedStrategicMoraleMod;
+		ubDoorOpeningNoise = other.ubDoorOpeningNoise;
+
+		ubLeaveHistoryCode = other.ubLeaveHistoryCode;
+		fDontUnsetLastTargetFromTurn = other.fDontUnsetLastTargetFromTurn;
+		bOverrideMoveSpeed = other.bOverrideMoveSpeed;
+		fUseMoverrideMoveSpeed = other.fUseMoverrideMoveSpeed;
+
+		uiTimeSoldierWillArrive = other.uiTimeSoldierWillArrive;
+		fUseLandingZoneForArrival = other.fUseLandingZoneForArrival;
+		fFallClockwise = other.fFallClockwise;
+		bVehicleUnderRepairID = other.bVehicleUnderRepairID;
+		iTimeCanSignElsewhere = other.iTimeCanSignElsewhere;
+		bHospitalPriceModifier = other.bHospitalPriceModifier;
+		uiStartTimeOfInsuranceContract = other.uiStartTimeOfInsuranceContract;
+		fRTInNonintAnim = other.fRTInNonintAnim;
+		fDoingExternalDeath = other.fDoingExternalDeath;
+		bCorpseQuoteTolerance = other.bCorpseQuoteTolerance;
+		iPositionSndID = other.iPositionSndID;
+		uiTuringSoundID = other.uiTuringSoundID;
+		ubLastDamageReason = other.ubLastDamageReason;
+		fComplainedThatTired = other.fComplainedThatTired;
+		for (int i = 0; i < 2; i++)
+			sLastTwoLocations[i] = other.sLastTwoLocations[i];
+		uiTimeSinceLastBleedGrunt = other.uiTimeSinceLastBleedGrunt;
+
+		return *this;
+	}
+
+	virtual RakNet::RakString GetName(void) const { return RakNet::RakString("SOLDIERTYPE"); }
+
+	virtual void WriteAllocationID(RakNet::Connection_RM3* destinationConnection, RakNet::BitStream* allocationIdBitstream) const {
+		allocationIdBitstream->Write(GetName());
+	}
+	void PrintStringInBitstream(RakNet::BitStream* bs)
+	{
+		if (bs->GetNumberOfBitsUsed() == 0)
+			return;
+		RakNet::RakString rakString;
+		bs->Read(rakString);
+		//printf("Receive: %s\n", rakString.C_String());
+	}
+
+	virtual void SerializeConstruction(RakNet::BitStream* constructionBitstream, RakNet::Connection_RM3* destinationConnection) {
+
+		constructionBitstream->Write(GetName() + RakNet::RakString(" SerializeConstruction"));
+	}
+	virtual bool DeserializeConstruction(RakNet::BitStream* constructionBitstream, RakNet::Connection_RM3* sourceConnection) {
+		PrintStringInBitstream(constructionBitstream);
+		return true;
+	}
+	virtual void SerializeDestruction(RakNet::BitStream* destructionBitstream, RakNet::Connection_RM3* destinationConnection) {
+
+		destructionBitstream->Write(GetName() + RakNet::RakString(" SerializeDestruction"));
+
+	}
+	virtual bool DeserializeDestruction(RakNet::BitStream* destructionBitstream, RakNet::Connection_RM3* sourceConnection) {
+		PrintStringInBitstream(destructionBitstream);
+		return true;
+	}
+	virtual void DeallocReplica(RakNet::Connection_RM3* sourceConnection) {
+		delete this;
+	}
+
+	/// Overloaded Replica3 function
+	virtual void OnUserReplicaPreSerializeTick(void)
+	{
+	}
+
+	virtual RM3SerializationResult Serialize(RakNet::SerializeParameters* serializeParameters) {
+		if (gGameOptions.fNetwork) // If we are client we don't serialize objects back to server
+			return RM3SR_DO_NOT_SERIALIZE;
+
+		serializeParameters->outputBitstream[0].Write(ubID);
+
+		serializeParameters->outputBitstream[0].Write(ubBodyType);
+		serializeParameters->outputBitstream[0].Write(bActionPoints);
+		serializeParameters->outputBitstream[0].Write(bInitialActionPoints);
+
+		serializeParameters->outputBitstream[0].Write(uiStatusFlags);
+
+		serializeParameters->outputBitstream[0].Write(inv);
+		// Pointers are not supposed to be synchronized
+		//serializeParameters->outputBitstream[0].Write(pTempObject);
+		//serializeParameters->outputBitstream[0].Write(pKeyRing);
+
+		serializeParameters->outputBitstream[0].Write(bOldLife); // life at end of last turn, recorded for monster AI
+		// attributes
+		serializeParameters->outputBitstream[0].Write(bInSector);
+		serializeParameters->outputBitstream[0].Write(bFlashPortraitFrame);
+		serializeParameters->outputBitstream[0].Write(sFractLife); // fraction of life pts (in hundreths)
+		serializeParameters->outputBitstream[0].Write(bBleeding); // blood loss control variable
+		serializeParameters->outputBitstream[0].Write(bBreath); // current breath value
+		serializeParameters->outputBitstream[0].Write(bBreathMax); // max breath, affected by fatigue/sleep
+		serializeParameters->outputBitstream[0].Write(bStealthMode);
+
+		serializeParameters->outputBitstream[0].Write(sBreathRed); // current breath value
+		serializeParameters->outputBitstream[0].Write(fDelayedMovement);
+
+		serializeParameters->outputBitstream[0].Write(ubWaitActionToDo);
+		serializeParameters->outputBitstream[0].Write(ubInsertionDirection);
+		// skills
+		//serializeParameters->outputBitstream[0].Write(opponent);
+		serializeParameters->outputBitstream[0].Write(bLastRenderVisibleValue);
+		serializeParameters->outputBitstream[0].Write(ubAttackingHand);
+		// traits
+		serializeParameters->outputBitstream[0].Write(sWeightCarriedAtTurnStart);
+		//serializeParameters->outputBitstream[0].Write(name);
+		rname = name.c_str(); // Using RakString as intermediate entity
+		serializeParameters->outputBitstream[0].Write(rname);
+		
+		serializeParameters->outputBitstream[0].Write(bVisible); // to render or not to render...
+
+
+		serializeParameters->outputBitstream[0].Write(bActive);
+
+		serializeParameters->outputBitstream[0].Write(bTeam); // Team identifier
+
+		//NEW MOVEMENT INFORMATION for Strategic Movement
+		serializeParameters->outputBitstream[0].Write(ubGroupID); //the movement group the merc is currently part of.
+		serializeParameters->outputBitstream[0].Write(fBetweenSectors); //set when the group isn't actually in a sector.
+		//sSectorX and sSectorY will reflect the sector the
+		//merc was at last.
+
+		serializeParameters->outputBitstream[0].Write(ubMovementNoiseHeard);// 8 flags by direction
+
+		// WORLD POSITION STUFF
+		serializeParameters->outputBitstream[0].Write(dXPos);
+		serializeParameters->outputBitstream[0].Write(dYPos);
+		serializeParameters->outputBitstream[0].Write(sInitialGridNo);
+		serializeParameters->outputBitstream[0].Write(sGridNo);
+		serializeParameters->outputBitstream[0].Write(bDirection);
+		serializeParameters->outputBitstream[0].Write(sHeightAdjustment);
+		serializeParameters->outputBitstream[0].Write(sDesiredHeight);
+		serializeParameters->outputBitstream[0].Write(sTempNewGridNo); // New grid no for advanced animations
+		serializeParameters->outputBitstream[0].Write(bOverTerrainType);
+
+		serializeParameters->outputBitstream[0].Write(bCollapsed); // collapsed due to being out of APs
+		serializeParameters->outputBitstream[0].Write(bBreathCollapsed); // collapsed due to being out of APs
+
+		serializeParameters->outputBitstream[0].Write(ubDesiredHeight);
+		serializeParameters->outputBitstream[0].Write(usPendingAnimation);
+		serializeParameters->outputBitstream[0].Write(ubPendingStanceChange);
+		serializeParameters->outputBitstream[0].Write(usAnimState);
+		serializeParameters->outputBitstream[0].Write(fNoAPToFinishMove);
+		serializeParameters->outputBitstream[0].Write(fPausedMove);
+		serializeParameters->outputBitstream[0].Write(fUIdeadMerc); // UI Flags for removing a newly dead merc
+		serializeParameters->outputBitstream[0].Write(fUICloseMerc); // UI Flags for closing panels
+
+		serializeParameters->outputBitstream[0].Write(UpdateCounter);
+		serializeParameters->outputBitstream[0].Write(DamageCounter);
+		serializeParameters->outputBitstream[0].Write(AICounter);
+		serializeParameters->outputBitstream[0].Write(FadeCounter);
+
+		serializeParameters->outputBitstream[0].Write(ubSkillTrait1);
+		serializeParameters->outputBitstream[0].Write(ubSkillTrait2);
+
+		serializeParameters->outputBitstream[0].Write(bDexterity); // dexterity (hand coord) value
+		serializeParameters->outputBitstream[0].Write(bWisdom);
+		//serializeParameters->outputBitstream[0].Write(attacker);
+		//serializeParameters->outputBitstream[0].Write(previous_attacker);
+		//serializeParameters->outputBitstream[0].Write(next_to_previous_attacker);
+		serializeParameters->outputBitstream[0].Write(fTurnInProgress);
+
+		serializeParameters->outputBitstream[0].Write(fIntendedTarget); // intentionally shot?
+		serializeParameters->outputBitstream[0].Write(fPauseAllAnimation);
+
+		serializeParameters->outputBitstream[0].Write(bExpLevel); // general experience level
+		serializeParameters->outputBitstream[0].Write(sInsertionGridNo);
+
+		serializeParameters->outputBitstream[0].Write(fContinueMoveAfterStanceChange);
+
+		//serializeParameters->outputBitstream[0].Write(AnimCache); // Probably it is not supposed to be synchronized
+
+		serializeParameters->outputBitstream[0].Write(bLife); // current life (hit points or health)
+		serializeParameters->outputBitstream[0].Write(bSide);
+		serializeParameters->outputBitstream[0].Write(bNewOppCnt);
+
+		serializeParameters->outputBitstream[0].Write(usAniCode);
+		serializeParameters->outputBitstream[0].Write(usAniFrame);
+		serializeParameters->outputBitstream[0].Write(sAniDelay);
+
+		// MOVEMENT TO NEXT TILE HANDLING STUFF
+		serializeParameters->outputBitstream[0].Write(bAgility); // agility (speed) value
+		serializeParameters->outputBitstream[0].Write(sDelayedMovementCauseGridNo);
+		serializeParameters->outputBitstream[0].Write(sReservedMovementGridNo);
+
+		serializeParameters->outputBitstream[0].Write(bStrength);
+
+		// Weapon Stuff
+		serializeParameters->outputBitstream[0].Write(sTargetGridNo);
+		serializeParameters->outputBitstream[0].Write(bTargetLevel);
+		serializeParameters->outputBitstream[0].Write(bTargetCubeLevel);
+		serializeParameters->outputBitstream[0].Write(sLastTarget);
+		serializeParameters->outputBitstream[0].Write(bTilesMoved);
+		serializeParameters->outputBitstream[0].Write(bLeadership);
+		serializeParameters->outputBitstream[0].Write(dNextBleed);
+		serializeParameters->outputBitstream[0].Write(fWarnedAboutBleeding);
+		serializeParameters->outputBitstream[0].Write(fDyingComment);
+
+		serializeParameters->outputBitstream[0].Write(ubTilesMovedPerRTBreathUpdate);
+		serializeParameters->outputBitstream[0].Write(usLastMovementAnimPerRTBreathUpdate);
+
+		serializeParameters->outputBitstream[0].Write(fTurningToShoot);
+		serializeParameters->outputBitstream[0].Write(fTurningUntilDone);
+		serializeParameters->outputBitstream[0].Write(fGettingHit);
+		serializeParameters->outputBitstream[0].Write(fInNonintAnim);
+		serializeParameters->outputBitstream[0].Write(fFlashLocator);
+		serializeParameters->outputBitstream[0].Write(sLocatorFrame);
+		serializeParameters->outputBitstream[0].Write(fShowLocator);
+		serializeParameters->outputBitstream[0].Write(fFlashPortrait);
+		serializeParameters->outputBitstream[0].Write(bMechanical);
+		serializeParameters->outputBitstream[0].Write(bLifeMax); // maximum life for this merc
+
+		//serializeParameters->outputBitstream[0].Write(face);
+
+
+		// PALETTE MANAGEMENT STUFF
+		//serializeParameters->outputBitstream[0].Write(HeadPal);
+		//serializeParameters->outputBitstream[0].Write(PantsPal);
+		//serializeParameters->outputBitstream[0].Write(VestPal);
+		//serializeParameters->outputBitstream[0].Write(SkinPal);
+		// Using RakString as intermediate entity
+		rHeadPal = HeadPal.c_str();
+		rPantsPal = PantsPal.c_str();
+		rVestPal = VestPal.c_str();
+		rSkinPal = SkinPal.c_str();
+		serializeParameters->outputBitstream[0].Write(rHeadPal);
+		serializeParameters->outputBitstream[0].Write(rPantsPal);
+		serializeParameters->outputBitstream[0].Write(rVestPal);
+		serializeParameters->outputBitstream[0].Write(rSkinPal);
+
+		//serializeParameters->outputBitstream[0].Write(pShades); // Shading tables
+		//serializeParameters->outputBitstream[0].Write(pGlowShades);
+		serializeParameters->outputBitstream[0].Write(bMedical);
+		serializeParameters->outputBitstream[0].Write(fBeginFade);
+		serializeParameters->outputBitstream[0].Write(ubFadeLevel);
+		serializeParameters->outputBitstream[0].Write(ubServiceCount);
+		//serializeParameters->outputBitstream[0].Write(service_partner);
+		serializeParameters->outputBitstream[0].Write(bMarksmanship);
+		serializeParameters->outputBitstream[0].Write(bExplosive);
+		//serializeParameters->outputBitstream[0].Write(pThrowParams);
+		serializeParameters->outputBitstream[0].Write(fTurningFromPronePosition);
+		serializeParameters->outputBitstream[0].Write(bReverse);
+		//serializeParameters->outputBitstream[0].Write(pLevelNode);
+
+		// WALKING STUFF
+		serializeParameters->outputBitstream[0].Write(bDesiredDirection);
+		serializeParameters->outputBitstream[0].Write(sDestXPos);
+		serializeParameters->outputBitstream[0].Write(sDestYPos);
+		serializeParameters->outputBitstream[0].Write(sDestination);
+		serializeParameters->outputBitstream[0].Write(sFinalDestination);
+		serializeParameters->outputBitstream[0].Write(bLevel);
+
+		// PATH STUFF
+		serializeParameters->outputBitstream[0].Write(ubPathingData);
+		serializeParameters->outputBitstream[0].Write(ubPathDataSize);
+		serializeParameters->outputBitstream[0].Write(ubPathIndex);
+		serializeParameters->outputBitstream[0].Write(sBlackList);
+		serializeParameters->outputBitstream[0].Write(bAimTime);
+		serializeParameters->outputBitstream[0].Write(bShownAimTime);
+		serializeParameters->outputBitstream[0].Write(bPathStored); // good for AI to reduct redundancy
+		serializeParameters->outputBitstream[0].Write(bHasKeys); // allows AI controlled dudes to open locked doors
+
+		serializeParameters->outputBitstream[0].Write(ubStrategicInsertionCode);
+		serializeParameters->outputBitstream[0].Write(usStrategicInsertionData);
+
+		//serializeParameters->outputBitstream[0].Write(light);
+		//serializeParameters->outputBitstream[0].Write(muzzle_flash);
+		serializeParameters->outputBitstream[0].Write(bMuzFlashCount);
+
+		serializeParameters->outputBitstream[0].Write(sX);
+		serializeParameters->outputBitstream[0].Write(sY);
+
+		serializeParameters->outputBitstream[0].Write(usOldAniState);
+		serializeParameters->outputBitstream[0].Write(sOldAniCode);
+
+		serializeParameters->outputBitstream[0].Write(bBulletsLeft);
+		serializeParameters->outputBitstream[0].Write(ubSuppressionPoints);
+
+		// STUFF FOR RANDOM ANIMATIONS
+		serializeParameters->outputBitstream[0].Write(uiTimeOfLastRandomAction);
+
+		// AI STUFF
+		serializeParameters->outputBitstream[0].Write(bOppList); // AI knowledge database
+		serializeParameters->outputBitstream[0].Write(bLastAction);
+		serializeParameters->outputBitstream[0].Write(bAction);
+		serializeParameters->outputBitstream[0].Write(usActionData);
+		serializeParameters->outputBitstream[0].Write(bNextAction);
+		serializeParameters->outputBitstream[0].Write(usNextActionData);
+		serializeParameters->outputBitstream[0].Write(bActionInProgress);
+		serializeParameters->outputBitstream[0].Write(bAlertStatus);
+		serializeParameters->outputBitstream[0].Write(bOppCnt);
+		serializeParameters->outputBitstream[0].Write(bNeutral);
+		serializeParameters->outputBitstream[0].Write(bNewSituation);
+		serializeParameters->outputBitstream[0].Write(bNextTargetLevel);
+		serializeParameters->outputBitstream[0].Write(bOrders);
+		serializeParameters->outputBitstream[0].Write(bAttitude);
+		serializeParameters->outputBitstream[0].Write(bUnderFire);
+		serializeParameters->outputBitstream[0].Write(bShock);
+		serializeParameters->outputBitstream[0].Write(bBypassToGreen);
+		serializeParameters->outputBitstream[0].Write(bDominantDir); // AI main direction to face...
+		serializeParameters->outputBitstream[0].Write(bPatrolCnt); // number of patrol gridnos
+		serializeParameters->outputBitstream[0].Write(bNextPatrolPnt); // index to next patrol gridno
+		serializeParameters->outputBitstream[0].Write(usPatrolGrid);// AI list for ptr->orders==PATROL
+		serializeParameters->outputBitstream[0].Write(sNoiseGridno);
+		serializeParameters->outputBitstream[0].Write(ubNoiseVolume);
+		serializeParameters->outputBitstream[0].Write(bLastAttackHit);
+		//serializeParameters->outputBitstream[0].Write(xrayed_by);
+		serializeParameters->outputBitstream[0].Write(dHeightAdjustment);
+		serializeParameters->outputBitstream[0].Write(bMorale);
+		serializeParameters->outputBitstream[0].Write(bTeamMoraleMod);
+		serializeParameters->outputBitstream[0].Write(bTacticalMoraleMod);
+		serializeParameters->outputBitstream[0].Write(bStrategicMoraleMod);
+		serializeParameters->outputBitstream[0].Write(bAIMorale);
+		serializeParameters->outputBitstream[0].Write(ubPendingAction);
+		serializeParameters->outputBitstream[0].Write(ubPendingActionAnimCount);
+		serializeParameters->outputBitstream[0].Write(uiPendingActionData1);
+		serializeParameters->outputBitstream[0].Write(sPendingActionData2);
+		serializeParameters->outputBitstream[0].Write(bPendingActionData3);
+		serializeParameters->outputBitstream[0].Write(ubDoorHandleCode);
+		serializeParameters->outputBitstream[0].Write(uiPendingActionData4);
+		serializeParameters->outputBitstream[0].Write(bInterruptDuelPts);
+		serializeParameters->outputBitstream[0].Write(bPassedLastInterrupt);
+		serializeParameters->outputBitstream[0].Write(bIntStartAPs);
+		serializeParameters->outputBitstream[0].Write(bMoved);
+		serializeParameters->outputBitstream[0].Write(bHunting);
+		serializeParameters->outputBitstream[0].Write(ubCaller);
+		serializeParameters->outputBitstream[0].Write(sCallerGridNo);
+		serializeParameters->outputBitstream[0].Write(bCallPriority);
+		serializeParameters->outputBitstream[0].Write(bCallActedUpon);
+		serializeParameters->outputBitstream[0].Write(bFrenzied);
+		serializeParameters->outputBitstream[0].Write(bNormalSmell);
+		serializeParameters->outputBitstream[0].Write(bMonsterSmell);
+		serializeParameters->outputBitstream[0].Write(bMobility);
+		serializeParameters->outputBitstream[0].Write(fAIFlags);
+
+		serializeParameters->outputBitstream[0].Write(fDontChargeReadyAPs);
+		serializeParameters->outputBitstream[0].Write(usAnimSurface);
+		serializeParameters->outputBitstream[0].Write(sZLevel);
+		serializeParameters->outputBitstream[0].Write(fPrevInWater);
+		serializeParameters->outputBitstream[0].Write(fGoBackToAimAfterHit);
+
+		serializeParameters->outputBitstream[0].Write(sWalkToAttackGridNo);
+		serializeParameters->outputBitstream[0].Write(sWalkToAttackWalkToCost);
+
+		serializeParameters->outputBitstream[0].Write(fForceShade);
+		//serializeParameters->outputBitstream[0].Write(pForcedShade);
+
+		serializeParameters->outputBitstream[0].Write(bDisplayDamageCount);
+		serializeParameters->outputBitstream[0].Write(fDisplayDamage);
+		serializeParameters->outputBitstream[0].Write(sDamage);
+		serializeParameters->outputBitstream[0].Write(sDamageX);
+		serializeParameters->outputBitstream[0].Write(sDamageY);
+		serializeParameters->outputBitstream[0].Write(bDoBurst);
+		serializeParameters->outputBitstream[0].Write(usUIMovementMode);
+		serializeParameters->outputBitstream[0].Write(fUIMovementFast);
+
+		serializeParameters->outputBitstream[0].Write(BlinkSelCounter);
+		serializeParameters->outputBitstream[0].Write(PortraitFlashCounter);
+		serializeParameters->outputBitstream[0].Write(fDeadSoundPlayed);
+		serializeParameters->outputBitstream[0].Write(ubProfile);
+		serializeParameters->outputBitstream[0].Write(ubQuoteRecord);
+		serializeParameters->outputBitstream[0].Write(ubQuoteActionID);
+		serializeParameters->outputBitstream[0].Write(ubBattleSoundID);
+
+		serializeParameters->outputBitstream[0].Write(fClosePanel);
+		serializeParameters->outputBitstream[0].Write(fClosePanelToDie);
+		serializeParameters->outputBitstream[0].Write(ubClosePanelFrame);
+		serializeParameters->outputBitstream[0].Write(fDeadPanel);
+		serializeParameters->outputBitstream[0].Write(ubDeadPanelFrame);
+
+		serializeParameters->outputBitstream[0].Write(sPanelFaceX);
+		serializeParameters->outputBitstream[0].Write(sPanelFaceY);
+
+		// QUOTE STUFF
+		serializeParameters->outputBitstream[0].Write(bNumHitsThisTurn);
+		serializeParameters->outputBitstream[0].Write(usQuoteSaidFlags);
+		serializeParameters->outputBitstream[0].Write(fCloseCall);
+		serializeParameters->outputBitstream[0].Write(bLastSkillCheck);
+		serializeParameters->outputBitstream[0].Write(ubSkillCheckAttempts);
+
+		serializeParameters->outputBitstream[0].Write(bStartFallDir);
+		serializeParameters->outputBitstream[0].Write(fTryingToFall);
+
+		serializeParameters->outputBitstream[0].Write(ubPendingDirection);
+		serializeParameters->outputBitstream[0].Write(uiAnimSubFlags);
+
+		serializeParameters->outputBitstream[0].Write(bAimShotLocation);
+		serializeParameters->outputBitstream[0].Write(ubHitLocation);
+
+		//serializeParameters->outputBitstream[0].Write(effect_shade); // Shading table for effects
+
+		serializeParameters->outputBitstream[0].Write(sSpreadLocations);
+		serializeParameters->outputBitstream[0].Write(fDoSpread);
+		serializeParameters->outputBitstream[0].Write(sStartGridNo);
+		serializeParameters->outputBitstream[0].Write(sEndGridNo);
+		serializeParameters->outputBitstream[0].Write(sForcastGridno);
+		serializeParameters->outputBitstream[0].Write(sZLevelOverride);
+		serializeParameters->outputBitstream[0].Write(bMovedPriorToInterrupt);
+		serializeParameters->outputBitstream[0].Write(iEndofContractTime); // time, in global time(resolution, minutes) that merc will leave, or if its a M.E.R.C. merc it will be set to -1. -2 for NPC and player generated
+		serializeParameters->outputBitstream[0].Write(iStartContractTime);
+		serializeParameters->outputBitstream[0].Write(iTotalContractLength); // total time of AIM mercs contract or the time since last paid for a M.E.R.C. merc
+		serializeParameters->outputBitstream[0].Write(iNextActionSpecialData); // AI special action data record for the next action
+		serializeParameters->outputBitstream[0].Write(ubWhatKindOfMercAmI); //Set to the type of character it is
+		serializeParameters->outputBitstream[0].Write(bAssignment); // soldiers current assignment
+		serializeParameters->outputBitstream[0].Write(fForcedToStayAwake); // forced by player to stay awake, reset to false, the moment they are set to rest or sleep
+		serializeParameters->outputBitstream[0].Write(bTrainStat); // current stat soldier is training
+		serializeParameters->outputBitstream[0].Write(sSector); // position on the Stategic Map
+		serializeParameters->outputBitstream[0].Write(iVehicleId); // the id of the vehicle the char is in
+		//serializeParameters->outputBitstream[0].Write(pMercPath); // Path Structure
+		serializeParameters->outputBitstream[0].Write(fHitByGasFlags); // flags
+		serializeParameters->outputBitstream[0].Write(usMedicalDeposit); // is there a medical deposit on merc
+		serializeParameters->outputBitstream[0].Write(usLifeInsurance); // is there life insurance taken out on merc
+
+		serializeParameters->outputBitstream[0].Write(iStartOfInsuranceContract);
+		serializeParameters->outputBitstream[0].Write(uiLastAssignmentChangeMin); // timestamp of last assignment change in minutes
+		serializeParameters->outputBitstream[0].Write(iTotalLengthOfInsuranceContract);
+
+		serializeParameters->outputBitstream[0].Write(ubSoldierClass); //admin, elite, troop (creature types?)
+		serializeParameters->outputBitstream[0].Write(ubAPsLostToSuppression);
+		serializeParameters->outputBitstream[0].Write(fChangingStanceDueToSuppression);
+		//serializeParameters->outputBitstream[0].Write(suppressor);
+
+		serializeParameters->outputBitstream[0].Write(ubCivilianGroup);
+
+		serializeParameters->outputBitstream[0].Write(uiChangeLevelTime);
+		serializeParameters->outputBitstream[0].Write(uiChangeHealthTime);
+		serializeParameters->outputBitstream[0].Write(uiChangeStrengthTime);
+		serializeParameters->outputBitstream[0].Write(uiChangeDexterityTime);
+		serializeParameters->outputBitstream[0].Write(uiChangeAgilityTime);
+		serializeParameters->outputBitstream[0].Write(uiChangeWisdomTime);
+		serializeParameters->outputBitstream[0].Write(uiChangeLeadershipTime);
+		serializeParameters->outputBitstream[0].Write(uiChangeMarksmanshipTime);
+		serializeParameters->outputBitstream[0].Write(uiChangeExplosivesTime);
+		serializeParameters->outputBitstream[0].Write(uiChangeMedicalTime);
+		serializeParameters->outputBitstream[0].Write(uiChangeMechanicalTime);
+
+		serializeParameters->outputBitstream[0].Write(uiUniqueSoldierIdValue); // the unique value every instance of a soldier gets - 1 is the first valid value
+		serializeParameters->outputBitstream[0].Write(bBeingAttackedCount); // Being attacked counter
+
+		serializeParameters->outputBitstream[0].Write(bNewItemCount);
+		serializeParameters->outputBitstream[0].Write(bNewItemCycleCount);
+		serializeParameters->outputBitstream[0].Write(fCheckForNewlyAddedItems);
+		serializeParameters->outputBitstream[0].Write(bEndDoorOpenCode);
+
+		serializeParameters->outputBitstream[0].Write(ubScheduleID);
+		serializeParameters->outputBitstream[0].Write(sEndDoorOpenCodeData);
+		serializeParameters->outputBitstream[0].Write(NextTileCounter);
+		serializeParameters->outputBitstream[0].Write(fBlockedByAnotherMerc);
+		serializeParameters->outputBitstream[0].Write(bBlockedByAnotherMercDirection);
+		serializeParameters->outputBitstream[0].Write(usAttackingWeapon);
+		//serializeParameters->outputBitstream[0].Write(target);
+		serializeParameters->outputBitstream[0].Write(bWeaponMode);
+		serializeParameters->outputBitstream[0].Write(bAIScheduleProgress);
+		serializeParameters->outputBitstream[0].Write(sOffWorldGridNo);
+		//serializeParameters->outputBitstream[0].Write(pAniTile);
+		serializeParameters->outputBitstream[0].Write(bCamo);
+		serializeParameters->outputBitstream[0].Write(sAbsoluteFinalDestination);
+		serializeParameters->outputBitstream[0].Write(ubHiResDirection);
+		serializeParameters->outputBitstream[0].Write(ubLastFootPrintSound);
+		serializeParameters->outputBitstream[0].Write(bVehicleID);
+		serializeParameters->outputBitstream[0].Write(fPastXDest);
+		serializeParameters->outputBitstream[0].Write(fPastYDest);
+		serializeParameters->outputBitstream[0].Write(bMovementDirection);
+		serializeParameters->outputBitstream[0].Write(sOldGridNo);
+		serializeParameters->outputBitstream[0].Write(usDontUpdateNewGridNoOnMoveAnimChange);
+		serializeParameters->outputBitstream[0].Write(sBoundingBoxWidth);
+		serializeParameters->outputBitstream[0].Write(sBoundingBoxHeight);
+		serializeParameters->outputBitstream[0].Write(sBoundingBoxOffsetX);
+		serializeParameters->outputBitstream[0].Write(sBoundingBoxOffsetY);
+		serializeParameters->outputBitstream[0].Write(uiTimeSameBattleSndDone);
+		serializeParameters->outputBitstream[0].Write(bOldBattleSnd);
+		serializeParameters->outputBitstream[0].Write(fContractPriceHasIncreased);
+		serializeParameters->outputBitstream[0].Write(uiBurstSoundID);
+		serializeParameters->outputBitstream[0].Write(fFixingSAMSite);
+		serializeParameters->outputBitstream[0].Write(fFixingRobot);
+		serializeParameters->outputBitstream[0].Write(bSlotItemTakenFrom);
+		serializeParameters->outputBitstream[0].Write(fSignedAnotherContract);
+		serializeParameters->outputBitstream[0].Write(fDontChargeTurningAPs);
+		//serializeParameters->outputBitstream[0].Write(auto_bandaging_medic);
+		//serializeParameters->outputBitstream[0].Write(robot_remote_holder);
+		serializeParameters->outputBitstream[0].Write(uiTimeOfLastContractUpdate);
+		serializeParameters->outputBitstream[0].Write(bTypeOfLastContract);
+		serializeParameters->outputBitstream[0].Write(bTurnsCollapsed);
+		serializeParameters->outputBitstream[0].Write(bSleepDrugCounter);
+		serializeParameters->outputBitstream[0].Write(ubMilitiaKills);
+
+		serializeParameters->outputBitstream[0].Write(bFutureDrugEffect); // value to represent effect of a needle
+		serializeParameters->outputBitstream[0].Write(bDrugEffectRate); // represents rate of increase and decrease of effect
+		serializeParameters->outputBitstream[0].Write(bDrugEffect); // value that affects AP & morale calc ( -ve is poorly )
+		serializeParameters->outputBitstream[0].Write(bDrugSideEffectRate); // duration of negative AP and morale effect
+		serializeParameters->outputBitstream[0].Write(bDrugSideEffect); // duration of negative AP and morale effect
+
+		serializeParameters->outputBitstream[0].Write(bBlindedCounter);
+		serializeParameters->outputBitstream[0].Write(fMercCollapsedFlag);
+		serializeParameters->outputBitstream[0].Write(fDoneAssignmentAndNothingToDoFlag);
+		serializeParameters->outputBitstream[0].Write(fMercAsleep);
+		serializeParameters->outputBitstream[0].Write(fDontChargeAPsForStanceChange);
+
+		serializeParameters->outputBitstream[0].Write(ubTurnsUntilCanSayHeardNoise);
+		serializeParameters->outputBitstream[0].Write(usQuoteSaidExtFlags);
+
+		serializeParameters->outputBitstream[0].Write(sContPathLocation);
+		serializeParameters->outputBitstream[0].Write(bGoodContPath);
+		serializeParameters->outputBitstream[0].Write(bNoiseLevel);
+		serializeParameters->outputBitstream[0].Write(bRegenerationCounter);
+		serializeParameters->outputBitstream[0].Write(bRegenBoostersUsedToday);
+		serializeParameters->outputBitstream[0].Write(bNumPelletsHitBy);
+		serializeParameters->outputBitstream[0].Write(sSkillCheckGridNo);
+		serializeParameters->outputBitstream[0].Write(ubLastEnemyCycledID);
+
+		serializeParameters->outputBitstream[0].Write(ubPrevSectorID);
+		serializeParameters->outputBitstream[0].Write(ubNumTilesMovesSinceLastForget);
+		serializeParameters->outputBitstream[0].Write(bTurningIncrement);
+		serializeParameters->outputBitstream[0].Write(uiBattleSoundID);
+
+		serializeParameters->outputBitstream[0].Write(fSoldierWasMoving);
+		serializeParameters->outputBitstream[0].Write(fSayAmmoQuotePending);
+		serializeParameters->outputBitstream[0].Write(usValueGoneUp);
+
+		serializeParameters->outputBitstream[0].Write(ubNumLocateCycles);
+		serializeParameters->outputBitstream[0].Write(ubDelayedMovementFlags);
+		serializeParameters->outputBitstream[0].Write(fMuzzleFlash);
+		//serializeParameters->outputBitstream[0].Write(CTGTTarget);
+
+		serializeParameters->outputBitstream[0].Write(PanelAnimateCounter);
+
+		serializeParameters->outputBitstream[0].Write(bCurrentCivQuote);
+		serializeParameters->outputBitstream[0].Write(bCurrentCivQuoteDelta);
+		serializeParameters->outputBitstream[0].Write(ubMiscSoldierFlags);
+		serializeParameters->outputBitstream[0].Write(ubReasonCantFinishMove);
+
+		serializeParameters->outputBitstream[0].Write(sLocationOfFadeStart);
+		serializeParameters->outputBitstream[0].Write(bUseExitGridForReentryDirection);
+
+		serializeParameters->outputBitstream[0].Write(uiTimeSinceLastSpoke);
+		serializeParameters->outputBitstream[0].Write(ubContractRenewalQuoteCode);
+		serializeParameters->outputBitstream[0].Write(sPreTraversalGridNo);
+		serializeParameters->outputBitstream[0].Write(uiXRayActivatedTime);
+		serializeParameters->outputBitstream[0].Write(bTurningFromUI);
+		serializeParameters->outputBitstream[0].Write(bPendingActionData5);
+
+		serializeParameters->outputBitstream[0].Write(bDelayedStrategicMoraleMod);
+		serializeParameters->outputBitstream[0].Write(ubDoorOpeningNoise);
+
+		serializeParameters->outputBitstream[0].Write(ubLeaveHistoryCode);
+		serializeParameters->outputBitstream[0].Write(fDontUnsetLastTargetFromTurn);
+		serializeParameters->outputBitstream[0].Write(bOverrideMoveSpeed);
+		serializeParameters->outputBitstream[0].Write(fUseMoverrideMoveSpeed);
+
+		serializeParameters->outputBitstream[0].Write(uiTimeSoldierWillArrive);
+		serializeParameters->outputBitstream[0].Write(fUseLandingZoneForArrival);
+		serializeParameters->outputBitstream[0].Write(fFallClockwise);
+		serializeParameters->outputBitstream[0].Write(bVehicleUnderRepairID);
+		serializeParameters->outputBitstream[0].Write(iTimeCanSignElsewhere);
+		serializeParameters->outputBitstream[0].Write(bHospitalPriceModifier);
+		serializeParameters->outputBitstream[0].Write(uiStartTimeOfInsuranceContract);
+		serializeParameters->outputBitstream[0].Write(fRTInNonintAnim);
+		serializeParameters->outputBitstream[0].Write(fDoingExternalDeath);
+		serializeParameters->outputBitstream[0].Write(bCorpseQuoteTolerance);
+		serializeParameters->outputBitstream[0].Write(iPositionSndID);
+		serializeParameters->outputBitstream[0].Write(uiTuringSoundID);
+		serializeParameters->outputBitstream[0].Write(ubLastDamageReason);
+		serializeParameters->outputBitstream[0].Write(fComplainedThatTired);
+		serializeParameters->outputBitstream[0].Write(sLastTwoLocations);
+		serializeParameters->outputBitstream[0].Write(uiTimeSinceLastBleedGrunt);
+		return RM3SR_BROADCAST_IDENTICALLY;
+	}
+	virtual void Deserialize(RakNet::DeserializeParameters* deserializeParameters) {
+		deserializeParameters->serializationBitstream[0].Read(ubID);
+
+		deserializeParameters->serializationBitstream[0].Read(ubBodyType);
+		deserializeParameters->serializationBitstream[0].Read(bActionPoints);
+		deserializeParameters->serializationBitstream[0].Read(bInitialActionPoints);
+
+		deserializeParameters->serializationBitstream[0].Read(uiStatusFlags);
+
+		deserializeParameters->serializationBitstream[0].Read(inv);
+		//deserializeParameters->serializationBitstream[0].Read(pTempObject);
+		//deserializeParameters->serializationBitstream[0].Read(pKeyRing);
+
+		deserializeParameters->serializationBitstream[0].Read(bOldLife); // life at end of last turn, recorded for monster AI
+		// attributes
+		deserializeParameters->serializationBitstream[0].Read(bInSector);
+		deserializeParameters->serializationBitstream[0].Read(bFlashPortraitFrame);
+		deserializeParameters->serializationBitstream[0].Read(sFractLife); // fraction of life pts (in hundreths)
+		deserializeParameters->serializationBitstream[0].Read(bBleeding); // blood loss control variable
+		deserializeParameters->serializationBitstream[0].Read(bBreath); // current breath value
+		deserializeParameters->serializationBitstream[0].Read(bBreathMax); // max breath, affected by fatigue/sleep
+		deserializeParameters->serializationBitstream[0].Read(bStealthMode);
+
+		deserializeParameters->serializationBitstream[0].Read(sBreathRed); // current breath value
+		deserializeParameters->serializationBitstream[0].Read(fDelayedMovement);
+
+		deserializeParameters->serializationBitstream[0].Read(ubWaitActionToDo);
+		deserializeParameters->serializationBitstream[0].Read(ubInsertionDirection);
+		// skills
+		//deserializeParameters->serializationBitstream[0].Read(opponent);
+		deserializeParameters->serializationBitstream[0].Read(bLastRenderVisibleValue);
+		deserializeParameters->serializationBitstream[0].Read(ubAttackingHand);
+		// traits
+		deserializeParameters->serializationBitstream[0].Read(sWeightCarriedAtTurnStart);
+		//deserializeParameters->serializationBitstream[0].Read(name);
+		deserializeParameters->serializationBitstream[0].Read(rname);
+		name = rname;
+
+		deserializeParameters->serializationBitstream[0].Read(bVisible); // to render or not to render...
+
+
+		deserializeParameters->serializationBitstream[0].Read(bActive);
+
+		deserializeParameters->serializationBitstream[0].Read(bTeam); // Team identifier
+
+		//NEW MOVEMENT INFORMATION for Strategic Movement
+		deserializeParameters->serializationBitstream[0].Read(ubGroupID); //the movement group the merc is currently part of.
+		deserializeParameters->serializationBitstream[0].Read(fBetweenSectors); //set when the group isn't actually in a sector.
+		//sSectorX and sSectorY will reflect the sector the
+		//merc was at last.
+
+		deserializeParameters->serializationBitstream[0].Read(ubMovementNoiseHeard);// 8 flags by direction
+
+		// WORLD POSITION STUFF
+		deserializeParameters->serializationBitstream[0].Read(dXPos);
+		deserializeParameters->serializationBitstream[0].Read(dYPos);
+		deserializeParameters->serializationBitstream[0].Read(sInitialGridNo);
+		deserializeParameters->serializationBitstream[0].Read(sGridNo);
+		deserializeParameters->serializationBitstream[0].Read(bDirection);
+		deserializeParameters->serializationBitstream[0].Read(sHeightAdjustment);
+		deserializeParameters->serializationBitstream[0].Read(sDesiredHeight);
+		deserializeParameters->serializationBitstream[0].Read(sTempNewGridNo); // New grid no for advanced animations
+		deserializeParameters->serializationBitstream[0].Read(bOverTerrainType);
+
+		deserializeParameters->serializationBitstream[0].Read(bCollapsed); // collapsed due to being out of APs
+		deserializeParameters->serializationBitstream[0].Read(bBreathCollapsed); // collapsed due to being out of APs
+
+		deserializeParameters->serializationBitstream[0].Read(ubDesiredHeight);
+		deserializeParameters->serializationBitstream[0].Read(usPendingAnimation);
+		deserializeParameters->serializationBitstream[0].Read(ubPendingStanceChange);
+		deserializeParameters->serializationBitstream[0].Read(usAnimState);
+		deserializeParameters->serializationBitstream[0].Read(fNoAPToFinishMove);
+		deserializeParameters->serializationBitstream[0].Read(fPausedMove);
+		deserializeParameters->serializationBitstream[0].Read(fUIdeadMerc); // UI Flags for removing a newly dead merc
+		deserializeParameters->serializationBitstream[0].Read(fUICloseMerc); // UI Flags for closing panels
+
+		deserializeParameters->serializationBitstream[0].Read(UpdateCounter);
+		deserializeParameters->serializationBitstream[0].Read(DamageCounter);
+		deserializeParameters->serializationBitstream[0].Read(AICounter);
+		deserializeParameters->serializationBitstream[0].Read(FadeCounter);
+
+		deserializeParameters->serializationBitstream[0].Read(ubSkillTrait1);
+		deserializeParameters->serializationBitstream[0].Read(ubSkillTrait2);
+
+		deserializeParameters->serializationBitstream[0].Read(bDexterity); // dexterity (hand coord) value
+		deserializeParameters->serializationBitstream[0].Read(bWisdom);
+		//deserializeParameters->serializationBitstream[0].Read(attacker);
+		//deserializeParameters->serializationBitstream[0].Read(previous_attacker);
+		//deserializeParameters->serializationBitstream[0].Read(next_to_previous_attacker);
+		deserializeParameters->serializationBitstream[0].Read(fTurnInProgress);
+
+		deserializeParameters->serializationBitstream[0].Read(fIntendedTarget); // intentionally shot?
+		deserializeParameters->serializationBitstream[0].Read(fPauseAllAnimation);
+
+		deserializeParameters->serializationBitstream[0].Read(bExpLevel); // general experience level
+		deserializeParameters->serializationBitstream[0].Read(sInsertionGridNo);
+
+		deserializeParameters->serializationBitstream[0].Read(fContinueMoveAfterStanceChange);
+
+		//deserializeParameters->serializationBitstream[0].Read(AnimCache);
+
+		deserializeParameters->serializationBitstream[0].Read(bLife); // current life (hit points or health)
+		deserializeParameters->serializationBitstream[0].Read(bSide);
+		deserializeParameters->serializationBitstream[0].Read(bNewOppCnt);
+
+		deserializeParameters->serializationBitstream[0].Read(usAniCode);
+		deserializeParameters->serializationBitstream[0].Read(usAniFrame);
+		deserializeParameters->serializationBitstream[0].Read(sAniDelay);
+
+		// MOVEMENT TO NEXT TILE HANDLING STUFF
+		deserializeParameters->serializationBitstream[0].Read(bAgility); // agility (speed) value
+		deserializeParameters->serializationBitstream[0].Read(sDelayedMovementCauseGridNo);
+		deserializeParameters->serializationBitstream[0].Read(sReservedMovementGridNo);
+
+		deserializeParameters->serializationBitstream[0].Read(bStrength);
+
+		// Weapon Stuff
+		deserializeParameters->serializationBitstream[0].Read(sTargetGridNo);
+		deserializeParameters->serializationBitstream[0].Read(bTargetLevel);
+		deserializeParameters->serializationBitstream[0].Read(bTargetCubeLevel);
+		deserializeParameters->serializationBitstream[0].Read(sLastTarget);
+		deserializeParameters->serializationBitstream[0].Read(bTilesMoved);
+		deserializeParameters->serializationBitstream[0].Read(bLeadership);
+		deserializeParameters->serializationBitstream[0].Read(dNextBleed);
+		deserializeParameters->serializationBitstream[0].Read(fWarnedAboutBleeding);
+		deserializeParameters->serializationBitstream[0].Read(fDyingComment);
+
+		deserializeParameters->serializationBitstream[0].Read(ubTilesMovedPerRTBreathUpdate);
+		deserializeParameters->serializationBitstream[0].Read(usLastMovementAnimPerRTBreathUpdate);
+
+		deserializeParameters->serializationBitstream[0].Read(fTurningToShoot);
+		deserializeParameters->serializationBitstream[0].Read(fTurningUntilDone);
+		deserializeParameters->serializationBitstream[0].Read(fGettingHit);
+		deserializeParameters->serializationBitstream[0].Read(fInNonintAnim);
+		deserializeParameters->serializationBitstream[0].Read(fFlashLocator);
+		deserializeParameters->serializationBitstream[0].Read(sLocatorFrame);
+		deserializeParameters->serializationBitstream[0].Read(fShowLocator);
+		deserializeParameters->serializationBitstream[0].Read(fFlashPortrait);
+		deserializeParameters->serializationBitstream[0].Read(bMechanical);
+		deserializeParameters->serializationBitstream[0].Read(bLifeMax); // maximum life for this merc
+
+		//deserializeParameters->serializationBitstream[0].Read(face);
+
+
+		// PALETTE MANAGEMENT STUFF
+		//deserializeParameters->serializationBitstream[0].Read(HeadPal);
+		//deserializeParameters->serializationBitstream[0].Read(PantsPal);
+		//deserializeParameters->serializationBitstream[0].Read(VestPal);
+		//deserializeParameters->serializationBitstream[0].Read(SkinPal);
+		deserializeParameters->serializationBitstream[0].Read(rHeadPal);
+		deserializeParameters->serializationBitstream[0].Read(rPantsPal);
+		deserializeParameters->serializationBitstream[0].Read(rVestPal);
+		deserializeParameters->serializationBitstream[0].Read(rSkinPal);
+		HeadPal = rHeadPal;
+		PantsPal = rPantsPal;
+		VestPal = rVestPal;
+		SkinPal = rSkinPal;
+
+		//deserializeParameters->serializationBitstream[0].Read(pShades); // Shading tables
+		//deserializeParameters->serializationBitstream[0].Read(pGlowShades);
+		deserializeParameters->serializationBitstream[0].Read(bMedical);
+		deserializeParameters->serializationBitstream[0].Read(fBeginFade);
+		deserializeParameters->serializationBitstream[0].Read(ubFadeLevel);
+		deserializeParameters->serializationBitstream[0].Read(ubServiceCount);
+		//deserializeParameters->serializationBitstream[0].Read(service_partner);
+		deserializeParameters->serializationBitstream[0].Read(bMarksmanship);
+		deserializeParameters->serializationBitstream[0].Read(bExplosive);
+		//deserializeParameters->serializationBitstream[0].Read(pThrowParams);
+		deserializeParameters->serializationBitstream[0].Read(fTurningFromPronePosition);
+		deserializeParameters->serializationBitstream[0].Read(bReverse);
+		//deserializeParameters->serializationBitstream[0].Read(pLevelNode);
+
+		// WALKING STUFF
+		deserializeParameters->serializationBitstream[0].Read(bDesiredDirection);
+		deserializeParameters->serializationBitstream[0].Read(sDestXPos);
+		deserializeParameters->serializationBitstream[0].Read(sDestYPos);
+		deserializeParameters->serializationBitstream[0].Read(sDestination);
+		deserializeParameters->serializationBitstream[0].Read(sFinalDestination);
+		deserializeParameters->serializationBitstream[0].Read(bLevel);
+
+		// PATH STUFF
+		deserializeParameters->serializationBitstream[0].Read(ubPathingData);
+		deserializeParameters->serializationBitstream[0].Read(ubPathDataSize);
+		deserializeParameters->serializationBitstream[0].Read(ubPathIndex);
+		deserializeParameters->serializationBitstream[0].Read(sBlackList);
+		deserializeParameters->serializationBitstream[0].Read(bAimTime);
+		deserializeParameters->serializationBitstream[0].Read(bShownAimTime);
+		deserializeParameters->serializationBitstream[0].Read(bPathStored); // good for AI to reduct redundancy
+		deserializeParameters->serializationBitstream[0].Read(bHasKeys); // allows AI controlled dudes to open locked doors
+
+		deserializeParameters->serializationBitstream[0].Read(ubStrategicInsertionCode);
+		deserializeParameters->serializationBitstream[0].Read(usStrategicInsertionData);
+
+		//deserializeParameters->serializationBitstream[0].Read(light);
+		//deserializeParameters->serializationBitstream[0].Read(muzzle_flash);
+		deserializeParameters->serializationBitstream[0].Read(bMuzFlashCount);
+
+		deserializeParameters->serializationBitstream[0].Read(sX);
+		deserializeParameters->serializationBitstream[0].Read(sY);
+
+		deserializeParameters->serializationBitstream[0].Read(usOldAniState);
+		deserializeParameters->serializationBitstream[0].Read(sOldAniCode);
+
+		deserializeParameters->serializationBitstream[0].Read(bBulletsLeft);
+		deserializeParameters->serializationBitstream[0].Read(ubSuppressionPoints);
+
+		// STUFF FOR RANDOM ANIMATIONS
+		deserializeParameters->serializationBitstream[0].Read(uiTimeOfLastRandomAction);
+
+		// AI STUFF
+		deserializeParameters->serializationBitstream[0].Read(bOppList); // AI knowledge database
+		deserializeParameters->serializationBitstream[0].Read(bLastAction);
+		deserializeParameters->serializationBitstream[0].Read(bAction);
+		deserializeParameters->serializationBitstream[0].Read(usActionData);
+		deserializeParameters->serializationBitstream[0].Read(bNextAction);
+		deserializeParameters->serializationBitstream[0].Read(usNextActionData);
+		deserializeParameters->serializationBitstream[0].Read(bActionInProgress);
+		deserializeParameters->serializationBitstream[0].Read(bAlertStatus);
+		deserializeParameters->serializationBitstream[0].Read(bOppCnt);
+		deserializeParameters->serializationBitstream[0].Read(bNeutral);
+		deserializeParameters->serializationBitstream[0].Read(bNewSituation);
+		deserializeParameters->serializationBitstream[0].Read(bNextTargetLevel);
+		deserializeParameters->serializationBitstream[0].Read(bOrders);
+		deserializeParameters->serializationBitstream[0].Read(bAttitude);
+		deserializeParameters->serializationBitstream[0].Read(bUnderFire);
+		deserializeParameters->serializationBitstream[0].Read(bShock);
+		deserializeParameters->serializationBitstream[0].Read(bBypassToGreen);
+		deserializeParameters->serializationBitstream[0].Read(bDominantDir); // AI main direction to face...
+		deserializeParameters->serializationBitstream[0].Read(bPatrolCnt); // number of patrol gridnos
+		deserializeParameters->serializationBitstream[0].Read(bNextPatrolPnt); // index to next patrol gridno
+		deserializeParameters->serializationBitstream[0].Read(usPatrolGrid);// AI list for ptr->orders==PATROL
+		deserializeParameters->serializationBitstream[0].Read(sNoiseGridno);
+		deserializeParameters->serializationBitstream[0].Read(ubNoiseVolume);
+		deserializeParameters->serializationBitstream[0].Read(bLastAttackHit);
+		//deserializeParameters->serializationBitstream[0].Read(xrayed_by);
+		deserializeParameters->serializationBitstream[0].Read(dHeightAdjustment);
+		deserializeParameters->serializationBitstream[0].Read(bMorale);
+		deserializeParameters->serializationBitstream[0].Read(bTeamMoraleMod);
+		deserializeParameters->serializationBitstream[0].Read(bTacticalMoraleMod);
+		deserializeParameters->serializationBitstream[0].Read(bStrategicMoraleMod);
+		deserializeParameters->serializationBitstream[0].Read(bAIMorale);
+		deserializeParameters->serializationBitstream[0].Read(ubPendingAction);
+		deserializeParameters->serializationBitstream[0].Read(ubPendingActionAnimCount);
+		deserializeParameters->serializationBitstream[0].Read(uiPendingActionData1);
+		deserializeParameters->serializationBitstream[0].Read(sPendingActionData2);
+		deserializeParameters->serializationBitstream[0].Read(bPendingActionData3);
+		deserializeParameters->serializationBitstream[0].Read(ubDoorHandleCode);
+		deserializeParameters->serializationBitstream[0].Read(uiPendingActionData4);
+		deserializeParameters->serializationBitstream[0].Read(bInterruptDuelPts);
+		deserializeParameters->serializationBitstream[0].Read(bPassedLastInterrupt);
+		deserializeParameters->serializationBitstream[0].Read(bIntStartAPs);
+		deserializeParameters->serializationBitstream[0].Read(bMoved);
+		deserializeParameters->serializationBitstream[0].Read(bHunting);
+		deserializeParameters->serializationBitstream[0].Read(ubCaller);
+		deserializeParameters->serializationBitstream[0].Read(sCallerGridNo);
+		deserializeParameters->serializationBitstream[0].Read(bCallPriority);
+		deserializeParameters->serializationBitstream[0].Read(bCallActedUpon);
+		deserializeParameters->serializationBitstream[0].Read(bFrenzied);
+		deserializeParameters->serializationBitstream[0].Read(bNormalSmell);
+		deserializeParameters->serializationBitstream[0].Read(bMonsterSmell);
+		deserializeParameters->serializationBitstream[0].Read(bMobility);
+		deserializeParameters->serializationBitstream[0].Read(fAIFlags);
+
+		deserializeParameters->serializationBitstream[0].Read(fDontChargeReadyAPs);
+		deserializeParameters->serializationBitstream[0].Read(usAnimSurface);
+		deserializeParameters->serializationBitstream[0].Read(sZLevel);
+		deserializeParameters->serializationBitstream[0].Read(fPrevInWater);
+		deserializeParameters->serializationBitstream[0].Read(fGoBackToAimAfterHit);
+
+		deserializeParameters->serializationBitstream[0].Read(sWalkToAttackGridNo);
+		deserializeParameters->serializationBitstream[0].Read(sWalkToAttackWalkToCost);
+
+		deserializeParameters->serializationBitstream[0].Read(fForceShade);
+		//deserializeParameters->serializationBitstream[0].Read(pForcedShade);
+
+		deserializeParameters->serializationBitstream[0].Read(bDisplayDamageCount);
+		deserializeParameters->serializationBitstream[0].Read(fDisplayDamage);
+		deserializeParameters->serializationBitstream[0].Read(sDamage);
+		deserializeParameters->serializationBitstream[0].Read(sDamageX);
+		deserializeParameters->serializationBitstream[0].Read(sDamageY);
+		deserializeParameters->serializationBitstream[0].Read(bDoBurst);
+		deserializeParameters->serializationBitstream[0].Read(usUIMovementMode);
+		deserializeParameters->serializationBitstream[0].Read(fUIMovementFast);
+
+		deserializeParameters->serializationBitstream[0].Read(BlinkSelCounter);
+		deserializeParameters->serializationBitstream[0].Read(PortraitFlashCounter);
+		deserializeParameters->serializationBitstream[0].Read(fDeadSoundPlayed);
+		deserializeParameters->serializationBitstream[0].Read(ubProfile);
+		deserializeParameters->serializationBitstream[0].Read(ubQuoteRecord);
+		deserializeParameters->serializationBitstream[0].Read(ubQuoteActionID);
+		deserializeParameters->serializationBitstream[0].Read(ubBattleSoundID);
+
+		deserializeParameters->serializationBitstream[0].Read(fClosePanel);
+		deserializeParameters->serializationBitstream[0].Read(fClosePanelToDie);
+		deserializeParameters->serializationBitstream[0].Read(ubClosePanelFrame);
+		deserializeParameters->serializationBitstream[0].Read(fDeadPanel);
+		deserializeParameters->serializationBitstream[0].Read(ubDeadPanelFrame);
+
+		deserializeParameters->serializationBitstream[0].Read(sPanelFaceX);
+		deserializeParameters->serializationBitstream[0].Read(sPanelFaceY);
+
+		// QUOTE STUFF
+		deserializeParameters->serializationBitstream[0].Read(bNumHitsThisTurn);
+		deserializeParameters->serializationBitstream[0].Read(usQuoteSaidFlags);
+		deserializeParameters->serializationBitstream[0].Read(fCloseCall);
+		deserializeParameters->serializationBitstream[0].Read(bLastSkillCheck);
+		deserializeParameters->serializationBitstream[0].Read(ubSkillCheckAttempts);
+
+		deserializeParameters->serializationBitstream[0].Read(bStartFallDir);
+		deserializeParameters->serializationBitstream[0].Read(fTryingToFall);
+
+		deserializeParameters->serializationBitstream[0].Read(ubPendingDirection);
+		deserializeParameters->serializationBitstream[0].Read(uiAnimSubFlags);
+
+		deserializeParameters->serializationBitstream[0].Read(bAimShotLocation);
+		deserializeParameters->serializationBitstream[0].Read(ubHitLocation);
+
+		//deserializeParameters->serializationBitstream[0].Read(effect_shade); // Shading table for effects
+
+		deserializeParameters->serializationBitstream[0].Read(sSpreadLocations);
+		deserializeParameters->serializationBitstream[0].Read(fDoSpread);
+		deserializeParameters->serializationBitstream[0].Read(sStartGridNo);
+		deserializeParameters->serializationBitstream[0].Read(sEndGridNo);
+		deserializeParameters->serializationBitstream[0].Read(sForcastGridno);
+		deserializeParameters->serializationBitstream[0].Read(sZLevelOverride);
+		deserializeParameters->serializationBitstream[0].Read(bMovedPriorToInterrupt);
+		deserializeParameters->serializationBitstream[0].Read(iEndofContractTime); // time, in global time(resolution, minutes) that merc will leave, or if its a M.E.R.C. merc it will be set to -1. -2 for NPC and player generated
+		deserializeParameters->serializationBitstream[0].Read(iStartContractTime);
+		deserializeParameters->serializationBitstream[0].Read(iTotalContractLength); // total time of AIM mercs contract or the time since last paid for a M.E.R.C. merc
+		deserializeParameters->serializationBitstream[0].Read(iNextActionSpecialData); // AI special action data record for the next action
+		deserializeParameters->serializationBitstream[0].Read(ubWhatKindOfMercAmI); //Set to the type of character it is
+		deserializeParameters->serializationBitstream[0].Read(bAssignment); // soldiers current assignment
+		deserializeParameters->serializationBitstream[0].Read(fForcedToStayAwake); // forced by player to stay awake, reset to false, the moment they are set to rest or sleep
+		deserializeParameters->serializationBitstream[0].Read(bTrainStat); // current stat soldier is training
+		deserializeParameters->serializationBitstream[0].Read(sSector); // position on the Stategic Map
+		deserializeParameters->serializationBitstream[0].Read(iVehicleId); // the id of the vehicle the char is in
+		//deserializeParameters->serializationBitstream[0].Read(pMercPath); // Path Structure
+		deserializeParameters->serializationBitstream[0].Read(fHitByGasFlags); // flags
+		deserializeParameters->serializationBitstream[0].Read(usMedicalDeposit); // is there a medical deposit on merc
+		deserializeParameters->serializationBitstream[0].Read(usLifeInsurance); // is there life insurance taken out on merc
+
+		deserializeParameters->serializationBitstream[0].Read(iStartOfInsuranceContract);
+		deserializeParameters->serializationBitstream[0].Read(uiLastAssignmentChangeMin); // timestamp of last assignment change in minutes
+		deserializeParameters->serializationBitstream[0].Read(iTotalLengthOfInsuranceContract);
+
+		deserializeParameters->serializationBitstream[0].Read(ubSoldierClass); //admin, elite, troop (creature types?)
+		deserializeParameters->serializationBitstream[0].Read(ubAPsLostToSuppression);
+		deserializeParameters->serializationBitstream[0].Read(fChangingStanceDueToSuppression);
+		//deserializeParameters->serializationBitstream[0].Read(suppressor);
+
+		deserializeParameters->serializationBitstream[0].Read(ubCivilianGroup);
+
+		deserializeParameters->serializationBitstream[0].Read(uiChangeLevelTime);
+		deserializeParameters->serializationBitstream[0].Read(uiChangeHealthTime);
+		deserializeParameters->serializationBitstream[0].Read(uiChangeStrengthTime);
+		deserializeParameters->serializationBitstream[0].Read(uiChangeDexterityTime);
+		deserializeParameters->serializationBitstream[0].Read(uiChangeAgilityTime);
+		deserializeParameters->serializationBitstream[0].Read(uiChangeWisdomTime);
+		deserializeParameters->serializationBitstream[0].Read(uiChangeLeadershipTime);
+		deserializeParameters->serializationBitstream[0].Read(uiChangeMarksmanshipTime);
+		deserializeParameters->serializationBitstream[0].Read(uiChangeExplosivesTime);
+		deserializeParameters->serializationBitstream[0].Read(uiChangeMedicalTime);
+		deserializeParameters->serializationBitstream[0].Read(uiChangeMechanicalTime);
+
+		deserializeParameters->serializationBitstream[0].Read(uiUniqueSoldierIdValue); // the unique value every instance of a soldier gets - 1 is the first valid value
+		deserializeParameters->serializationBitstream[0].Read(bBeingAttackedCount); // Being attacked counter
+
+		deserializeParameters->serializationBitstream[0].Read(bNewItemCount);
+		deserializeParameters->serializationBitstream[0].Read(bNewItemCycleCount);
+		deserializeParameters->serializationBitstream[0].Read(fCheckForNewlyAddedItems);
+		deserializeParameters->serializationBitstream[0].Read(bEndDoorOpenCode);
+
+		deserializeParameters->serializationBitstream[0].Read(ubScheduleID);
+		deserializeParameters->serializationBitstream[0].Read(sEndDoorOpenCodeData);
+		deserializeParameters->serializationBitstream[0].Read(NextTileCounter);
+		deserializeParameters->serializationBitstream[0].Read(fBlockedByAnotherMerc);
+		deserializeParameters->serializationBitstream[0].Read(bBlockedByAnotherMercDirection);
+		deserializeParameters->serializationBitstream[0].Read(usAttackingWeapon);
+		//deserializeParameters->serializationBitstream[0].Read(target);
+		deserializeParameters->serializationBitstream[0].Read(bWeaponMode);
+		deserializeParameters->serializationBitstream[0].Read(bAIScheduleProgress);
+		deserializeParameters->serializationBitstream[0].Read(sOffWorldGridNo);
+		//deserializeParameters->serializationBitstream[0].Read(pAniTile);
+		deserializeParameters->serializationBitstream[0].Read(bCamo);
+		deserializeParameters->serializationBitstream[0].Read(sAbsoluteFinalDestination);
+		deserializeParameters->serializationBitstream[0].Read(ubHiResDirection);
+		deserializeParameters->serializationBitstream[0].Read(ubLastFootPrintSound);
+		deserializeParameters->serializationBitstream[0].Read(bVehicleID);
+		deserializeParameters->serializationBitstream[0].Read(fPastXDest);
+		deserializeParameters->serializationBitstream[0].Read(fPastYDest);
+		deserializeParameters->serializationBitstream[0].Read(bMovementDirection);
+		deserializeParameters->serializationBitstream[0].Read(sOldGridNo);
+		deserializeParameters->serializationBitstream[0].Read(usDontUpdateNewGridNoOnMoveAnimChange);
+		deserializeParameters->serializationBitstream[0].Read(sBoundingBoxWidth);
+		deserializeParameters->serializationBitstream[0].Read(sBoundingBoxHeight);
+		deserializeParameters->serializationBitstream[0].Read(sBoundingBoxOffsetX);
+		deserializeParameters->serializationBitstream[0].Read(sBoundingBoxOffsetY);
+		deserializeParameters->serializationBitstream[0].Read(uiTimeSameBattleSndDone);
+		deserializeParameters->serializationBitstream[0].Read(bOldBattleSnd);
+		deserializeParameters->serializationBitstream[0].Read(fContractPriceHasIncreased);
+		deserializeParameters->serializationBitstream[0].Read(uiBurstSoundID);
+		deserializeParameters->serializationBitstream[0].Read(fFixingSAMSite);
+		deserializeParameters->serializationBitstream[0].Read(fFixingRobot);
+		deserializeParameters->serializationBitstream[0].Read(bSlotItemTakenFrom);
+		deserializeParameters->serializationBitstream[0].Read(fSignedAnotherContract);
+		deserializeParameters->serializationBitstream[0].Read(fDontChargeTurningAPs);
+		//deserializeParameters->serializationBitstream[0].Read(auto_bandaging_medic);
+		//deserializeParameters->serializationBitstream[0].Read(robot_remote_holder);
+		deserializeParameters->serializationBitstream[0].Read(uiTimeOfLastContractUpdate);
+		deserializeParameters->serializationBitstream[0].Read(bTypeOfLastContract);
+		deserializeParameters->serializationBitstream[0].Read(bTurnsCollapsed);
+		deserializeParameters->serializationBitstream[0].Read(bSleepDrugCounter);
+		deserializeParameters->serializationBitstream[0].Read(ubMilitiaKills);
+
+		deserializeParameters->serializationBitstream[0].Read(bFutureDrugEffect); // value to represent effect of a needle
+		deserializeParameters->serializationBitstream[0].Read(bDrugEffectRate); // represents rate of increase and decrease of effect
+		deserializeParameters->serializationBitstream[0].Read(bDrugEffect); // value that affects AP & morale calc ( -ve is poorly )
+		deserializeParameters->serializationBitstream[0].Read(bDrugSideEffectRate); // duration of negative AP and morale effect
+		deserializeParameters->serializationBitstream[0].Read(bDrugSideEffect); // duration of negative AP and morale effect
+
+		deserializeParameters->serializationBitstream[0].Read(bBlindedCounter);
+		deserializeParameters->serializationBitstream[0].Read(fMercCollapsedFlag);
+		deserializeParameters->serializationBitstream[0].Read(fDoneAssignmentAndNothingToDoFlag);
+		deserializeParameters->serializationBitstream[0].Read(fMercAsleep);
+		deserializeParameters->serializationBitstream[0].Read(fDontChargeAPsForStanceChange);
+
+		deserializeParameters->serializationBitstream[0].Read(ubTurnsUntilCanSayHeardNoise);
+		deserializeParameters->serializationBitstream[0].Read(usQuoteSaidExtFlags);
+
+		deserializeParameters->serializationBitstream[0].Read(sContPathLocation);
+		deserializeParameters->serializationBitstream[0].Read(bGoodContPath);
+		deserializeParameters->serializationBitstream[0].Read(bNoiseLevel);
+		deserializeParameters->serializationBitstream[0].Read(bRegenerationCounter);
+		deserializeParameters->serializationBitstream[0].Read(bRegenBoostersUsedToday);
+		deserializeParameters->serializationBitstream[0].Read(bNumPelletsHitBy);
+		deserializeParameters->serializationBitstream[0].Read(sSkillCheckGridNo);
+		deserializeParameters->serializationBitstream[0].Read(ubLastEnemyCycledID);
+
+		deserializeParameters->serializationBitstream[0].Read(ubPrevSectorID);
+		deserializeParameters->serializationBitstream[0].Read(ubNumTilesMovesSinceLastForget);
+		deserializeParameters->serializationBitstream[0].Read(bTurningIncrement);
+		deserializeParameters->serializationBitstream[0].Read(uiBattleSoundID);
+
+		deserializeParameters->serializationBitstream[0].Read(fSoldierWasMoving);
+		deserializeParameters->serializationBitstream[0].Read(fSayAmmoQuotePending);
+		deserializeParameters->serializationBitstream[0].Read(usValueGoneUp);
+
+		deserializeParameters->serializationBitstream[0].Read(ubNumLocateCycles);
+		deserializeParameters->serializationBitstream[0].Read(ubDelayedMovementFlags);
+		deserializeParameters->serializationBitstream[0].Read(fMuzzleFlash);
+		//deserializeParameters->serializationBitstream[0].Read(CTGTTarget);
+
+		deserializeParameters->serializationBitstream[0].Read(PanelAnimateCounter);
+
+		deserializeParameters->serializationBitstream[0].Read(bCurrentCivQuote);
+		deserializeParameters->serializationBitstream[0].Read(bCurrentCivQuoteDelta);
+		deserializeParameters->serializationBitstream[0].Read(ubMiscSoldierFlags);
+		deserializeParameters->serializationBitstream[0].Read(ubReasonCantFinishMove);
+
+		deserializeParameters->serializationBitstream[0].Read(sLocationOfFadeStart);
+		deserializeParameters->serializationBitstream[0].Read(bUseExitGridForReentryDirection);
+
+		deserializeParameters->serializationBitstream[0].Read(uiTimeSinceLastSpoke);
+		deserializeParameters->serializationBitstream[0].Read(ubContractRenewalQuoteCode);
+		deserializeParameters->serializationBitstream[0].Read(sPreTraversalGridNo);
+		deserializeParameters->serializationBitstream[0].Read(uiXRayActivatedTime);
+		deserializeParameters->serializationBitstream[0].Read(bTurningFromUI);
+		deserializeParameters->serializationBitstream[0].Read(bPendingActionData5);
+
+		deserializeParameters->serializationBitstream[0].Read(bDelayedStrategicMoraleMod);
+		deserializeParameters->serializationBitstream[0].Read(ubDoorOpeningNoise);
+
+		deserializeParameters->serializationBitstream[0].Read(ubLeaveHistoryCode);
+		deserializeParameters->serializationBitstream[0].Read(fDontUnsetLastTargetFromTurn);
+		deserializeParameters->serializationBitstream[0].Read(bOverrideMoveSpeed);
+		deserializeParameters->serializationBitstream[0].Read(fUseMoverrideMoveSpeed);
+
+		deserializeParameters->serializationBitstream[0].Read(uiTimeSoldierWillArrive);
+		deserializeParameters->serializationBitstream[0].Read(fUseLandingZoneForArrival);
+		deserializeParameters->serializationBitstream[0].Read(fFallClockwise);
+		deserializeParameters->serializationBitstream[0].Read(bVehicleUnderRepairID);
+		deserializeParameters->serializationBitstream[0].Read(iTimeCanSignElsewhere);
+		deserializeParameters->serializationBitstream[0].Read(bHospitalPriceModifier);
+		deserializeParameters->serializationBitstream[0].Read(uiStartTimeOfInsuranceContract);
+		deserializeParameters->serializationBitstream[0].Read(fRTInNonintAnim);
+		deserializeParameters->serializationBitstream[0].Read(fDoingExternalDeath);
+		deserializeParameters->serializationBitstream[0].Read(bCorpseQuoteTolerance);
+		deserializeParameters->serializationBitstream[0].Read(iPositionSndID);
+		deserializeParameters->serializationBitstream[0].Read(uiTuringSoundID);
+		deserializeParameters->serializationBitstream[0].Read(ubLastDamageReason);
+		deserializeParameters->serializationBitstream[0].Read(fComplainedThatTired);
+		deserializeParameters->serializationBitstream[0].Read(sLastTwoLocations);
+		deserializeParameters->serializationBitstream[0].Read(uiTimeSinceLastBleedGrunt);
+	}
+
+	virtual void SerializeConstructionRequestAccepted(RakNet::BitStream* serializationBitstream, RakNet::Connection_RM3* requestingConnection) {
+		serializationBitstream->Write(GetName() + RakNet::RakString(" SerializeConstructionRequestAccepted"));
+	}
+	virtual void DeserializeConstructionRequestAccepted(RakNet::BitStream* serializationBitstream, RakNet::Connection_RM3* acceptingConnection) {
+		PrintStringInBitstream(serializationBitstream);
+	}
+	virtual void SerializeConstructionRequestRejected(RakNet::BitStream* serializationBitstream, RakNet::Connection_RM3* requestingConnection) {
+		serializationBitstream->Write(GetName() + RakNet::RakString(" SerializeConstructionRequestRejected"));
+	}
+	virtual void DeserializeConstructionRequestRejected(RakNet::BitStream* serializationBitstream, RakNet::Connection_RM3* rejectingConnection) {
+		PrintStringInBitstream(serializationBitstream);
+	}
+
+	virtual void OnPoppedConnection(RakNet::Connection_RM3* droppedConnection)
+	{
+	}
+	void NotifyReplicaOfMessageDeliveryStatus(RakNetGUID guid, uint32_t receiptId, bool messageArrived)
+	{
+	}
+
+	virtual RM3ConstructionState QueryConstruction(RakNet::Connection_RM3* destinationConnection, ReplicaManager3* replicaManager3) {
+		return QueryConstruction_ServerConstruction(destinationConnection, gGameOptions.fNetwork != TRUE);
+	}
+	virtual bool QueryRemoteConstruction(RakNet::Connection_RM3* sourceConnection) {
+		return QueryRemoteConstruction_ServerConstruction(sourceConnection, gGameOptions.fNetwork != TRUE);
+	}
+	virtual RM3QuerySerializationResult QuerySerialization(RakNet::Connection_RM3* destinationConnection) {
+		return QuerySerialization_ServerSerializable(destinationConnection, gGameOptions.fNetwork != TRUE);
+	}
+	virtual RM3ActionOnPopConnection QueryActionOnPopConnection(RakNet::Connection_RM3* droppedConnection) const {
+		return QueryActionOnPopConnection_Server(droppedConnection);
+	}
+
 	// ID
 	SoldierID ubID;
 
@@ -361,6 +2444,7 @@ struct SOLDIERTYPE
 	// traits
 	INT16 sWeightCarriedAtTurnStart;
 	ST::string name;
+	RakString rname; // Intermediate entity
 
 	INT8 bVisible; // to render or not to render...
 
@@ -473,6 +2557,11 @@ struct SOLDIERTYPE
 	ST::string PantsPal;
 	ST::string VestPal;
 	ST::string SkinPal;
+	// Intermediate entities
+	RakString rHeadPal;
+	RakString rPantsPal;
+	RakString rVestPal;
+	RakString rSkinPal;
 
 	UINT16 *pShades[ NUM_SOLDIER_SHADES ]; // Shading tables
 	UINT16 *pGlowShades[20];

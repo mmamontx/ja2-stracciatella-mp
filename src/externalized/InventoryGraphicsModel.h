@@ -4,6 +4,9 @@
 
 #include <string_theory/string>
 
+// Preventing name conflict with windows.h
+#undef small
+
 class InventoryGraphicsModel {
 	public:
 		InventoryGraphicsModel(GraphicModel small, GraphicModel big);

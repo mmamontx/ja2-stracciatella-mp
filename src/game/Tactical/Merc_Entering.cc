@@ -459,7 +459,8 @@ void HandleHeliDrop( )
 			guiPendingOverrideEvent = LU_BEGINUILOCK;
 		}
 
-		if (_KeyDown(SDLK_ESCAPE))
+		//if (_KeyDown(SDLK_ESCAPE))
+		if (1) // FIXME: Omitting helicopter drop animation - not sure how it would affect multiplayer
 		{
 			// Loop through all mercs not yet placed
 			for ( cnt = gbCurDrop; cnt < gbNumHeliSeatsOccupied; cnt++ )

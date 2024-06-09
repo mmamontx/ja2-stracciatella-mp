@@ -234,6 +234,7 @@ static void QueryRTLeftButton(UIEventKind* const puiNewEvent)
 														{
 															*puiNewEvent = C_WAIT_FOR_CONFIRM;
 															gfPlotNewMovement = TRUE;
+															//SLOGI("gfPlotNewMovement = TRUE");
 														}
 													}
 												}

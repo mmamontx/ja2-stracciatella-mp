@@ -142,7 +142,7 @@ void InitTacticalPlacementGUI()
 	MakeButton(DONE_BUTTON,   437, DoneOverheadPlacementClickCallback, gpStrategicString[STR_TP_DONE],   gpStrategicString[STR_TP_DONEHELP]);
 	iTPButtons[DONE_BUTTON]->AllowDisabledFastHelp();
 
-	GROUP const& bg = *gpBattleGroup;
+	GROUP_JA2 const& bg = *gpBattleGroup;
 	/* First pass: Count the number of mercs that are going to be placed by the
 	 * player. This determines the size of the array we will allocate. */
 	size_t n = 0;

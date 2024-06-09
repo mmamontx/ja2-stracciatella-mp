@@ -456,6 +456,8 @@ static void SetClockResolutionToCompressMode(INT32 iCompressMode)
 		gfTimeCompressionOn = TRUE;
 
 		// handle the player just starting a game
+		// TODO: When the server hits time compression button - the client must automatically
+		// go to the tactical map together with him
 		HandleTimeCompressWithTeamJackedInAndGearedToGo( );
 	}
 

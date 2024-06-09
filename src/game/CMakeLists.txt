@@ -1,5 +1,6 @@
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Editor")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Laptop")
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/RakNet")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Strategic")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Tactical")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/TacticalAI")

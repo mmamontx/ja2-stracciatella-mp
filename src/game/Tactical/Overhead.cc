@@ -228,6 +228,8 @@ static INT8   gbNumMercsUntilWaitingOver       = 0;
 static UINT32 guiWaitingForAllMercsToExitTimer = 0;
 BOOLEAN       gfKillingGuysForLosingBattle     = FALSE;
 
+int ii; // Global variable for BASE macro
+
 
 static INT32 GetFreeMercSlot(void)
 {
@@ -408,6 +410,9 @@ void InitOverhead()
 	std::fill(std::begin(MercSlots), std::end(MercSlots), nullptr);
 	std::fill(std::begin(AwaySlots), std::end(AwaySlots), nullptr);
 	std::fill(std::begin(Menptr), std::end(Menptr), SOLDIERTYPE{});
+
+	//for (int i = 0; i < 2; i++)
+	//	printf("&(Menptr[%d]) = %p\n", i, &(Menptr[i]));
 
 	TacticalStatusType& t = gTacticalStatus;
 	t = TacticalStatusType{};
@@ -590,6 +595,7 @@ void ExecuteOverhead(void)
 		for (UINT32 cnt = 0; cnt < guiNumMercSlots; ++cnt)
 		{
 			SOLDIERTYPE* pSoldier = MercSlots[cnt];
+			//printf("ExecuteOverhead() MercSlots[%d] = %p\n", cnt, MercSlots[cnt]);
 
 			if (pSoldier != NULL)
 			{

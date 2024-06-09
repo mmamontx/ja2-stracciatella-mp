@@ -77,8 +77,16 @@
 #include "VObject.h"
 #include "VObject_Blitters.h"
 #include "VSurface.h"
+#include "Utils/Text_Input.h"
+#include "RakNet/MessageIdentifiers.h"
+#include "GameInitOptionsScreen.h"
+#include "Strategic.h"
+#include "Game_Init.h"
 
 #include <string_theory/format>
+#include <Game_Event_Hook.h>
+
+using namespace RakNet;
 
 #define MAX_SORT_METHODS					6
 
@@ -370,6 +378,9 @@ static PathSt* g_prev_path;
 
 static bool fLockOutMapScreenInterface = false;
 
+std::list<struct PLAYER> gPlayers;
+DataStructures::List<Replica3*> gReplicaList;
+static bool gNetworkCreated = FALSE;
 
 // GLOBAL VARIABLES (EXTERNAL)
 
@@ -401,7 +412,274 @@ extern BOOLEAN gfMilitiaPopupCreated;
 
 void CancelMapUIMessage( void );
 
+// For debugging purposes (so we don't have to hire mercs manually everytime)
+void HireRandomMercs(unsigned int n)
+{
+	struct MERC_HIRE_STRUCT h;
+	int id_random;
+	srand((unsigned)time(NULL));
 
+	for (int i = 0; i < n; i++)
+	{
+		id_random = rand() % 40; // There should be at least 40 mercs (considering AIM only)
+		// FIXME: Prevent id_random from having same value as in one of previous iterations of this loop
+		h = MERC_HIRE_STRUCT{};
+
+		h.ubProfileID = id_random;
+		h.sSector = g_merc_arrive_sector;
+		h.fUseLandingZoneForArrival = TRUE;
+		h.ubInsertionCode = INSERTION_CODE_ARRIVING_GAME;
+		h.iTotalContractLength = 1;
+		h.fCopyProfileItemsOver = true;
+
+		gMercProfiles[id_random].ubMiscFlags |= PROFILE_MISC_FLAG_ALREADY_USED_ITEMS;
+
+		HireMerc(h);
+	}
+
+	fDrawCharacterList = true;
+	fTeamPanelDirty = true;
+	ReBuildCharactersList();
+}
+
+unsigned char SGetPacketIdentifier(Packet *p)
+{
+	if (p == 0)
+		return 255;
+
+	if ((unsigned char)p->data[0] == ID_TIMESTAMP)
+	{
+		assert(p->length > sizeof(unsigned char) + sizeof(unsigned long));
+		return (unsigned char)p->data[sizeof(unsigned char) + sizeof(unsigned long)];
+	}
+	else
+		return (unsigned char)p->data[0];
+}
+
+DWORD WINAPI server_packet(LPVOID lpParam)
+{
+	RakNet::Packet *p;
+	unsigned char SpacketIdentifier;
+
+	while (TRUE) {
+		p = gNetworkOptions.peer->Receive();
+
+		while (p)
+		{
+			// We got a packet, get the identifier with our handy function
+			SpacketIdentifier = SGetPacketIdentifier(p);
+
+			// Check if this is a network message packet
+			switch (SpacketIdentifier)
+			{
+			case ID_DISCONNECTION_NOTIFICATION:
+				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_DISCONNECTION_NOTIFICATION");
+				break;
+			case ID_ALREADY_CONNECTED:
+				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_ALREADY_CONNECTED");
+				break;
+			case ID_REMOTE_DISCONNECTION_NOTIFICATION: // Server telling the clients of another client disconnecting gracefully.  You can manually broadcast this in a peer to peer enviroment if you want.
+				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_REMOTE_DISCONNECTION_NOTIFICATION");
+				break;
+			case ID_REMOTE_CONNECTION_LOST: // Server telling the clients of another client disconnecting forcefully.  You can manually broadcast this in a peer to peer enviroment if you want.
+				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_REMOTE_CONNECTION_LOST");
+				break;
+			case ID_REMOTE_NEW_INCOMING_CONNECTION: // Server telling the clients of another client connecting.  You can manually broadcast this in a peer to peer enviroment if you want.
+				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_REMOT/MING_CONNECTION");
+				break;
+			case ID_CONNECTION_ATTEMPT_FAILED:
+				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_CONNECTION_ATTEMPT_FAILED");
+				break;
+			case ID_NO_FREE_INCOMING_CONNECTIONS:
+				// Sorry, the server is full
+				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_NO_FREE_INCOMING_CONNECTIONS");
+				break;
+			case ID_CONNECTION_LOST:
+				// Couldn't deliver a reliable packet - i.e. the other system was abnormally
+				// terminated
+				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_CONNECTION_LOST");
+				break;
+			case ID_CONNECTION_REQUEST_ACCEPTED:
+				// This tells the client that it has connected
+				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_CONNECTION_REQUEST_ACCEPTED");
+				break;
+			case ID_NEW_INCOMING_CONNECTION:
+				// This tells the server that a client has connected
+				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_NEW_INCOMING_CONNECTION");
+				break;
+			case ID_USER_PACKET_NAME:
+			{
+				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_USER_PACKET_NAME");
+				struct USER_PACKET_NAME* up;
+				up = (struct USER_PACKET_NAME*)p->data;
+
+				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, (ST::string)up->name + " has connected.");
+
+				// Registering the new player in the global struct
+				struct PLAYER player;
+				player.guid = p->guid;
+				strcpy(player.name, up->name);
+				gPlayers.push_back(player);
+
+				break;
+			}
+			case ID_USER_PACKET_MESSAGE:
+			{
+				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_USER_PACKET_MESSAGE");
+				struct USER_PACKET_MESSAGE* up;
+				up = (struct USER_PACKET_MESSAGE*)p->data;
+
+				for (std::list<struct PLAYER>::iterator it = gPlayers.begin(); it != gPlayers.end(); it++)
+					if (it->guid == p->guid)
+						ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, (ST::string)it->name + "> " + (ST::string)up->message);
+
+				break;
+			}
+			case ID_REPLICA_MANAGER_SCOPE_CHANGE:
+				// Changed scope of an object
+				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_REPLICA_MANAGER_SCOPE_CHANGE");
+				break;
+			default:
+				char unknown_id[3];
+				itoa(SpacketIdentifier, unknown_id, 10);
+				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, "SpacketIdentifier = " + (ST::string)unknown_id);
+				break;
+			}
+
+			// We're done with the packet, get more :)
+			gNetworkOptions.peer->DeallocatePacket(p);
+			p = gNetworkOptions.peer->Receive();
+		}
+
+		Sleep(33); // ~30 FPS
+	}
+
+	return 0;
+}
+
+DWORD WINAPI client_packet(LPVOID lpParam)
+{
+	RakNet::Packet* p;
+	unsigned char SpacketIdentifier;
+
+	while (TRUE) {
+		p = gNetworkOptions.peer->Receive();
+
+		while (p)
+		{
+			// We got a packet, get the identifier with our handy function
+			SpacketIdentifier = SGetPacketIdentifier(p);
+
+			// Check if this is a network message packet
+			switch (SpacketIdentifier)
+			{
+			case ID_DISCONNECTION_NOTIFICATION:
+				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_DISCONNECTION_NOTIFICATION");
+				break;
+			case ID_ALREADY_CONNECTED:
+				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_ALREADY_CONNECTED");
+				break;
+			case ID_REMOTE_DISCONNECTION_NOTIFICATION: // Server telling the clients of another client disconnecting gracefully.  You can manually broadcast this in a peer to peer enviroment if you want.
+				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_REMOTE_DISCONNECTION_NOTIFICATION");
+				break;
+			case ID_REMOTE_CONNECTION_LOST: // Server telling the clients of another client disconnecting forcefully.  You can manually broadcast this in a peer to peer enviroment if you want.
+				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_REMOTE_CONNECTION_LOST");
+				break;
+			case ID_REMOTE_NEW_INCOMING_CONNECTION: // Server telling the clients of another client connecting.  You can manually broadcast this in a peer to peer enviroment if you want.
+				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_REMOT/MING_CONNECTION");
+				break;
+			case ID_CONNECTION_ATTEMPT_FAILED:
+				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_CONNECTION_ATTEMPT_FAILED");
+				break;
+			case ID_NO_FREE_INCOMING_CONNECTIONS:
+				// Sorry, the server is full
+				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_NO_FREE_INCOMING_CONNECTIONS");
+				break;
+			case ID_CONNECTION_LOST:
+				// Couldn't deliver a reliable packet - i.e. the other system was abnormally
+				// terminated
+				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_CONNECTION_LOST");
+				break;
+			case ID_CONNECTION_REQUEST_ACCEPTED:
+				// This tells the client that it has connected
+				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_CONNECTION_REQUEST_ACCEPTED");
+				break;
+			case ID_NEW_INCOMING_CONNECTION:
+				// This tells the server that a client has connected
+				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_NEW_INCOMING_CONNECTION");
+				break;
+			case ID_REPLICA_MANAGER_CONSTRUCTION:
+				// Create an object
+				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_REPLICA_MANAGER_CONSTRUCTION");
+				break;
+			case ID_REPLICA_MANAGER_SCOPE_CHANGE: // Not sure what does this one mean
+				// Changed scope of an object
+				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_REPLICA_MANAGER_SCOPE_CHANGE");
+				break;
+			case ID_REPLICA_MANAGER_SERIALIZE:
+				// Serialized data of an object
+				//ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_REPLICA_MANAGER_SERIALIZE");
+				break;
+			case ID_REPLICA_MANAGER_DOWNLOAD_STARTED:
+				// New connection, about to send all world objects
+				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_REPLICA_MANAGER_DOWNLOAD_STARTED");
+				break;
+			case ID_REPLICA_MANAGER_DOWNLOAD_COMPLETE:
+			{
+				// Finished downloading all serialized objects
+				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_REPLICA_MANAGER_DOWNLOAD_COMPLETE");
+
+				gReplicaManager.GetReferencedReplicaList(gReplicaList);
+				//for (int idx = 0; idx < 2; idx++)
+				//{
+				//	printf("gReplicaList[%d] = %p\n", idx, gReplicaList[idx]);
+				//}
+
+				FOR_EACH_IN_TEAM(s, OUR_TEAM) // Below are actions that were supposed to be done when hiring mercs through AIM
+				{
+					gfAtLeastOneMercWasHired = true; // Ugly, but should handle the case when the server doesn't have any characters yet on client connection
+					//printf("s->face = %p\n", s->face);
+					InitSoldierFace(*s); // 'face' has to be initialized locally since originally it points to the host memory and causes an exception
+					//printf("!s->face = %p\n", s->face);
+					AddStrategicEvent(EVENT_DELAYED_HIRING_OF_MERC, (STARTING_TIME + FIRST_ARRIVAL_DELAY) / NUM_SEC_IN_MIN, s->ubID); // Place to the helicopter
+					EVENT_InitNewSoldierAnim(s, STANDING, Random(10), TRUE); // Initialize animation locally
+					CreateSoldierPalettes(*s); // Initialize palette locally
+				}
+
+				// Update merc list in the left panel to show replicated characters
+				fDrawCharacterList = true;
+				fTeamPanelDirty = true;
+				ReBuildCharactersList();
+
+				break;
+			}
+			case ID_USER_PACKET_MESSAGE:
+			{
+				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_USER_PACKET_MESSAGE");
+				struct USER_PACKET_MESSAGE* up;
+				up = (struct USER_PACKET_MESSAGE*)p->data;
+
+				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, "?> " + (ST::string)up->message); // FIXME: As there is no gPlayers list the name is unknown and replaced with '?'
+
+				break;
+			}
+			default:
+				char unknown_id[3];
+				itoa(SpacketIdentifier, unknown_id, 10);
+				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, "SpacketIdentifier = " + (ST::string)unknown_id);
+				break;
+			}
+
+			// We're done with the packet, get more :)
+			gNetworkOptions.peer->DeallocatePacket(p);
+			p = gNetworkOptions.peer->Receive();
+		}
+
+		Sleep(33); // ~30 FPS
+	}
+
+	return 0;
+}
 
 // the tries to select a mapscreen character by his soldier ID
 void SetInfoChar(SOLDIERTYPE const* const s)
@@ -803,7 +1081,7 @@ static void DrawCharacterInfo(SOLDIERTYPE const& s)
 
 		default:
 		{
-			GROUP const* const g = GetSoldierGroup(s);
+			GROUP_JA2 const* const g = GetSoldierGroup(s);
 			if (g && PlayerGroupInMotion(g))
 			{ // Show ETA
 				UINT32 const arrival_time = GetWorldTotalMin() + CalculateTravelTimeOfGroup(g);
@@ -937,7 +1215,7 @@ INT32 GetPathTravelTimeDuringPlotting(PathSt* pPath)
 	INT32 iTravelTime = 0;
 	WAYPOINT pCurrent;
 	WAYPOINT pNext;
-	GROUP *pGroup;
+	GROUP_JA2 *pGroup;
 	UINT8 ubGroupId = 0;
 	BOOLEAN fSkipFirstNode = FALSE;
 
@@ -1441,6 +1719,27 @@ ScreenID MapScreenHandle(void)
 		// create buttons
 		CreateButtonsForMapBorder( );
 
+		InitTextInputMode();
+		SetTextInputCursor(CUROSR_IBEAM_WHITE);
+		SetTextInputFont(FONT12ARIALFIXEDWIDTH);
+		Set16BPPTextFieldColor(Get16BPPColor(FROMRGB(0, 0, 0)));
+		SetBevelColors(Get16BPPColor(FROMRGB(136, 138, 135)), Get16BPPColor(FROMRGB(24, 61, 81)));
+		SetTextInputRegularColors(FONT_WHITE, 2);
+		SetTextInputHilitedColors(2, FONT_WHITE, FONT_WHITE);
+		SetCursorColor(Get16BPPColor(FROMRGB(255, 255, 255)));
+
+		//  FIXME: Place outgoing chat message textbox more accurate
+		AddTextInputField(0, // Left
+			460, // Top
+			120, // Width
+			17, // Height
+			MSYS_PRIORITY_HIGH,
+			"",
+			MAX_MESSAGE_LEN,
+			INPUTTYPE_FULL_TEXT);
+
+		SetActiveField(0);
+
 		// create mouse regions for level markers
 		CreateMouseRegionsForLevelMarkers( );
 
@@ -1635,6 +1934,24 @@ ScreenID MapScreenHandle(void)
 	// don't process any input until we've been through here once
 	if (!gfFirstMapscreenFrame)
 	{
+		if (!gfAtLeastOneMercWasHired)
+			if (!gGameOptions.fNetwork) // Create new objects for server only - they are supposed to be replicated
+				HireRandomMercs(2); // FIXME: For debugging purposes only - to be removed
+
+		if ((gGameOptions.fNetwork) && (!gConnected)) { // If we are client - send connection request to the server
+			struct USER_PACKET_NAME p;
+			p.id = ID_USER_PACKET_NAME;
+			strcpy(p.name, gNetworkOptions.name.c_str());
+			gNetworkOptions.peer->Send((char*)&p, sizeof(p), MEDIUM_PRIORITY, RELIABLE, 0, UNASSIGNED_RAKNET_GUID, true);
+			gConnected = TRUE; // FIXME: We don't verify that we have successfully connected
+		}
+
+		if (!gNetworkCreated) {
+			CreateThread(NULL, 0, gGameOptions.fNetwork ? client_packet : server_packet, NULL, 0, NULL);
+
+			gNetworkCreated = TRUE;
+		}
+
 		// Handle Interface
 		uiNewScreen = HandleMapUI( );
 		if ( uiNewScreen != MAP_SCREEN )
@@ -1970,6 +2287,8 @@ ScreenID MapScreenHandle(void)
 
 	// render buttons
 	RenderButtons( );
+
+	RenderAllTextFields();
 
 	if( fShowMapScreenMovementList )
 	{
@@ -2689,7 +3008,7 @@ static void Teleport()
 	// check to see if this person is moving, if not...then assign them to mvt group
 	if (s.ubGroupID  == 0)
 	{
-		GROUP& g = *CreateNewPlayerGroupDepartingFromSector(s.sSector);
+		GROUP_JA2& g = *CreateNewPlayerGroupDepartingFromSector(s.sSector);
 		AddPlayerToGroup(g, s);
 	}
 
@@ -3006,14 +3325,27 @@ static void HandleModAlt(UINT32 const key)
 	}
 }
 
-
 static void GetMapKeyboardInput()
 {
 	InputAtom InputEvent;
 	while (DequeueSpecificEvent(&InputEvent, KEYBOARD_EVENTS))
 	{
-		if (InputEvent.usEvent == KEY_DOWN)
+		if (!HandleTextInput(&InputEvent) && (InputEvent.usEvent == KEY_DOWN))
 		{
+			if (InputEvent.usParam == KEY_RETURN) {
+				ST::string str = GetStringFromField(0);
+
+				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, gNetworkOptions.name + "> " + str); // FIXME: Make messages broadcasted from the server instead of 'hardshowing' this message
+
+				// Sending the message to others
+				struct USER_PACKET_MESSAGE up;
+				up.id = ID_USER_PACKET_MESSAGE;
+				strcpy(up.message, str.c_str());
+				gNetworkOptions.peer->Send((char*)&up, sizeof(up), MEDIUM_PRIORITY, RELIABLE, 0, UNASSIGNED_RAKNET_GUID, true);
+
+				//SetInputFieldString(0, {}); // FIXME: Find a way to clear the text field without errors
+			}
+
 			// if game is paused because of player, unpause with any key
 			if (gfPauseDueToPlayerGamePause)
 			{
@@ -7321,7 +7653,7 @@ static void ExplainWhySkyriderCantFly(void)
 
 static UINT8 PlayerMercsInHelicopterSector()
 {
-	GROUP& g = *GetGroup(GetHelicopter().ubMovementGroup);
+	GROUP_JA2& g = *GetGroup(GetHelicopter().ubMovementGroup);
 	if (g.fBetweenSectors) return 0;
 	return PlayerMercsInSector(g.ubSector);
 }
@@ -7674,7 +8006,7 @@ ST::string GetMapscreenMercDestinationString(SOLDIERTYPE const& s)
 			 * sector, so show that as his destination individual soldiers don't
 			 * store previous/next sector coordinates, must go to his group for that
 			 */
-			GROUP const& g = *GetSoldierGroup(s);
+			GROUP_JA2 const& g = *GetSoldierGroup(s);
 			sSector = g.ubNext;
 		}
 		return ST::format("{}{}", pMapVertIndex[sSector.y], pMapHortIndex[sSector.x]);

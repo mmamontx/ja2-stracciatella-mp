@@ -6165,7 +6165,7 @@ void SetTimeOfAssignmentChangeForMerc( SOLDIERTYPE *pSoldier )
 }
 
 
-BOOLEAN AnyMercInGroupCantContinueMoving(GROUP const& g)
+BOOLEAN AnyMercInGroupCantContinueMoving(GROUP_JA2 const& g)
 {
 	BOOLEAN group_must_stop = FALSE;
 	UINT16  quote           = QUOTE_NEED_SLEEP;
@@ -6221,7 +6221,7 @@ static bool AssignMercToAMovementGroup(SOLDIERTYPE& s)
 	if (s.bAssignment == IN_TRANSIT) return false; // In transit
 	if (s.ubGroupID != 0)            return false; // In a movement group
 
-	GROUP& g = *CreateNewPlayerGroupDepartingFromSector(s.sSector);
+	GROUP_JA2& g = *CreateNewPlayerGroupDepartingFromSector(s.sSector);
 	AddPlayerToGroup(g, s);
 	return true;
 }

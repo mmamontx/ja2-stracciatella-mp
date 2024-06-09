@@ -2,7 +2,7 @@
 #define __STRATEGIC_AI_H
 
 #include "Types.h"
-struct GROUP;
+struct GROUP_JA2;
 
 #define SAVED_ARMY_COMPOSITIONS		60
 #define SAVED_GARRISON_GROUPS		100
@@ -32,10 +32,10 @@ void EvaluateQueenSituation(void);
 extern BOOLEAN gfUseAlternateQueenPosition;
 
 //returns TRUE if the group was deleted.
-BOOLEAN StrategicAILookForAdjacentGroups( GROUP *pGroup );
-void RemoveGroupFromStrategicAILists(GROUP const&);
+BOOLEAN StrategicAILookForAdjacentGroups( GROUP_JA2 *pGroup );
+void RemoveGroupFromStrategicAILists(GROUP_JA2 const&);
 void RecalculateSectorWeight( UINT8 ubSectorID );
-void RecalculateGroupWeight(GROUP const&);
+void RecalculateGroupWeight(GROUP_JA2 const&);
 
 BOOLEAN OkayForEnemyToMoveThroughSector( UINT8 ubSectorID );
 
@@ -49,10 +49,10 @@ size_t FindPatrolGroupIndexForGroupID( UINT8 ubGroupID );
 size_t FindPatrolGroupIndexForGroupIDPending( UINT8 ubGroupID );
 size_t FindGarrisonIndexForGroupIDPending( UINT8 ubGroupID );
 
-GROUP* FindPendingGroupInSector( UINT8 ubSectorID );
+GROUP_JA2* FindPendingGroupInSector( UINT8 ubSectorID );
 
 
-void RepollSAIGroup( GROUP *pGroup );
+void RepollSAIGroup( GROUP_JA2 *pGroup );
 
 
 extern BOOLEAN gfDisplayStrategicAILogs;

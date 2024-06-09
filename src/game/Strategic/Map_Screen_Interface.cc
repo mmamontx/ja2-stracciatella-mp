@@ -1395,7 +1395,7 @@ void UpdateMapScreenAssignmentPositions( void )
 }
 
 
-void RandomMercInGroupSaysQuote(GROUP const& g, UINT16 const quote_num)
+void RandomMercInGroupSaysQuote(GROUP_JA2 const& g, UINT16 const quote_num)
 {
 	/* If traversing tactically, don't do this, unless time compression was
 	 * required for some reason (don't go to sector) */
@@ -3910,7 +3910,7 @@ MoveError CanEntireMovementGroupMercIsInMove(SOLDIERTYPE& s)
 
 	/* Even if group is 0 (not that that should happen, should it?) still loop
 	 * through for other mercs selected to move */
-	GROUP const* const g = GetSoldierGroup(s);
+	GROUP_JA2 const* const g = GetSoldierGroup(s);
 
 	/* If anyone in the merc's group or also selected cannot move for whatever
 	 * reason return an error */

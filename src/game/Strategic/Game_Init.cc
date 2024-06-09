@@ -61,13 +61,19 @@
 #include "Timer_Control.h"
 #include "Vehicles.h"
 #include "WorldDef.h"
+#include "GameInitOptionsScreen.h"
+#include "NetworkIDManager.h"
 #include <stdexcept>
 #include <string_theory/format>
+
+using namespace RakNet;
 
 void InitScriptingEngine();
 
 UINT8			gubScreenCount=0;
 
+ReplicaManager3Sample gReplicaManager;
+NetworkIDManager gNetworkIdManager;
 
 static void InitNPCs()
 {
@@ -196,6 +202,16 @@ void ShutdownStrategicLayer()
 }
 
 
+DWORD WINAPI replicamgr(LPVOID lpParam)
+{
+	int idx;
+	while (1)
+	{
+		Sleep(1000); // Not sure if the period can affect sync delay, if so - it should be reduced
+	}
+	return 0;
+}
+
 void InitNewGame()
 {
 	uiMeanWhileFlags = 0;
@@ -264,6 +280,33 @@ void InitNewGame()
 
 		// Set the fact the game is in progress
 		gTacticalStatus.fHasAGameBeenStarted = TRUE;
+
+		gEnemyEnabled = FALSE; // FIXME: Disabling enemies for debugging purposes - to be removed
+		gNetworkOptions.peer = RakPeerInterface::GetInstance();
+
+		if (!gGameOptions.fNetwork)
+		{
+			ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, "We are server.");
+
+			CreateThread(NULL, 0, replicamgr, NULL, 0, NULL);
+
+			gNetworkOptions.peer->Startup(MAX_NUM_CLIENTS, &SocketDescriptor(gNetworkOptions.port, 0), 1);
+			gNetworkOptions.peer->AttachPlugin(&gReplicaManager);
+			gReplicaManager.SetNetworkIDManager(&gNetworkIdManager);
+			gNetworkOptions.peer->SetMaximumIncomingConnections(MAX_NUM_CLIENTS);
+
+			for (int i = 0; i < TOTAL_SOLDIERS; i++)
+				gReplicaManager.Reference(&(Menptr[i]));
+		}
+		else
+		{
+			ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, "We are client.");
+
+			gNetworkOptions.peer->Startup(1, &SocketDescriptor(), 1);
+			gNetworkOptions.peer->AttachPlugin(&gReplicaManager);
+			gReplicaManager.SetNetworkIDManager(&gNetworkIdManager);
+			gNetworkOptions.peer->Connect(gNetworkOptions.ip.c_str(), gNetworkOptions.port, 0, 0);
+		}
 	}
 	else if (gubScreenCount == 1)
 	{

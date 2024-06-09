@@ -55,7 +55,7 @@ void InitVehicles(void)
 	for( cnt = 0; cnt <  MAX_VEHICLES; cnt++ )
 	{
 		// create mvt groups
-		GROUP* const g = CreateNewVehicleGroupDepartingFromSector(SGPSector(1, 1));
+		GROUP_JA2* const g = CreateNewVehicleGroupDepartingFromSector(SGPSector(1, 1));
 		g->fPersistant = TRUE;
 		gubVehicleMovementGroups[cnt] = g->ubGroupID;
 	}
@@ -100,7 +100,7 @@ INT32 AddVehicleToList(const SGPSector& sMap, const INT16 sGridNo, const UINT8 u
 	v->ubMovementGroup = gubVehicleMovementGroups[vid];
 
 	// ATE: Add movement mask to group...
-	GROUP* const g = GetGroup(v->ubMovementGroup);
+	GROUP_JA2* const g = GetGroup(v->ubMovementGroup);
 	// This is okay, no groups exist, so simply return.
 	if (!g && gfEditMode) return vid;
 	Assert(g);
@@ -173,7 +173,7 @@ static bool AddSoldierToVehicle(SOLDIERTYPE& s, VEHICLETYPE& v)
 
 			// I really have vehicles.
 			// ONLY add to vehicle group once!
-			GROUP& g = *GetGroup(v.ubMovementGroup);
+			GROUP_JA2& g = *GetGroup(v.ubMovementGroup);
 			if (!DoesPlayerExistInPGroup(g, *vs))
 			{
 				//NOW.. add guy to vehicle group....
@@ -361,7 +361,7 @@ static bool RemoveSoldierFromVehicle(SOLDIERTYPE& s)
 		// Remove vehicle from squad
 		RemoveCharacterFromSquads(&vs);
 		// ATE: Add him back to vehicle group!
-		GROUP& g = *GetGroup(v.ubMovementGroup);
+		GROUP_JA2& g = *GetGroup(v.ubMovementGroup);
 		if (!DoesPlayerExistInPGroup(g, vs)) AddPlayerToGroup(g, vs);
 		ChangeSoldiersAssignment(&vs, ASSIGNMENT_EMPTY);
 	}
@@ -425,7 +425,7 @@ VEHICLETYPE& GetVehicle(INT32 const vehicle_id)
 }
 
 
-VEHICLETYPE& GetVehicleFromMvtGroup(GROUP const& g)
+VEHICLETYPE& GetVehicleFromMvtGroup(GROUP_JA2 const& g)
 {
 	// given the id of a mvt group, find a vehicle in this group
 	FOR_EACH_VEHICLE(v)
@@ -808,7 +808,7 @@ void LoadVehicleMovementInfoFromSavedGameFile(HWFILE const hFile)
 	for( cnt = 5; cnt <  MAX_VEHICLES; cnt++ )
 	{
 		// create mvt groups
-		GROUP* const g = CreateNewVehicleGroupDepartingFromSector(SGPSector(1, 1));
+		GROUP_JA2* const g = CreateNewVehicleGroupDepartingFromSector(SGPSector(1, 1));
 		g->fPersistant = TRUE;
 		gubVehicleMovementGroups[cnt] = g->ubGroupID;
 	}
@@ -853,7 +853,7 @@ BOOLEAN OKUseVehicle( UINT8 ubProfile )
 
 static void TeleportVehicleToItsClosestSector(const UINT8 ubGroupID)
 {
-	GROUP  *pGroup = NULL;
+	GROUP_JA2  *pGroup = NULL;
 	UINT32 uiTimeToNextSector;
 	UINT32 uiTimeToLastSector;
 	SGPSector sPrev, sNext;
@@ -993,7 +993,7 @@ SOLDIERTYPE* PickRandomPassengerFromVehicle(SOLDIERTYPE* const pSoldier)
 }
 
 
-bool DoesVehicleGroupHaveAnyPassengers(GROUP const& g)
+bool DoesVehicleGroupHaveAnyPassengers(GROUP_JA2 const& g)
 {
 	return GetNumberInVehicle(GetVehicleFromMvtGroup(g)) != 0;
 }

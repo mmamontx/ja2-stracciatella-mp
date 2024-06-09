@@ -5,7 +5,10 @@
 #include "MessageBoxScreen.h"
 #include "ScreenIDs.h"
 #include "JA2Types.h"
+#include "ReplicaManager3.h"
 #include <string_theory/string>
+
+using namespace RakNet;
 
 
 // Sector name identifiers
@@ -104,6 +107,8 @@ extern GUIButtonRef giMapContractButton;
 extern GUIButtonRef giCharInfoButton[2];
 extern BOOLEAN      fDrawCharacterList;
 extern SGPSector    gsHighlightSector;
+
+extern DataStructures::List<Replica3*> gReplicaList;
 
 // create/destroy inventory button as needed
 void CreateDestroyMapInvButton(void);

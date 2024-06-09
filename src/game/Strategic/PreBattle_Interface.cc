@@ -64,7 +64,7 @@ extern BOOLEAN gfDelayAutoResolveStart;
 
 
 BOOLEAN gfTacticalTraversal = FALSE;
-GROUP *gpTacticalTraversalGroup = NULL;
+GROUP_JA2 *gpTacticalTraversalGroup = NULL;
 SOLDIERTYPE *gpTacticalTraversalChosenSoldier = NULL;
 
 
@@ -98,7 +98,7 @@ enum //GraphicIDs for the panel
 
 bool gfDisplayPotentialRetreatPaths = false;
 
-GROUP *gpBattleGroup = NULL;
+GROUP_JA2 *gpBattleGroup = NULL;
 
 
 static MOUSE_REGION PBInterfaceBlanket;
@@ -166,7 +166,7 @@ static void GoToSectorCallback(GUI_BUTTON* btn, UINT32 reason);
 static void RetreatMercsCallback(GUI_BUTTON* btn, UINT32 reason);
 
 
-void InitPreBattleInterface(GROUP* const battle_group, bool const persistent_pbi)
+void InitPreBattleInterface(GROUP_JA2* const battle_group, bool const persistent_pbi)
 {
 	// ARM: Feb01/98 - Cancel out of mapscreen movement plotting if PBI subscreen is coming up
 	if (bSelectedDestChar != -1 || fPlotForHelicopter)
@@ -325,7 +325,7 @@ void InitPreBattleInterface(GROUP* const battle_group, bool const persistent_pbi
 				if (best_exp_level > s.bExpLevel) best_exp_level = s.bExpLevel; // XXX Determines minimum, not maximum, i.e. stays at 0
 				if (s.ubPrevSectorID == 255)
 				{ //Not able to retreat (calculate it for group)
-					GROUP* const g = GetGroup(group_id);
+					GROUP_JA2* const g = GetGroup(group_id);
 					Assert(g);
 					CalculateGroupRetreatSector(g);
 				}
@@ -1198,7 +1198,7 @@ void CalculateNonPersistantPBIInfo(void)
 }
 
 
-static void PutNonSquadMercsInPlayerGroupOnSquads(GROUP* pGroup, BOOLEAN fExitVehicles);
+static void PutNonSquadMercsInPlayerGroupOnSquads(GROUP_JA2* pGroup, BOOLEAN fExitVehicles);
 
 
 static void PutNonSquadMercsInBattleSectorOnSquads(BOOLEAN fExitVehicles)
@@ -1207,7 +1207,7 @@ static void PutNonSquadMercsInBattleSectorOnSquads(BOOLEAN fExitVehicles)
 	// the tactical placement interface to work in case of simultaneous multi-vehicle arrivals!
 	FOR_EACH_GROUP_SAFE(i)
 	{
-		GROUP& g = *i;
+		GROUP_JA2& g = *i;
 		if (!PlayerGroupInvolvedInThisCombat(g)) continue;
 
 		// the helicopter group CAN be involved, if it's on the ground, in which case everybody must get out of it
@@ -1227,7 +1227,7 @@ static void PutNonSquadMercsInBattleSectorOnSquads(BOOLEAN fExitVehicles)
 }
 
 
-static void PutNonSquadMercsInPlayerGroupOnSquads(GROUP* const pGroup, const BOOLEAN fExitVehicles)
+static void PutNonSquadMercsInPlayerGroupOnSquads(GROUP_JA2* const pGroup, const BOOLEAN fExitVehicles)
 {
 	std::optional<INT8> bUniqueVehicleSquad;
 	if (pGroup->fVehicle)
@@ -1298,7 +1298,7 @@ static void ClearMovementForAllInvolvedPlayerGroups(void)
 {
 	FOR_EACH_GROUP(i)
 	{
-		GROUP& g = *i;
+		GROUP_JA2& g = *i;
 		if (!PlayerGroupInvolvedInThisCombat(g)) continue;
 		// clear their strategic movement (mercpaths and waypoints)
 		ClearMercPathsAndWaypointsForAllInGroup(g);
@@ -1313,7 +1313,7 @@ void RetreatAllInvolvedPlayerGroups( void )
 
 	FOR_EACH_GROUP(i)
 	{
-		GROUP& g = *i;
+		GROUP_JA2& g = *i;
 		if (!PlayerGroupInvolvedInThisCombat(g)) continue;
 		// Don't retreat empty vehicle groups!
 		if (g.fVehicle && !DoesVehicleGroupHaveAnyPassengers(g)) continue;
@@ -1342,7 +1342,7 @@ bool PlayerMercInvolvedInThisCombat(SOLDIERTYPE const& s)
 }
 
 
-bool PlayerGroupInvolvedInThisCombat(GROUP const& g)
+bool PlayerGroupInvolvedInThisCombat(GROUP_JA2 const& g)
 {
 	/* Player group, non-empty, not between sectors, in the right sector, isn't a
 	 * group of in transit, dead, or POW mercs, and either not the helicopter

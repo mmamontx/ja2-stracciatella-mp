@@ -4,7 +4,7 @@
 #include "Types.h"
 #include "Strategic_Movement.h"
 
-void InitPreBattleInterface(GROUP* battle_group, bool persistent_pbi);
+void InitPreBattleInterface(GROUP_JA2* battle_group, bool persistent_pbi);
 void KillPreBattleInterface(void);
 void RenderPreBattleInterface(void);
 
@@ -13,10 +13,10 @@ extern bool    gfDisplayPotentialRetreatPaths;
 extern BOOLEAN gfAutomaticallyStartAutoResolve;
 extern BOOLEAN fDisableMapInterfaceDueToBattle;
 
-extern GROUP *gpBattleGroup;
+extern GROUP_JA2 *gpBattleGroup;
 
 extern BOOLEAN gfTacticalTraversal;
-extern GROUP *gpTacticalTraversalGroup;
+extern GROUP_JA2 *gpTacticalTraversalGroup;
 extern SOLDIERTYPE *gpTacticalTraversalChosenSoldier;
 
 extern BOOLEAN gfGotoSectorTransition;
@@ -81,7 +81,7 @@ void WakeUpAllMercsInSectorUnderAttack();
 
 void RetreatAllInvolvedPlayerGroups( void );
 
-bool PlayerGroupInvolvedInThisCombat(GROUP const&);
+bool PlayerGroupInvolvedInThisCombat(GROUP_JA2 const&);
 bool PlayerMercInvolvedInThisCombat(SOLDIERTYPE const&);
 
 enum

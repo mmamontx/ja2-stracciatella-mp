@@ -3,6 +3,8 @@
 
 #include "Debug.h"
 #include "Soldier_Control.h"
+#include "GameInitOptionsScreen.h"
+#include "MapScreen.h"
 
 
 #define MAX_REALTIME_SPEED_VAL		10
@@ -135,9 +137,12 @@ extern const char* const gzActionStr[];
 // Soldier List used for all soldier overhead interaction
 extern SOLDIERTYPE Menptr[TOTAL_SOLDIERS];
 
+#define IS_VALID_CLIENT ((gGameOptions.fNetwork) && (gConnected) && (gReplicaList.Size() != 0))
+
 static inline SOLDIERTYPE& GetMan(UINT const idx)
 {
-	Assert(idx < lengthof(Menptr));
+	Assert(idx < lengthof(Menptr)); // FIXME: For client do assertion based on replica array size
+	if (IS_VALID_CLIENT) return *((SOLDIERTYPE*)gReplicaList[idx]);
 	return Menptr[idx];
 }
 
@@ -188,26 +193,45 @@ static inline BOOLEAN IsTeamActive(const UINT team)
 }
 
 
+//#define BASE_FOR_EACH_IN_TEAM(type, iter, team)                                      \
+//	for (type* iter = &Menptr[gTacticalStatus.Team[(team)].bFirstID],    \
+//		* const end__##iter = &Menptr[gTacticalStatus.Team[(team)].bLastID + 1]; \
+//		iter != end__##iter;                                                         \
+//		++iter)                                                                      \
+//		if (!iter->bActive) continue; else
+extern int ii;
 #define BASE_FOR_EACH_IN_TEAM(type, iter, team)                                      \
-	for (type* iter = &Menptr[gTacticalStatus.Team[(team)].bFirstID],    \
+	ii = gTacticalStatus.Team[(team)].bFirstID; \
+	for (type* iter = ((IS_VALID_CLIENT) ? ((type*)gReplicaList[gTacticalStatus.Team[(team)].bFirstID]) : (&Menptr[gTacticalStatus.Team[(team)].bFirstID])),    \
 		* const end__##iter = &Menptr[gTacticalStatus.Team[(team)].bLastID + 1]; \
-		iter != end__##iter;                                                         \
-		++iter)                                                                      \
+		(IS_VALID_CLIENT) ? (ii < (gTacticalStatus.Team[(team)].bLastID + 1)) : (iter != end__##iter);                                                         \
+		(IS_VALID_CLIENT) ? (++ii, iter = ((type*)gReplicaList[ii])) : ++iter)                                                                      \
 		if (!iter->bActive) continue; else
 #define FOR_EACH_IN_TEAM( iter, team) BASE_FOR_EACH_IN_TEAM(      SOLDIERTYPE, iter, (team))
 #define CFOR_EACH_IN_TEAM(iter, team) BASE_FOR_EACH_IN_TEAM(const SOLDIERTYPE, iter, (team))
 
+//#define BASE_FOR_EACH_SOLDIER(type, iter)                  \
+//	for (type* iter = Menptr; iter != Menptr + MAX_NUM_SOLDIERS; ++iter) \
+//		if (!iter->bActive) continue; else
 #define BASE_FOR_EACH_SOLDIER(type, iter)                  \
-	for (type* iter = Menptr; iter != Menptr + MAX_NUM_SOLDIERS; ++iter) \
+	ii = 0; \
+	for (type* iter = ((IS_VALID_CLIENT) ? ((type*)gReplicaList[0]) : Menptr); ((IS_VALID_CLIENT) ? (ii < MAX_NUM_SOLDIERS) : (iter != Menptr + MAX_NUM_SOLDIERS)); ((IS_VALID_CLIENT) ? (++ii, iter = ((type*)gReplicaList[ii])) : ++iter)) \
 		if (!iter->bActive) continue; else
 #define FOR_EACH_SOLDIER( iter) BASE_FOR_EACH_SOLDIER(      SOLDIERTYPE, iter)
 #define CFOR_EACH_SOLDIER(iter) BASE_FOR_EACH_SOLDIER(const SOLDIERTYPE, iter)
 
+//#define BASE_FOR_EACH_NON_PLAYER_SOLDIER(type, iter)                                    \
+//	for (type* iter = &Menptr[gTacticalStatus.Team[ENEMY_TEAM].bFirstID],    \
+//		* const end__##iter = &Menptr[gTacticalStatus.Team[CIV_TEAM  ].bLastID + 1]; \
+//		iter != end__##iter;                                                             \
+//		++iter)                                                                          \
+//		if (!iter->bActive) continue; else
 #define BASE_FOR_EACH_NON_PLAYER_SOLDIER(type, iter)                                    \
-	for (type* iter = &Menptr[gTacticalStatus.Team[ENEMY_TEAM].bFirstID],    \
+	ii = gTacticalStatus.Team[ENEMY_TEAM].bFirstID; \
+	for (type* iter = ((IS_VALID_CLIENT) ? ((type *)gReplicaList[gTacticalStatus.Team[ENEMY_TEAM].bFirstID]) : (&Menptr[gTacticalStatus.Team[ENEMY_TEAM].bFirstID])),    \
 		* const end__##iter = &Menptr[gTacticalStatus.Team[CIV_TEAM  ].bLastID + 1]; \
-		iter != end__##iter;                                                             \
-		++iter)                                                                          \
+		(IS_VALID_CLIENT) ? ii < (gTacticalStatus.Team[CIV_TEAM  ].bLastID + 1) : (iter != end__##iter);                                                             \
+		(IS_VALID_CLIENT) ? (++ii, iter = ((type*)gReplicaList[ii])) : ++iter)                                                                          \
 		if (!iter->bActive) continue; else
 #define FOR_EACH_NON_PLAYER_SOLDIER( iter) BASE_FOR_EACH_NON_PLAYER_SOLDIER(      SOLDIERTYPE, iter)
 #define CFOR_EACH_NON_PLAYER_SOLDIER(iter) BASE_FOR_EACH_NON_PLAYER_SOLDIER(const SOLDIERTYPE, iter)

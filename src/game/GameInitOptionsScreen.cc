@@ -25,6 +25,8 @@
 #include "Video.h"
 #include "WordWrap.h"
 #include "UILayout.h"
+#include "Utils/Text_Input.h"
+#include "HImage.h"
 
 #include <string_theory/string>
 
@@ -91,6 +93,15 @@ enum
 	NUM_GUN_OPTIONS,
 };
 
+// Network options
+enum
+{
+	GIO_SERVER,
+	GIO_CLIENT,
+
+	NUM_NETWORK_OPTIONS,
+};
+
 #if 0 // JA2Gold: no more timed turns setting
 // enum for the timed turns setting
 enum
@@ -135,6 +146,10 @@ static ScreenID gubGIOExitScreen = GAME_INIT_OPTIONS_SCREEN;
 
 static SGPVObject* guiGIOMainBackGroundImage;
 
+NETWORK_OPTIONS gNetworkOptions;
+BOOL gConnected = FALSE;
+BOOL gEnemyEnabled = TRUE;
+
 
 // Done Button
 static void BtnGIODoneCallback(GUI_BUTTON *btn,UINT32 reason);
@@ -158,6 +173,10 @@ static void BtnGameStyleTogglesCallback(GUI_BUTTON *btn,UINT32 reason);
 //checkbox to toggle Gun options
 static GUIButtonRef guiGunOptionToggles[NUM_GUN_OPTIONS];
 static void BtnGunOptionsTogglesCallback(GUI_BUTTON *btn, UINT32 reason);
+
+//checkbox to toggle Network options
+static GUIButtonRef guiNetworkOptionToggles[NUM_NETWORK_OPTIONS];
+static void BtnNetworkOptionsTogglesCallback(GUI_BUTTON* btn, UINT32 reason);
 
 #if 0// JA2Gold: no more timed turns setting
 //checkbox to toggle Timed turn option on or off
@@ -203,6 +222,8 @@ ScreenID GameInitOptionsScreenHandle(void)
 	// render buttons marked dirty
 	MarkButtonsDirty();
 	RenderButtons();
+
+	RenderAllTextFields();
 
 #if 0 // XXX was commented out
 	// render help
@@ -302,6 +323,52 @@ static void EnterGIOScreen()
 		MakeCheckBoxes(guiGunOptionToggles, lengthof(guiGunOptionToggles), x, y, BtnGunOptionsTogglesCallback, def);
 	}
 
+	{ // Check box to toggle Network options
+		INT16  const x = 0; // FIXME: Define a constant and set a proper position
+		INT16  const y = 75; // FIXME: Define a constant and set a proper position
+		size_t const def = gGameOptions.fNetwork ? GIO_CLIENT : GIO_SERVER;
+		MakeCheckBoxes(guiNetworkOptionToggles, lengthof(guiNetworkOptionToggles), x, y, BtnNetworkOptionsTogglesCallback, def);
+	}
+
+	InitTextInputMode();
+
+	SetTextInputCursor(CUROSR_IBEAM_WHITE);
+	SetTextInputFont(FONT12ARIALFIXEDWIDTH);
+	Set16BPPTextFieldColor(Get16BPPColor(FROMRGB(0, 0, 0)));
+	SetBevelColors(Get16BPPColor(FROMRGB(136, 138, 135)), Get16BPPColor(FROMRGB(24, 61, 81)));
+	SetTextInputRegularColors(FONT_WHITE, 2);
+	SetTextInputHilitedColors(2, FONT_WHITE, FONT_WHITE);
+	SetCursorColor(Get16BPPColor(FROMRGB(255, 255, 255)));
+
+	AddTextInputField(0, // Left
+		0, // Top
+		120, // Width
+		17, // Height
+		MSYS_PRIORITY_HIGH,
+		"Player Name",
+		MAX_NAME_LEN,
+		INPUTTYPE_DOSFILENAME); // Alphanumeric
+
+	AddTextInputField(0, // Left
+		25, // Top
+		120, // Width
+		17, // Height
+		MSYS_PRIORITY_HIGH,
+		"127.0.0.1",
+		15, // 4 numbers up to 3 digits each + 3 points between them
+		INPUTTYPE_FULL_TEXT); // TODO: Verify that it matches IP address format
+
+	AddTextInputField(0, // Left
+		50, // Top
+		120, // Width
+		17, // Height
+		MSYS_PRIORITY_HIGH,
+		"60005",
+		5, // Max digits in IPv4 port number
+		INPUTTYPE_NUMERICSTRICT);
+
+	SetActiveField(0);
+
 #if 0 // JA2 Gold: no more timed turns
 	{ // Check box to toggle the timed turn option
 		INT16  const x   = GIO_TIMED_TURN_SETTING_X + GIO_OFFSET_TO_TOGGLE_BOX;
@@ -345,6 +412,11 @@ static void ExitGIOScreen()
 
 	// Check box to toggle gun options
 	FOR_EACH(GUIButtonRef, i, guiGunOptionToggles) RemoveButton(*i);
+
+	// Check box to toggle network options
+	FOR_EACH(GUIButtonRef, i, guiNetworkOptionToggles) RemoveButton(*i);
+
+	KillAllTextInputModes();
 
 #if 0 // JA2Gold: no more timed turns setting
 	// Remove the timed turns toggle.
@@ -495,7 +567,7 @@ static void GetGIOScreenUserInput(void)
 
 	while (DequeueSpecificEvent(&Event, KEYBOARD_EVENTS))
 	{
-		if (Event.usEvent == KEY_DOWN)
+		if (!HandleTextInput(&Event) && (Event.usEvent == KEY_DOWN))
 		{
 			switch (Event.usParam)
 			{
@@ -559,6 +631,15 @@ static void BtnGunOptionsTogglesCallback(GUI_BUTTON *btn, UINT32 reason)
 	if (reason & MSYS_CALLBACK_REASON_POINTER_UP)
 	{
 		SelectCheckbox(guiGunOptionToggles, *btn);
+	}
+}
+
+
+static void BtnNetworkOptionsTogglesCallback(GUI_BUTTON* btn, UINT32 reason)
+{
+	if (reason & MSYS_CALLBACK_REASON_POINTER_UP)
+	{
+		SelectCheckbox(guiNetworkOptionToggles, *btn);
 	}
 }
 
@@ -633,6 +714,18 @@ static UINT8 GetCurrentGunButtonSetting(void)
 }
 
 
+static UINT8 GetCurrentNetworkButtonSetting(void)
+{
+	UINT8	cnt;
+
+	for (cnt = 0; cnt < NUM_NETWORK_OPTIONS; cnt++)
+	{
+		if (guiNetworkOptionToggles[cnt]->Clicked()) return cnt;
+	}
+	return 0;
+}
+
+
 #if 0// JA2 Gold: no timed turns
 static UINT8 GetCurrentTimedTurnsButtonSetting(void)
 {
@@ -688,6 +781,14 @@ static void RestoreGIOButtonBackGrounds(void)
 		usPosY += GIO_GAP_BN_SETTINGS;
 	}
 
+	// Check box to toggle Network options
+	usPosY = 75; // FIXME: Define a constant and set a proper position
+	for (cnt = 0; cnt < NUM_NETWORK_OPTIONS; cnt++)
+	{
+		RestoreExternBackgroundRect(0, usPosY, 34, 29); // FIXME: Define a constant and set a proper position (1st arg)
+		usPosY += GIO_GAP_BN_SETTINGS;
+	}
+
 #if 0 // JA2Gold: no more timed turns setting
 	// Check box to toggle timed turns options
 	usPosY = GIO_TIMED_TURN_SETTING_Y - GIO_OFFSET_TO_TOGGLE_BOX_Y;
@@ -714,6 +815,7 @@ static void DoneFadeOutForExitGameInitOptionScreen(void)
 	gGameOptions.fGunNut = GetCurrentGunButtonSetting();
 	gGameOptions.fSciFi = GetCurrentGameStyleButtonSetting();
 	gGameOptions.ubDifficultyLevel = GetCurrentDifficultyButtonSetting() + 1;
+	gGameOptions.fNetwork = GetCurrentNetworkButtonSetting();
 #if 0 // JA2Gold: no more timed turns setting
 	gGameOptions.fTurnTimeLimit = GetCurrentTimedTurnsButtonSetting();
 #endif
@@ -727,6 +829,13 @@ static void DoneFadeOutForExitGameInitOptionScreen(void)
 	{
 		gubGIOExitScreen = INTRO_SCREEN;
 	}
+
+	ST::string name = GetStringFromField(0);
+	ST::string ip = GetStringFromField(1);
+	ST::string port = GetStringFromField(2);
+	gNetworkOptions.name = name;
+	gNetworkOptions.ip = ip;
+	gNetworkOptions.port = atoi(port.c_str());
 
 	//set the fact that we should do the intro videos
 	SetIntroType(INTRO_BEGINING);

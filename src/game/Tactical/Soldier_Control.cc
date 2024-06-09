@@ -3720,6 +3720,7 @@ void ChangeSoldierStance( SOLDIERTYPE *pSoldier, UINT8 ubDesiredStance )
 		usNewState = GetNewSoldierStateFromNewStance( pSoldier, ubDesiredStance );
 
 		// Set desired stance
+		//printf("pSoldier = %p ->ubDesiredHeight = %d ->ubDesiredStance = %d\n", pSoldier, pSoldier->ubDesiredHeight, ubDesiredStance);
 		pSoldier->ubDesiredHeight = ubDesiredStance;
 
 		// Now change to appropriate animation

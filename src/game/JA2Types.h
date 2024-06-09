@@ -15,7 +15,7 @@ struct BULLET;
 struct DB_STRUCTURE_REF;
 struct EXPLOSIONTYPE;
 struct FACETYPE;
-struct GROUP;
+struct GROUP_JA2;
 struct ITEM_POOL;
 struct LEVELNODE;
 struct LIGHT_SPRITE;
