@@ -23,7 +23,7 @@ Backlog:
 
 Contact: mmamontx@gmail.com
 
-[Below goes original README.ms content from the original JA2 Stracciatella repo.]
+[Below goes original README.md content from JA2 Stracciatella repo.]
 
 [![GitHub CI](https://img.shields.io/github/actions/workflow/status/ja2-stracciatella/ja2-stracciatella/github-ci.yml?branch=master&label=GitHub%20CI&logo=github)](https://github.com/ja2-stracciatella/ja2-stracciatella/actions?query=workflow%3A%22GitHub+CI%22)
 [![AppVeyor](https://img.shields.io/appveyor/ci/ja2-stracciatella/ja2-stracciatella/master.svg?style=flat-square&logo=appveyor&label=AppVeyor)](https://ci.appveyor.com/project/ja2-stracciatella/ja2-stracciatella)
