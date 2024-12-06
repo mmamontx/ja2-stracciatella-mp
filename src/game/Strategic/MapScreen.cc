@@ -421,8 +421,12 @@ void HireRandomMercs(unsigned int n)
 
 	for (int i = 0; i < n; i++)
 	{
-		id_random = rand() % 40; // There should be at least 40 mercs (considering AIM only)
-		// FIXME: Prevent id_random from having same value as in one of previous iterations of this loop
+		// Prevent repetitive mercs
+		do
+		{
+			id_random = rand() % 40; // There should be at least 40 mercs (considering AIM only)
+		} while (gMercProfiles[id_random].bMercStatus < 0);
+
 		h = MERC_HIRE_STRUCT{};
 
 		h.ubProfileID = id_random;

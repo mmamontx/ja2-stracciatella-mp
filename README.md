@@ -2,23 +2,24 @@
 
 This fork is an attempt to introduce full scale multiplayer to Jagged Alliance 2. It is based on JA2 Stracciatella project and leverages JA2 1.13 experience. However, here the approach is different from 1.13: rather than introducing a separate multiplayer mode - rewritten and limited to individual skirmishes - this particular implementation directly alters singleplayer campaign (code) to make it support cooperative play.
 
-The implementation approach is simple: start the regular game from the beggining and introduce multiplayer functionality where it is naturally expected. Fix crashes caused by changes and move forward step by step. Here is the vision: basically JA2 multiplayer should be the same thing as the singleplayer, but enabling other players to observe everything from their PCs and use their own controls. It is just as if the players would play hotseat (like some of us did it as kids), but with 2+ PCs instead of a single one. Considering this the changes are not expected to be too complex and mostly should consist of minor alterations since the original code is not designed for multiplayer. However, there is one thing that does introduce complications: somehow all the game status should be synchronized between the players. JA2 1.13 addresses this by a number of callbacks that manually reflect parameters of individual objects to other players when various game events happen. As the game session moves forward inability to track down everything causes discrepancies between what players observe and also crashes. This particular fork attempts to use RakNet object replication mechanism to address this problem and handle it in a more natural fashion.
+The implementation approach is simple: start the regular game from the beggining and introduce multiplayer functionality where it is naturally expected. Fix crashes caused by changes and move forward step by step.
+
+Here is the vision: basically JA2 multiplayer should be the same thing as the singleplayer, but enabling other players to observe everything from their PCs and use their own controls. It is just as if the players would play hotseat (like some of us did it as kids), but with 2+ PCs instead of a single one. Considering this the changes are not expected to be too complex and mostly should consist of minor alterations since the original code is not designed for multiplayer. However, there is one thing that does introduce complications: somehow all the game status should be synchronized between the players. JA2 1.13 addresses this by a number of callbacks that manually reflect parameters of individual objects to other players when various game events happen. As the game session moves forward inability to track down everything causes discrepancies between what players observe and also crashes. This particular fork attempts to use RakNet object replication mechanism to address this problem and handle it in a more natural fashion.
 
 Roadmap (Milestones):
 
-- Multiplayer on the strategy screen. So that players can see squad members and chat messages of each other. (Basic functionality done, need to introduce minor fixes.)
-- Multiplayer on the tactical screen: in the realtime mode. So that players can observe actions of each other and interact. (WIP: introducing object replication mechanism.)
-- Multiplayer on the tactical screen: in the battle/turn-based mode.
-- Moving to another sector.
-- Full demo - from the helicopter in Omerta to Drassen capture.
-- All the rest.
+1. Multiplayer on the strategy screen. So that players can see squad members and chat messages of each other. (Basic functionality done, need to introduce minor fixes.)
+2. Multiplayer on the tactical screen: in the realtime mode. So that players can observe actions of each other and interact. (WIP: introducing object replication mechanism.)
+3. Multiplayer on the tactical screen: in the battle/turn-based mode.
+4. Moving to another sector.
+5. Full demo - from the helicopter in Omerta to Drassen capture.
+6. All the rest.
 
 Backlog:
 
 - Make object replication work (fix crashes).
 - Get updates from JA2 Stracciatella master.
 - Clear the written message in the box after it's sent to the chat (investigate the issue).
-- For debugging purposes: make N mercs be automatically hired (stable and without cloned/repetitive mercs).
 - Fix the initial game connection screen (place the new buttons more friendly and add captions).
 
 Contact: mmamontx@gmail.com
