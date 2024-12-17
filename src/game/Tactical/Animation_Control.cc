@@ -2832,10 +2832,11 @@ UINT16 GetSoldierAnimationSurface(SOLDIERTYPE const* const pSoldier)
 		// Ensure that it's loaded!
 		if ( gAnimSurfaceDatabase[usAnimSurface].hVideoObject == NULL )
 		{
-			//printf("pSoldier = %p\n", pSoldier);
 			SLOGW("Animation Surface for Body {}, animation {}, surface {} not loaded.",
 				pSoldier->ubBodyType, gAnimControl[pSoldier->usAnimState].zAnimStr, usAnimSurface);
-			usAnimSurface = INVALID_ANIMATION_SURFACE;
+			// FIXME: Below is a workaround: TBD root-cause how come the animation is not loaded
+			//usAnimSurface = INVALID_ANIMATION_SURFACE;
+			LoadAnimationSurface(pSoldier->ubID, usAnimSurface, pSoldier->usAnimState);
 		}
 	}
 
