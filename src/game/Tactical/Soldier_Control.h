@@ -339,50 +339,44 @@ struct SOLDIERTYPE : public Replica3
 
 		uiStatusFlags = 0;
 
-		//for (int i = 0; i < NUM_INV_SLOTS; i++)
-		//	inv[i] = 0; // FIXME: Initialize
+		memset(inv, 0, sizeof(inv));
 		pTempObject = NULL;
 		pKeyRing = NULL;
 
-		bOldLife = 0; // life at end of last turn, recorded for monster AI
-		// attributes
+		bOldLife = 0;
+
 		bInSector = 0;
 		bFlashPortraitFrame = 0;
-		sFractLife = 0; // fraction of life pts (in hundreths)
-		bBleeding = 0; // blood loss control variable
-		bBreath = 0; // current breath value
-		bBreathMax = 0; // max breath, affected by fatigue/sleep
+		sFractLife = 0;
+		bBleeding = 0;
+		bBreath = 0;
+		bBreathMax = 0;
 		bStealthMode = 0;
 
-		sBreathRed = 0; // current breath value
+		sBreathRed = 0;
 		fDelayedMovement = 0;
 
 		ubWaitActionToDo = 0;
 		ubInsertionDirection = 0;
-		// skills
+
 		opponent = NULL;
 		bLastRenderVisibleValue = 0;
 		ubAttackingHand = 0;
-		// traits
+
 		sWeightCarriedAtTurnStart = 0;
-		//name = NULL; // FIXME: Initialize
+		memset(&name, 0, sizeof(name));
 
-		bVisible = 0; // to render or not to render...
-
+		bVisible = 0;
 
 		bActive = 0;
 
-		bTeam = 0; // Team identifier
+		bTeam = 0;
 
-		//NEW MOVEMENT INFORMATION for Strategic Movement
-		ubGroupID = 0; //the movement group the merc is currently part of.
-		fBetweenSectors = 0; //set when the group isn't actually in a sector.
-		//sSectorX and sSectorY will reflect the sector the
-		//merc was at last.
+		ubGroupID = 0;
+		fBetweenSectors = 0;
 
-		ubMovementNoiseHeard = 0;// 8 flags by direction
+		ubMovementNoiseHeard = 0;
 
-		// WORLD POSITION STUFF
 		dXPos = 0;
 		dYPos = 0;
 		sInitialGridNo = 0;
@@ -390,11 +384,11 @@ struct SOLDIERTYPE : public Replica3
 		bDirection = 0;
 		sHeightAdjustment = 0;
 		sDesiredHeight = 0;
-		sTempNewGridNo = 0; // New grid no for advanced animations
+		sTempNewGridNo = 0;
 		bOverTerrainType = 0;
 
-		bCollapsed = 0; // collapsed due to being out of APs
-		bBreathCollapsed = 0; // collapsed due to being out of APs
+		bCollapsed = 0;
+		bBreathCollapsed = 0;
 
 		ubDesiredHeight = 0;
 		usPendingAnimation = 0;
@@ -402,36 +396,36 @@ struct SOLDIERTYPE : public Replica3
 		usAnimState = 0;
 		fNoAPToFinishMove = 0;
 		fPausedMove = 0;
-		fUIdeadMerc = 0; // UI Flags for removing a newly dead merc
-		fUICloseMerc = 0; // UI Flags for closing panels
+		fUIdeadMerc = 0;
+		fUICloseMerc = 0;
 
-		// FIXME: Initialize
-		//UpdateCounter = NULL;
-		//DamageCounter = NULL;
-		//AICounter = NULL;
-		//FadeCounter = NULL;
+		memset(&UpdateCounter, 0, sizeof(UpdateCounter));
+		memset(&DamageCounter, 0, sizeof(DamageCounter));
+		memset(&AICounter, 0, sizeof(AICounter));
+		memset(&FadeCounter, 0, sizeof(FadeCounter));
 
 		ubSkillTrait1 = 0;
 		ubSkillTrait2 = 0;
 
-		bDexterity = 0; // dexterity (hand coord) value
+		bDexterity = 0;
 		bWisdom = 0;
 		attacker = NULL;
 		previous_attacker = NULL;
 		next_to_previous_attacker = NULL;
 		fTurnInProgress = 0;
 
-		fIntendedTarget = 0; // intentionally shot?
+		fIntendedTarget = 0;
 		fPauseAllAnimation = 0;
 
-		bExpLevel = 0; // general experience level
+		bExpLevel = 0;
 		sInsertionGridNo = 0;
 
 		fContinueMoveAfterStanceChange = 0;
 
-		//AnimCache = NULL; // FIXME: Initialize
+		// FIXME: memset() below being uncommented causes a crash on client side - TBD investigate
+		//memset(&AnimCache, 0, sizeof(AnimCache));
 
-		bLife = 0; // current life (hit points or health)
+		bLife = 0;
 		bSide = 0;
 		bNewOppCnt = 0;
 
@@ -439,14 +433,12 @@ struct SOLDIERTYPE : public Replica3
 		usAniFrame = 0;
 		sAniDelay = 0;
 
-		// MOVEMENT TO NEXT TILE HANDLING STUFF
-		bAgility = 0; // agility (speed) value
+		bAgility = 0;
 		sDelayedMovementCauseGridNo = 0;
 		sReservedMovementGridNo = 0;
 
 		bStrength = 0;
 
-		// Weapon Stuff
 		sTargetGridNo = 0;
 		bTargetLevel = 0;
 		bTargetCubeLevel = 0;
@@ -469,22 +461,17 @@ struct SOLDIERTYPE : public Replica3
 		fShowLocator = 0;
 		fFlashPortrait = 0;
 		bMechanical = 0;
-		bLifeMax = 0; // maximum life for this merc
+		bLifeMax = 0;
 
 		face = NULL;
 
+		memset(&HeadPal, 0, sizeof(HeadPal));
+		memset(&PantsPal, 0, sizeof(PantsPal));
+		memset(&VestPal, 0, sizeof(VestPal));
+		memset(&SkinPal, 0, sizeof(SkinPal));
 
-		// PALETTE MANAGEMENT STUFF
-		// FIXME: Initialize
-		//HeadPal = NULL;
-		//PantsPal = NULL;
-		//VestPal = NULL;
-		//SkinPal = NULL;
-
-		for (int i = 0; i < NUM_SOLDIER_SHADES; i++)
-			pShades[i] = NULL;
-		for (int i = 0; i < 20; i++)
-			pGlowShades[i] = NULL;
+		memset(pShades, 0, sizeof(pShades));
+		memset(pGlowShades, 0, sizeof(pGlowShades));
 		bMedical = 0;
 		fBeginFade = 0;
 		ubFadeLevel = 0;
@@ -497,7 +484,6 @@ struct SOLDIERTYPE : public Replica3
 		bReverse = 0;
 		pLevelNode = NULL;
 
-		// WALKING STUFF
 		bDesiredDirection = 0;
 		sDestXPos = 0;
 		sDestYPos = 0;
@@ -505,16 +491,14 @@ struct SOLDIERTYPE : public Replica3
 		sFinalDestination = 0;
 		bLevel = 0;
 
-		// PATH STUFF
-		for (int i = 0; i < MAX_PATH_LIST_SIZE; i++)
-			ubPathingData[i] = 0;
+		memset(ubPathingData, 0, sizeof(ubPathingData));
 		ubPathDataSize = 0;
 		ubPathIndex = 0;
 		sBlackList = 0;
 		bAimTime = 0;
 		bShownAimTime = 0;
-		bPathStored = 0; // good for AI to reduct redundancy
-		bHasKeys = 0; // allows AI controlled dudes to open locked doors
+		bPathStored = 0;
+		bHasKeys = 0;
 
 		ubStrategicInsertionCode = 0;
 		usStrategicInsertionData = 0;
@@ -532,12 +516,9 @@ struct SOLDIERTYPE : public Replica3
 		bBulletsLeft = 0;
 		ubSuppressionPoints = 0;
 
-		// STUFF FOR RANDOM ANIMATIONS
 		uiTimeOfLastRandomAction = 0;
 
-		// AI STUFF
-		for (int i = 0; i < MAX_NUM_SOLDIERS; i++)
-			bOppList[i] = 0;
+		memset(bOppList, 0, sizeof(bOppList));
 		bLastAction = 0;
 		bAction = 0;
 		usActionData = 0;
@@ -554,11 +535,10 @@ struct SOLDIERTYPE : public Replica3
 		bUnderFire = 0;
 		bShock = 0;
 		bBypassToGreen = 0;
-		bDominantDir = 0; // AI main direction to face...
-		bPatrolCnt = 0; // number of patrol gridnos
-		bNextPatrolPnt = 0; // index to next patrol gridno
-		for (int i = 0; i < MAXPATROLGRIDS; i++)
-			usPatrolGrid[i] = 0;
+		bDominantDir = 0;
+		bPatrolCnt = 0;
+		bNextPatrolPnt = 0;
+		memset(usPatrolGrid, 0, sizeof(usPatrolGrid));
 		sNoiseGridno = 0;
 		ubNoiseVolume = 0;
 		bLastAttackHit = 0;
@@ -612,8 +592,8 @@ struct SOLDIERTYPE : public Replica3
 		usUIMovementMode = 0;
 		fUIMovementFast = 0;
 
-		//BlinkSelCounter = 0;
-		//PortraitFlashCounter = 0;
+		memset(&BlinkSelCounter, 0, sizeof(BlinkSelCounter));
+		memset(&PortraitFlashCounter, 0, sizeof(PortraitFlashCounter));
 		fDeadSoundPlayed = 0;
 		ubProfile = 0;
 		ubQuoteRecord = 0;
@@ -629,7 +609,6 @@ struct SOLDIERTYPE : public Replica3
 		sPanelFaceX = 0;
 		sPanelFaceY = 0;
 
-		// QUOTE STUFF
 		bNumHitsThisTurn = 0;
 		usQuoteSaidFlags = 0;
 		fCloseCall = 0;
@@ -645,36 +624,35 @@ struct SOLDIERTYPE : public Replica3
 		bAimShotLocation = 0;
 		ubHitLocation = 0;
 
-		effect_shade = NULL; // Shading table for effects
+		effect_shade = NULL;
 
-		for (int i = 0; i < 6; i++)
-			sSpreadLocations[i] = 0;
+		memset(sSpreadLocations, 0, sizeof(sSpreadLocations));
 		fDoSpread = 0;
 		sStartGridNo = 0;
 		sEndGridNo = 0;
 		sForcastGridno = 0;
 		sZLevelOverride = 0;
 		bMovedPriorToInterrupt = 0;
-		iEndofContractTime = 0; // time, in global time(resolution, minutes) that merc will leave, or if its a M.E.R.C. merc it will be set to -1. -2 for NPC and player generated
+		iEndofContractTime = 0;
 		iStartContractTime = 0;
-		iTotalContractLength = 0; // total time of AIM mercs contract or the time since last paid for a M.E.R.C. merc
-		iNextActionSpecialData = 0; // AI special action data record for the next action
-		ubWhatKindOfMercAmI = 0; //Set to the type of character it is
-		bAssignment = 0; // soldiers current assignment
-		fForcedToStayAwake = 0; // forced by player to stay awake, reset to false, the moment they are set to rest or sleep
-		bTrainStat = 0; // current stat soldier is training
-		sSector = 0; // position on the Stategic Map
-		iVehicleId = 0; // the id of the vehicle the char is in
-		pMercPath = NULL; // Path Structure
-		fHitByGasFlags = 0; // flags
-		usMedicalDeposit = 0; // is there a medical deposit on merc
-		usLifeInsurance = 0; // is there life insurance taken out on merc
+		iTotalContractLength = 0;
+		iNextActionSpecialData = 0;
+		ubWhatKindOfMercAmI = 0;
+		bAssignment = 0;
+		fForcedToStayAwake = 0;
+		bTrainStat = 0;
+		sSector = 0;
+		iVehicleId = 0;
+		pMercPath = NULL;
+		fHitByGasFlags = 0;
+		usMedicalDeposit = 0;
+		usLifeInsurance = 0;
 
 		iStartOfInsuranceContract = 0;
-		uiLastAssignmentChangeMin = 0; // timestamp of last assignment change in minutes
+		uiLastAssignmentChangeMin = 0;
 		iTotalLengthOfInsuranceContract = 0;
 
-		ubSoldierClass = 0; //admin, elite, troop (creature types?)
+		ubSoldierClass = 0;
 		ubAPsLostToSuppression = 0;
 		fChangingStanceDueToSuppression = 0;
 		suppressor = NULL;
@@ -693,24 +671,22 @@ struct SOLDIERTYPE : public Replica3
 		uiChangeMedicalTime = 0;
 		uiChangeMechanicalTime = 0;
 
-		uiUniqueSoldierIdValue = 0; // the unique value every instance of a soldier gets - 1 is the first valid value
-		bBeingAttackedCount = 0; // Being attacked counter
+		uiUniqueSoldierIdValue = 0;
+		bBeingAttackedCount = 0;
 
-		for (int i = 0; i < NUM_INV_SLOTS; i++) {
-			bNewItemCount[i] = 0;
-			bNewItemCycleCount[i] = 0;
-		}
+		memset(bNewItemCount, 0, sizeof(bNewItemCount));
+		memset(bNewItemCycleCount, 0, sizeof(bNewItemCycleCount));
 		fCheckForNewlyAddedItems = 0;
 		bEndDoorOpenCode = 0;
 
 		ubScheduleID = 0;
 		sEndDoorOpenCodeData = 0;
-		//NextTileCounter = 0;
+		memset(&NextTileCounter, 0, sizeof(NextTileCounter));
 		fBlockedByAnotherMerc = 0;
 		bBlockedByAnotherMercDirection = 0;
 		usAttackingWeapon = 0;
 		target = NULL;
-		//bWeaponMode = 0;
+		memset(&bWeaponMode, 0, sizeof(bWeaponMode));
 		bAIScheduleProgress = 0;
 		sOffWorldGridNo = 0;
 		pAniTile = NULL;
@@ -729,7 +705,7 @@ struct SOLDIERTYPE : public Replica3
 		sBoundingBoxOffsetX = 0;
 		sBoundingBoxOffsetY = 0;
 		uiTimeSameBattleSndDone = 0;
-		//bOldBattleSnd = 0;
+		memset(&bOldBattleSnd, 0, sizeof(bOldBattleSnd));
 		fContractPriceHasIncreased = 0;
 		uiBurstSoundID = 0;
 		fFixingSAMSite = 0;
@@ -745,14 +721,11 @@ struct SOLDIERTYPE : public Replica3
 		bSleepDrugCounter = 0;
 		ubMilitiaKills = 0;
 
-		for (int i = 0; i < 2; i++) {
-			bFutureDrugEffect[i] = 0;
-			bDrugEffectRate[i] = 0;
-			bDrugEffect[i] = 0;
-			bDrugSideEffectRate[i] = 0;
-			bDrugSideEffect[i] = 0;
-		}
-
+		memset(bFutureDrugEffect, 0, sizeof(bFutureDrugEffect));
+		memset(bDrugEffectRate, 0, sizeof(bDrugEffectRate));
+		memset(bDrugEffect, 0, sizeof(bDrugEffect));
+		memset(bDrugSideEffectRate, 0, sizeof(bDrugSideEffectRate));
+		memset(bDrugSideEffect, 0, sizeof(bDrugSideEffect));
 
 		bBlindedCounter = 0;
 		fMercCollapsedFlag = 0;
@@ -786,7 +759,7 @@ struct SOLDIERTYPE : public Replica3
 		fMuzzleFlash = 0;
 		CTGTTarget = NULL;
 
-		//PanelAnimateCounter = NULL;
+		memset(&PanelAnimateCounter, 0, sizeof(PanelAnimateCounter));
 
 		bCurrentCivQuote = 0;
 		bCurrentCivQuoteDelta = 0;
@@ -825,12 +798,11 @@ struct SOLDIERTYPE : public Replica3
 		uiTuringSoundID = 0;
 		ubLastDamageReason = 0;
 		fComplainedThatTired = 0;
-		for (int i = 0; i < 2; i++)
-			sLastTwoLocations[i] = 0;
+		memset(sLastTwoLocations, 0, sizeof(sLastTwoLocations));
 		uiTimeSinceLastBleedGrunt = 0;
 	}
 
-	~SOLDIERTYPE()
+	~SOLDIERTYPE() // FIXME: Remove?
 	{
 	}
 
@@ -849,46 +821,40 @@ struct SOLDIERTYPE : public Replica3
 		pTempObject = other.pTempObject;
 		pKeyRing = other.pKeyRing;
 
-		bOldLife = other.bOldLife; // life at end of last turn, recorded for monster AI
-		// attributes
+		bOldLife = other.bOldLife;
+
 		bInSector = other.bInSector;
 		bFlashPortraitFrame = other.bFlashPortraitFrame;
-		sFractLife = other.sFractLife; // fraction of life pts (in hundreths)
-		bBleeding = other.bBleeding; // blood loss control variable
-		bBreath = other.bBreath; // current breath value
-		bBreathMax = other.bBreathMax; // max breath, affected by fatigue/sleep
+		sFractLife = other.sFractLife;
+		bBleeding = other.bBleeding;
+		bBreath = other.bBreath;
+		bBreathMax = other.bBreathMax;
 		bStealthMode = other.bStealthMode;
 
-		sBreathRed = other.sBreathRed; // current breath value
+		sBreathRed = other.sBreathRed;
 		fDelayedMovement = other.fDelayedMovement;
 
 		ubWaitActionToDo = other.ubWaitActionToDo;
 		ubInsertionDirection = other.ubInsertionDirection;
-		// skills
+
 		opponent = other.opponent;
 		bLastRenderVisibleValue = other.bLastRenderVisibleValue;
 		ubAttackingHand = other.ubAttackingHand;
-		// traits
+
 		sWeightCarriedAtTurnStart = other.sWeightCarriedAtTurnStart;
-		//name = other.name;
 		name = other.name.c_str(); // Instead of direct assignment to avoid exception
 
-		bVisible = other.bVisible; // to render or not to render...
-
+		bVisible = other.bVisible;
 
 		bActive = other.bActive;
 
-		bTeam = other.bTeam; // Team identifier
+		bTeam = other.bTeam;
 
-		//NEW MOVEMENT INFORMATION for Strategic Movement
-		ubGroupID = other.ubGroupID; //the movement group the merc is currently part of.
-		fBetweenSectors = other.fBetweenSectors; //set when the group isn't actually in a sector.
-		//sSectorX and sSectorY will reflect the sector the
-		//merc was at last.
+		ubGroupID = other.ubGroupID;
+		fBetweenSectors = other.fBetweenSectors;
 
-		ubMovementNoiseHeard = other.ubMovementNoiseHeard;// 8 flags by direction
+		ubMovementNoiseHeard = other.ubMovementNoiseHeard;
 
-		// WORLD POSITION STUFF
 		dXPos = other.dXPos;
 		dYPos = other.dYPos;
 		sInitialGridNo = other.sInitialGridNo;
@@ -896,11 +862,11 @@ struct SOLDIERTYPE : public Replica3
 		bDirection = other.bDirection;
 		sHeightAdjustment = other.sHeightAdjustment;
 		sDesiredHeight = other.sDesiredHeight;
-		sTempNewGridNo = other.sTempNewGridNo; // New grid no for advanced animations
+		sTempNewGridNo = other.sTempNewGridNo;
 		bOverTerrainType = other.bOverTerrainType;
 
-		bCollapsed = other.bCollapsed; // collapsed due to being out of APs
-		bBreathCollapsed = other.bBreathCollapsed; // collapsed due to being out of APs
+		bCollapsed = other.bCollapsed;
+		bBreathCollapsed = other.bBreathCollapsed;
 
 		ubDesiredHeight = other.ubDesiredHeight;
 		usPendingAnimation = other.usPendingAnimation;
@@ -908,8 +874,8 @@ struct SOLDIERTYPE : public Replica3
 		usAnimState = other.usAnimState;
 		fNoAPToFinishMove = other.fNoAPToFinishMove;
 		fPausedMove = other.fPausedMove;
-		fUIdeadMerc = other.fUIdeadMerc; // UI Flags for removing a newly dead merc
-		fUICloseMerc = other.fUICloseMerc; // UI Flags for closing panels
+		fUIdeadMerc = other.fUIdeadMerc;
+		fUICloseMerc = other.fUICloseMerc;
 
 		UpdateCounter = other.UpdateCounter;
 		DamageCounter = other.DamageCounter;
@@ -919,24 +885,24 @@ struct SOLDIERTYPE : public Replica3
 		ubSkillTrait1 = other.ubSkillTrait1;
 		ubSkillTrait2 = other.ubSkillTrait2;
 
-		bDexterity = other.bDexterity; // dexterity (hand coord) value
+		bDexterity = other.bDexterity;
 		bWisdom = other.bWisdom;
 		attacker = other.attacker;
 		previous_attacker = other.previous_attacker;
 		next_to_previous_attacker = other.next_to_previous_attacker;
 		fTurnInProgress = other.fTurnInProgress;
 
-		fIntendedTarget = other.fIntendedTarget; // intentionally shot?
+		fIntendedTarget = other.fIntendedTarget;
 		fPauseAllAnimation = other.fPauseAllAnimation;
 
-		bExpLevel = other.bExpLevel; // general experience level
+		bExpLevel = other.bExpLevel;
 		sInsertionGridNo = other.sInsertionGridNo;
 
 		fContinueMoveAfterStanceChange = other.fContinueMoveAfterStanceChange;
 
 		AnimCache = other.AnimCache;
 
-		bLife = other.bLife; // current life (hit points or health)
+		bLife = other.bLife;
 		bSide = other.bSide;
 		bNewOppCnt = other.bNewOppCnt;
 
@@ -944,14 +910,12 @@ struct SOLDIERTYPE : public Replica3
 		usAniFrame = other.usAniFrame;
 		sAniDelay = other.sAniDelay;
 
-		// MOVEMENT TO NEXT TILE HANDLING STUFF
-		bAgility = other.bAgility; // agility (speed) value
+		bAgility = other.bAgility;
 		sDelayedMovementCauseGridNo = other.sDelayedMovementCauseGridNo;
 		sReservedMovementGridNo = other.sReservedMovementGridNo;
 
 		bStrength = other.bStrength;
 
-		// Weapon Stuff
 		sTargetGridNo = other.sTargetGridNo;
 		bTargetLevel = other.bTargetLevel;
 		bTargetCubeLevel = other.bTargetCubeLevel;
@@ -974,20 +938,15 @@ struct SOLDIERTYPE : public Replica3
 		fShowLocator = other.fShowLocator;
 		fFlashPortrait = other.fFlashPortrait;
 		bMechanical = other.bMechanical;
-		bLifeMax = other.bLifeMax; // maximum life for this merc
+		bLifeMax = other.bLifeMax;
 
 		face = other.face;
 
-
-		// PALETTE MANAGEMENT STUFF
-		//HeadPal = other.HeadPal;
-		//PantsPal = other.PantsPal;
-		//VestPal = other.VestPal;
-		//SkinPal = other.SkinPal;
-		HeadPal = other.HeadPal.c_str(); // Instead of direct assignment to avoid exception
-		PantsPal = other.PantsPal.c_str(); // Instead of direct assignment to avoid exception
-		VestPal = other.VestPal.c_str(); // Instead of direct assignment to avoid exception
-		SkinPal = other.SkinPal.c_str(); // Instead of direct assignment to avoid exception
+		// Instead of direct assignment to avoid exception
+		HeadPal = other.HeadPal.c_str();
+		PantsPal = other.PantsPal.c_str();
+		VestPal = other.VestPal.c_str();
+		SkinPal = other.SkinPal.c_str();
 
 		for (int i = 0; i < NUM_SOLDIER_SHADES; i++)
 			pShades[i] = other.pShades[i];
@@ -1005,7 +964,6 @@ struct SOLDIERTYPE : public Replica3
 		bReverse = other.bReverse;
 		pLevelNode = other.pLevelNode;
 
-		// WALKING STUFF
 		bDesiredDirection = other.bDesiredDirection;
 		sDestXPos = other.sDestXPos;
 		sDestYPos = other.sDestYPos;
@@ -1013,7 +971,6 @@ struct SOLDIERTYPE : public Replica3
 		sFinalDestination = other.sFinalDestination;
 		bLevel = other.bLevel;
 
-		// PATH STUFF
 		for (int i = 0; i < MAX_PATH_LIST_SIZE; i++)
 			ubPathingData[i] = other.ubPathingData[i];
 		ubPathDataSize = other.ubPathDataSize;
@@ -1021,8 +978,8 @@ struct SOLDIERTYPE : public Replica3
 		sBlackList = other.sBlackList;
 		bAimTime = other.bAimTime;
 		bShownAimTime = other.bShownAimTime;
-		bPathStored = other.bPathStored; // good for AI to reduct redundancy
-		bHasKeys = other.bHasKeys; // allows AI controlled dudes to open locked doors
+		bPathStored = other.bPathStored;
+		bHasKeys = other.bHasKeys;
 
 		ubStrategicInsertionCode = other.ubStrategicInsertionCode;
 		usStrategicInsertionData = other.usStrategicInsertionData;
@@ -1040,10 +997,8 @@ struct SOLDIERTYPE : public Replica3
 		bBulletsLeft = other.bBulletsLeft;
 		ubSuppressionPoints = other.ubSuppressionPoints;
 
-		// STUFF FOR RANDOM ANIMATIONS
 		uiTimeOfLastRandomAction = other.uiTimeOfLastRandomAction;
 
-		// AI STUFF
 		for (int i = 0; i < MAX_NUM_SOLDIERS; i++)
 			bOppList[i] = other.bOppList[i];
 		bLastAction = other.bLastAction;
@@ -1062,9 +1017,9 @@ struct SOLDIERTYPE : public Replica3
 		bUnderFire = other.bUnderFire;
 		bShock = other.bShock;
 		bBypassToGreen = other.bBypassToGreen;
-		bDominantDir = other.bDominantDir; // AI main direction to face...
-		bPatrolCnt = other.bPatrolCnt; // number of patrol gridnos
-		bNextPatrolPnt = other.bNextPatrolPnt; // index to next patrol gridno
+		bDominantDir = other.bDominantDir;
+		bPatrolCnt = other.bPatrolCnt;
+		bNextPatrolPnt = other.bNextPatrolPnt;
 		for (int i = 0; i < MAXPATROLGRIDS; i++)
 			usPatrolGrid[i] = other.usPatrolGrid[i];
 		sNoiseGridno = other.sNoiseGridno;
@@ -1137,7 +1092,6 @@ struct SOLDIERTYPE : public Replica3
 		sPanelFaceX = other.sPanelFaceX;
 		sPanelFaceY = other.sPanelFaceY;
 
-		// QUOTE STUFF
 		bNumHitsThisTurn = other.bNumHitsThisTurn;
 		usQuoteSaidFlags = other.usQuoteSaidFlags;
 		fCloseCall = other.fCloseCall;
@@ -1153,7 +1107,7 @@ struct SOLDIERTYPE : public Replica3
 		bAimShotLocation = other.bAimShotLocation;
 		ubHitLocation = other.ubHitLocation;
 
-		effect_shade = other.effect_shade; // Shading table for effects
+		effect_shade = other.effect_shade;
 
 		for (int i = 0; i < 6; i++)
 			sSpreadLocations[i] = other.sSpreadLocations[i];
@@ -1163,26 +1117,26 @@ struct SOLDIERTYPE : public Replica3
 		sForcastGridno = other.sForcastGridno;
 		sZLevelOverride = other.sZLevelOverride;
 		bMovedPriorToInterrupt = other.bMovedPriorToInterrupt;
-		iEndofContractTime = other.iEndofContractTime; // time, in global time(resolution, minutes) that merc will leave, or if its a M.E.R.C. merc it will be set to -1. -2 for NPC and player generated
+		iEndofContractTime = other.iEndofContractTime;
 		iStartContractTime = other.iStartContractTime;
-		iTotalContractLength = other.iTotalContractLength; // total time of AIM mercs contract or the time since last paid for a M.E.R.C. merc
-		iNextActionSpecialData = other.iNextActionSpecialData; // AI special action data record for the next action
-		ubWhatKindOfMercAmI = other.ubWhatKindOfMercAmI; //Set to the type of character it is
-		bAssignment = other.bAssignment; // soldiers current assignment
-		fForcedToStayAwake = other.fForcedToStayAwake; // forced by player to stay awake, reset to false, the moment they are set to rest or sleep
-		bTrainStat = other.bTrainStat; // current stat soldier is training
-		sSector = other.sSector; // position on the Stategic Map
-		iVehicleId = other.iVehicleId; // the id of the vehicle the char is in
-		pMercPath = other.pMercPath; // Path Structure
-		fHitByGasFlags = other.fHitByGasFlags; // flags
-		usMedicalDeposit = other.usMedicalDeposit; // is there a medical deposit on merc
-		usLifeInsurance = other.usLifeInsurance; // is there life insurance taken out on merc
+		iTotalContractLength = other.iTotalContractLength;
+		iNextActionSpecialData = other.iNextActionSpecialData;
+		ubWhatKindOfMercAmI = other.ubWhatKindOfMercAmI;
+		bAssignment = other.bAssignment;
+		fForcedToStayAwake = other.fForcedToStayAwake;
+		bTrainStat = other.bTrainStat;
+		sSector = other.sSector;
+		iVehicleId = other.iVehicleId;
+		pMercPath = other.pMercPath;
+		fHitByGasFlags = other.fHitByGasFlags;
+		usMedicalDeposit = other.usMedicalDeposit;
+		usLifeInsurance = other.usLifeInsurance;
 
 		iStartOfInsuranceContract = other.iStartOfInsuranceContract;
-		uiLastAssignmentChangeMin = other.uiLastAssignmentChangeMin; // timestamp of last assignment change in minutes
+		uiLastAssignmentChangeMin = other.uiLastAssignmentChangeMin;
 		iTotalLengthOfInsuranceContract = other.iTotalLengthOfInsuranceContract;
 
-		ubSoldierClass = other.ubSoldierClass; //admin, elite, troop (creature types?)
+		ubSoldierClass = other.ubSoldierClass;
 		ubAPsLostToSuppression = other.ubAPsLostToSuppression;
 		fChangingStanceDueToSuppression = other.fChangingStanceDueToSuppression;
 		suppressor = other.suppressor;
@@ -1201,8 +1155,8 @@ struct SOLDIERTYPE : public Replica3
 		uiChangeMedicalTime = other.uiChangeMedicalTime;
 		uiChangeMechanicalTime = other.uiChangeMechanicalTime;
 
-		uiUniqueSoldierIdValue = other.uiUniqueSoldierIdValue; // the unique value every instance of a soldier gets - 1 is the first valid value
-		bBeingAttackedCount = other.bBeingAttackedCount; // Being attacked counter
+		uiUniqueSoldierIdValue = other.uiUniqueSoldierIdValue;
+		bBeingAttackedCount = other.bBeingAttackedCount;
 
 		for (int i = 0; i < NUM_INV_SLOTS; i++) {
 			bNewItemCount[i] = other.bNewItemCount[i];
@@ -1260,7 +1214,6 @@ struct SOLDIERTYPE : public Replica3
 			bDrugSideEffectRate[i] = other.bDrugSideEffectRate[i];
 			bDrugSideEffect[i] = other.bDrugSideEffect[i];
 		}
-
 
 		bBlindedCounter = other.bBlindedCounter;
 		fMercCollapsedFlag = other.fMercCollapsedFlag;
@@ -1397,47 +1350,41 @@ struct SOLDIERTYPE : public Replica3
 		//serializeParameters->outputBitstream[0].Write(pTempObject);
 		//serializeParameters->outputBitstream[0].Write(pKeyRing);
 
-		serializeParameters->outputBitstream[0].Write(bOldLife); // life at end of last turn, recorded for monster AI
-		// attributes
+		serializeParameters->outputBitstream[0].Write(bOldLife);
+
 		serializeParameters->outputBitstream[0].Write(bInSector);
 		serializeParameters->outputBitstream[0].Write(bFlashPortraitFrame);
-		serializeParameters->outputBitstream[0].Write(sFractLife); // fraction of life pts (in hundreths)
-		serializeParameters->outputBitstream[0].Write(bBleeding); // blood loss control variable
-		serializeParameters->outputBitstream[0].Write(bBreath); // current breath value
-		serializeParameters->outputBitstream[0].Write(bBreathMax); // max breath, affected by fatigue/sleep
+		serializeParameters->outputBitstream[0].Write(sFractLife);
+		serializeParameters->outputBitstream[0].Write(bBleeding);
+		serializeParameters->outputBitstream[0].Write(bBreath);
+		serializeParameters->outputBitstream[0].Write(bBreathMax);
 		serializeParameters->outputBitstream[0].Write(bStealthMode);
 
-		serializeParameters->outputBitstream[0].Write(sBreathRed); // current breath value
+		serializeParameters->outputBitstream[0].Write(sBreathRed);
 		serializeParameters->outputBitstream[0].Write(fDelayedMovement);
 
 		serializeParameters->outputBitstream[0].Write(ubWaitActionToDo);
 		serializeParameters->outputBitstream[0].Write(ubInsertionDirection);
-		// skills
+
 		//serializeParameters->outputBitstream[0].Write(opponent);
 		serializeParameters->outputBitstream[0].Write(bLastRenderVisibleValue);
 		serializeParameters->outputBitstream[0].Write(ubAttackingHand);
-		// traits
+
 		serializeParameters->outputBitstream[0].Write(sWeightCarriedAtTurnStart);
-		//serializeParameters->outputBitstream[0].Write(name);
 		rname = name.c_str(); // Using RakString as intermediate entity
 		serializeParameters->outputBitstream[0].Write(rname);
 		
-		serializeParameters->outputBitstream[0].Write(bVisible); // to render or not to render...
-
+		serializeParameters->outputBitstream[0].Write(bVisible);
 
 		serializeParameters->outputBitstream[0].Write(bActive);
 
-		serializeParameters->outputBitstream[0].Write(bTeam); // Team identifier
+		serializeParameters->outputBitstream[0].Write(bTeam);
 
-		//NEW MOVEMENT INFORMATION for Strategic Movement
-		serializeParameters->outputBitstream[0].Write(ubGroupID); //the movement group the merc is currently part of.
-		serializeParameters->outputBitstream[0].Write(fBetweenSectors); //set when the group isn't actually in a sector.
-		//sSectorX and sSectorY will reflect the sector the
-		//merc was at last.
+		serializeParameters->outputBitstream[0].Write(ubGroupID);
+		serializeParameters->outputBitstream[0].Write(fBetweenSectors);
 
-		serializeParameters->outputBitstream[0].Write(ubMovementNoiseHeard);// 8 flags by direction
+		serializeParameters->outputBitstream[0].Write(ubMovementNoiseHeard);
 
-		// WORLD POSITION STUFF
 		serializeParameters->outputBitstream[0].Write(dXPos);
 		serializeParameters->outputBitstream[0].Write(dYPos);
 		serializeParameters->outputBitstream[0].Write(sInitialGridNo);
@@ -1445,11 +1392,11 @@ struct SOLDIERTYPE : public Replica3
 		serializeParameters->outputBitstream[0].Write(bDirection);
 		serializeParameters->outputBitstream[0].Write(sHeightAdjustment);
 		serializeParameters->outputBitstream[0].Write(sDesiredHeight);
-		serializeParameters->outputBitstream[0].Write(sTempNewGridNo); // New grid no for advanced animations
+		serializeParameters->outputBitstream[0].Write(sTempNewGridNo);
 		serializeParameters->outputBitstream[0].Write(bOverTerrainType);
 
-		serializeParameters->outputBitstream[0].Write(bCollapsed); // collapsed due to being out of APs
-		serializeParameters->outputBitstream[0].Write(bBreathCollapsed); // collapsed due to being out of APs
+		serializeParameters->outputBitstream[0].Write(bCollapsed);
+		serializeParameters->outputBitstream[0].Write(bBreathCollapsed);
 
 		serializeParameters->outputBitstream[0].Write(ubDesiredHeight);
 		serializeParameters->outputBitstream[0].Write(usPendingAnimation);
@@ -1457,8 +1404,8 @@ struct SOLDIERTYPE : public Replica3
 		serializeParameters->outputBitstream[0].Write(usAnimState);
 		serializeParameters->outputBitstream[0].Write(fNoAPToFinishMove);
 		serializeParameters->outputBitstream[0].Write(fPausedMove);
-		serializeParameters->outputBitstream[0].Write(fUIdeadMerc); // UI Flags for removing a newly dead merc
-		serializeParameters->outputBitstream[0].Write(fUICloseMerc); // UI Flags for closing panels
+		serializeParameters->outputBitstream[0].Write(fUIdeadMerc);
+		serializeParameters->outputBitstream[0].Write(fUICloseMerc);
 
 		serializeParameters->outputBitstream[0].Write(UpdateCounter);
 		serializeParameters->outputBitstream[0].Write(DamageCounter);
@@ -1468,24 +1415,24 @@ struct SOLDIERTYPE : public Replica3
 		serializeParameters->outputBitstream[0].Write(ubSkillTrait1);
 		serializeParameters->outputBitstream[0].Write(ubSkillTrait2);
 
-		serializeParameters->outputBitstream[0].Write(bDexterity); // dexterity (hand coord) value
+		serializeParameters->outputBitstream[0].Write(bDexterity);
 		serializeParameters->outputBitstream[0].Write(bWisdom);
 		//serializeParameters->outputBitstream[0].Write(attacker);
 		//serializeParameters->outputBitstream[0].Write(previous_attacker);
 		//serializeParameters->outputBitstream[0].Write(next_to_previous_attacker);
 		serializeParameters->outputBitstream[0].Write(fTurnInProgress);
 
-		serializeParameters->outputBitstream[0].Write(fIntendedTarget); // intentionally shot?
+		serializeParameters->outputBitstream[0].Write(fIntendedTarget);
 		serializeParameters->outputBitstream[0].Write(fPauseAllAnimation);
 
-		serializeParameters->outputBitstream[0].Write(bExpLevel); // general experience level
+		serializeParameters->outputBitstream[0].Write(bExpLevel);
 		serializeParameters->outputBitstream[0].Write(sInsertionGridNo);
 
 		serializeParameters->outputBitstream[0].Write(fContinueMoveAfterStanceChange);
 
-		//serializeParameters->outputBitstream[0].Write(AnimCache); // Probably it is not supposed to be synchronized
+		//serializeParameters->outputBitstream[0].Write(AnimCache);
 
-		serializeParameters->outputBitstream[0].Write(bLife); // current life (hit points or health)
+		serializeParameters->outputBitstream[0].Write(bLife);
 		serializeParameters->outputBitstream[0].Write(bSide);
 		serializeParameters->outputBitstream[0].Write(bNewOppCnt);
 
@@ -1493,14 +1440,12 @@ struct SOLDIERTYPE : public Replica3
 		serializeParameters->outputBitstream[0].Write(usAniFrame);
 		serializeParameters->outputBitstream[0].Write(sAniDelay);
 
-		// MOVEMENT TO NEXT TILE HANDLING STUFF
-		serializeParameters->outputBitstream[0].Write(bAgility); // agility (speed) value
+		serializeParameters->outputBitstream[0].Write(bAgility);
 		serializeParameters->outputBitstream[0].Write(sDelayedMovementCauseGridNo);
 		serializeParameters->outputBitstream[0].Write(sReservedMovementGridNo);
 
 		serializeParameters->outputBitstream[0].Write(bStrength);
 
-		// Weapon Stuff
 		serializeParameters->outputBitstream[0].Write(sTargetGridNo);
 		serializeParameters->outputBitstream[0].Write(bTargetLevel);
 		serializeParameters->outputBitstream[0].Write(bTargetCubeLevel);
@@ -1523,16 +1468,10 @@ struct SOLDIERTYPE : public Replica3
 		serializeParameters->outputBitstream[0].Write(fShowLocator);
 		serializeParameters->outputBitstream[0].Write(fFlashPortrait);
 		serializeParameters->outputBitstream[0].Write(bMechanical);
-		serializeParameters->outputBitstream[0].Write(bLifeMax); // maximum life for this merc
+		serializeParameters->outputBitstream[0].Write(bLifeMax);
 
 		//serializeParameters->outputBitstream[0].Write(face);
 
-
-		// PALETTE MANAGEMENT STUFF
-		//serializeParameters->outputBitstream[0].Write(HeadPal);
-		//serializeParameters->outputBitstream[0].Write(PantsPal);
-		//serializeParameters->outputBitstream[0].Write(VestPal);
-		//serializeParameters->outputBitstream[0].Write(SkinPal);
 		// Using RakString as intermediate entity
 		rHeadPal = HeadPal.c_str();
 		rPantsPal = PantsPal.c_str();
@@ -1543,7 +1482,7 @@ struct SOLDIERTYPE : public Replica3
 		serializeParameters->outputBitstream[0].Write(rVestPal);
 		serializeParameters->outputBitstream[0].Write(rSkinPal);
 
-		//serializeParameters->outputBitstream[0].Write(pShades); // Shading tables
+		//serializeParameters->outputBitstream[0].Write(pShades);
 		//serializeParameters->outputBitstream[0].Write(pGlowShades);
 		serializeParameters->outputBitstream[0].Write(bMedical);
 		serializeParameters->outputBitstream[0].Write(fBeginFade);
@@ -1557,7 +1496,6 @@ struct SOLDIERTYPE : public Replica3
 		serializeParameters->outputBitstream[0].Write(bReverse);
 		//serializeParameters->outputBitstream[0].Write(pLevelNode);
 
-		// WALKING STUFF
 		serializeParameters->outputBitstream[0].Write(bDesiredDirection);
 		serializeParameters->outputBitstream[0].Write(sDestXPos);
 		serializeParameters->outputBitstream[0].Write(sDestYPos);
@@ -1565,15 +1503,14 @@ struct SOLDIERTYPE : public Replica3
 		serializeParameters->outputBitstream[0].Write(sFinalDestination);
 		serializeParameters->outputBitstream[0].Write(bLevel);
 
-		// PATH STUFF
 		serializeParameters->outputBitstream[0].Write(ubPathingData);
 		serializeParameters->outputBitstream[0].Write(ubPathDataSize);
 		serializeParameters->outputBitstream[0].Write(ubPathIndex);
 		serializeParameters->outputBitstream[0].Write(sBlackList);
 		serializeParameters->outputBitstream[0].Write(bAimTime);
 		serializeParameters->outputBitstream[0].Write(bShownAimTime);
-		serializeParameters->outputBitstream[0].Write(bPathStored); // good for AI to reduct redundancy
-		serializeParameters->outputBitstream[0].Write(bHasKeys); // allows AI controlled dudes to open locked doors
+		serializeParameters->outputBitstream[0].Write(bPathStored);
+		serializeParameters->outputBitstream[0].Write(bHasKeys);
 
 		serializeParameters->outputBitstream[0].Write(ubStrategicInsertionCode);
 		serializeParameters->outputBitstream[0].Write(usStrategicInsertionData);
@@ -1591,11 +1528,9 @@ struct SOLDIERTYPE : public Replica3
 		serializeParameters->outputBitstream[0].Write(bBulletsLeft);
 		serializeParameters->outputBitstream[0].Write(ubSuppressionPoints);
 
-		// STUFF FOR RANDOM ANIMATIONS
 		serializeParameters->outputBitstream[0].Write(uiTimeOfLastRandomAction);
 
-		// AI STUFF
-		serializeParameters->outputBitstream[0].Write(bOppList); // AI knowledge database
+		serializeParameters->outputBitstream[0].Write(bOppList);
 		serializeParameters->outputBitstream[0].Write(bLastAction);
 		serializeParameters->outputBitstream[0].Write(bAction);
 		serializeParameters->outputBitstream[0].Write(usActionData);
@@ -1612,10 +1547,10 @@ struct SOLDIERTYPE : public Replica3
 		serializeParameters->outputBitstream[0].Write(bUnderFire);
 		serializeParameters->outputBitstream[0].Write(bShock);
 		serializeParameters->outputBitstream[0].Write(bBypassToGreen);
-		serializeParameters->outputBitstream[0].Write(bDominantDir); // AI main direction to face...
-		serializeParameters->outputBitstream[0].Write(bPatrolCnt); // number of patrol gridnos
-		serializeParameters->outputBitstream[0].Write(bNextPatrolPnt); // index to next patrol gridno
-		serializeParameters->outputBitstream[0].Write(usPatrolGrid);// AI list for ptr->orders==PATROL
+		serializeParameters->outputBitstream[0].Write(bDominantDir);
+		serializeParameters->outputBitstream[0].Write(bPatrolCnt);
+		serializeParameters->outputBitstream[0].Write(bNextPatrolPnt);
+		serializeParameters->outputBitstream[0].Write(usPatrolGrid);
 		serializeParameters->outputBitstream[0].Write(sNoiseGridno);
 		serializeParameters->outputBitstream[0].Write(ubNoiseVolume);
 		serializeParameters->outputBitstream[0].Write(bLastAttackHit);
@@ -1686,7 +1621,6 @@ struct SOLDIERTYPE : public Replica3
 		serializeParameters->outputBitstream[0].Write(sPanelFaceX);
 		serializeParameters->outputBitstream[0].Write(sPanelFaceY);
 
-		// QUOTE STUFF
 		serializeParameters->outputBitstream[0].Write(bNumHitsThisTurn);
 		serializeParameters->outputBitstream[0].Write(usQuoteSaidFlags);
 		serializeParameters->outputBitstream[0].Write(fCloseCall);
@@ -1702,7 +1636,7 @@ struct SOLDIERTYPE : public Replica3
 		serializeParameters->outputBitstream[0].Write(bAimShotLocation);
 		serializeParameters->outputBitstream[0].Write(ubHitLocation);
 
-		//serializeParameters->outputBitstream[0].Write(effect_shade); // Shading table for effects
+		//serializeParameters->outputBitstream[0].Write(effect_shade);
 
 		serializeParameters->outputBitstream[0].Write(sSpreadLocations);
 		serializeParameters->outputBitstream[0].Write(fDoSpread);
@@ -1711,26 +1645,26 @@ struct SOLDIERTYPE : public Replica3
 		serializeParameters->outputBitstream[0].Write(sForcastGridno);
 		serializeParameters->outputBitstream[0].Write(sZLevelOverride);
 		serializeParameters->outputBitstream[0].Write(bMovedPriorToInterrupt);
-		serializeParameters->outputBitstream[0].Write(iEndofContractTime); // time, in global time(resolution, minutes) that merc will leave, or if its a M.E.R.C. merc it will be set to -1. -2 for NPC and player generated
+		serializeParameters->outputBitstream[0].Write(iEndofContractTime);
 		serializeParameters->outputBitstream[0].Write(iStartContractTime);
-		serializeParameters->outputBitstream[0].Write(iTotalContractLength); // total time of AIM mercs contract or the time since last paid for a M.E.R.C. merc
-		serializeParameters->outputBitstream[0].Write(iNextActionSpecialData); // AI special action data record for the next action
-		serializeParameters->outputBitstream[0].Write(ubWhatKindOfMercAmI); //Set to the type of character it is
-		serializeParameters->outputBitstream[0].Write(bAssignment); // soldiers current assignment
-		serializeParameters->outputBitstream[0].Write(fForcedToStayAwake); // forced by player to stay awake, reset to false, the moment they are set to rest or sleep
-		serializeParameters->outputBitstream[0].Write(bTrainStat); // current stat soldier is training
-		serializeParameters->outputBitstream[0].Write(sSector); // position on the Stategic Map
-		serializeParameters->outputBitstream[0].Write(iVehicleId); // the id of the vehicle the char is in
-		//serializeParameters->outputBitstream[0].Write(pMercPath); // Path Structure
-		serializeParameters->outputBitstream[0].Write(fHitByGasFlags); // flags
-		serializeParameters->outputBitstream[0].Write(usMedicalDeposit); // is there a medical deposit on merc
-		serializeParameters->outputBitstream[0].Write(usLifeInsurance); // is there life insurance taken out on merc
+		serializeParameters->outputBitstream[0].Write(iTotalContractLength);
+		serializeParameters->outputBitstream[0].Write(iNextActionSpecialData);
+		serializeParameters->outputBitstream[0].Write(ubWhatKindOfMercAmI);
+		serializeParameters->outputBitstream[0].Write(bAssignment);
+		serializeParameters->outputBitstream[0].Write(fForcedToStayAwake);
+		serializeParameters->outputBitstream[0].Write(bTrainStat);
+		serializeParameters->outputBitstream[0].Write(sSector);
+		serializeParameters->outputBitstream[0].Write(iVehicleId);
+		//serializeParameters->outputBitstream[0].Write(pMercPath);
+		serializeParameters->outputBitstream[0].Write(fHitByGasFlags);
+		serializeParameters->outputBitstream[0].Write(usMedicalDeposit);
+		serializeParameters->outputBitstream[0].Write(usLifeInsurance);
 
 		serializeParameters->outputBitstream[0].Write(iStartOfInsuranceContract);
-		serializeParameters->outputBitstream[0].Write(uiLastAssignmentChangeMin); // timestamp of last assignment change in minutes
+		serializeParameters->outputBitstream[0].Write(uiLastAssignmentChangeMin);
 		serializeParameters->outputBitstream[0].Write(iTotalLengthOfInsuranceContract);
 
-		serializeParameters->outputBitstream[0].Write(ubSoldierClass); //admin, elite, troop (creature types?)
+		serializeParameters->outputBitstream[0].Write(ubSoldierClass);
 		serializeParameters->outputBitstream[0].Write(ubAPsLostToSuppression);
 		serializeParameters->outputBitstream[0].Write(fChangingStanceDueToSuppression);
 		//serializeParameters->outputBitstream[0].Write(suppressor);
@@ -1749,8 +1683,8 @@ struct SOLDIERTYPE : public Replica3
 		serializeParameters->outputBitstream[0].Write(uiChangeMedicalTime);
 		serializeParameters->outputBitstream[0].Write(uiChangeMechanicalTime);
 
-		serializeParameters->outputBitstream[0].Write(uiUniqueSoldierIdValue); // the unique value every instance of a soldier gets - 1 is the first valid value
-		serializeParameters->outputBitstream[0].Write(bBeingAttackedCount); // Being attacked counter
+		serializeParameters->outputBitstream[0].Write(uiUniqueSoldierIdValue);
+		serializeParameters->outputBitstream[0].Write(bBeingAttackedCount);
 
 		serializeParameters->outputBitstream[0].Write(bNewItemCount);
 		serializeParameters->outputBitstream[0].Write(bNewItemCycleCount);
@@ -1799,11 +1733,11 @@ struct SOLDIERTYPE : public Replica3
 		serializeParameters->outputBitstream[0].Write(bSleepDrugCounter);
 		serializeParameters->outputBitstream[0].Write(ubMilitiaKills);
 
-		serializeParameters->outputBitstream[0].Write(bFutureDrugEffect); // value to represent effect of a needle
-		serializeParameters->outputBitstream[0].Write(bDrugEffectRate); // represents rate of increase and decrease of effect
-		serializeParameters->outputBitstream[0].Write(bDrugEffect); // value that affects AP & morale calc ( -ve is poorly )
-		serializeParameters->outputBitstream[0].Write(bDrugSideEffectRate); // duration of negative AP and morale effect
-		serializeParameters->outputBitstream[0].Write(bDrugSideEffect); // duration of negative AP and morale effect
+		serializeParameters->outputBitstream[0].Write(bFutureDrugEffect);
+		serializeParameters->outputBitstream[0].Write(bDrugEffectRate);
+		serializeParameters->outputBitstream[0].Write(bDrugEffect);
+		serializeParameters->outputBitstream[0].Write(bDrugSideEffectRate);
+		serializeParameters->outputBitstream[0].Write(bDrugSideEffect);
 
 		serializeParameters->outputBitstream[0].Write(bBlindedCounter);
 		serializeParameters->outputBitstream[0].Write(fMercCollapsedFlag);
@@ -1878,6 +1812,7 @@ struct SOLDIERTYPE : public Replica3
 		serializeParameters->outputBitstream[0].Write(fComplainedThatTired);
 		serializeParameters->outputBitstream[0].Write(sLastTwoLocations);
 		serializeParameters->outputBitstream[0].Write(uiTimeSinceLastBleedGrunt);
+
 		return RM3SR_BROADCAST_IDENTICALLY;
 	}
 	virtual void Deserialize(RakNet::DeserializeParameters* deserializeParameters) {
@@ -1890,50 +1825,46 @@ struct SOLDIERTYPE : public Replica3
 		deserializeParameters->serializationBitstream[0].Read(uiStatusFlags);
 
 		deserializeParameters->serializationBitstream[0].Read(inv);
+		// Pointers are not supposed to be synchronized
 		//deserializeParameters->serializationBitstream[0].Read(pTempObject);
 		//deserializeParameters->serializationBitstream[0].Read(pKeyRing);
 
-		deserializeParameters->serializationBitstream[0].Read(bOldLife); // life at end of last turn, recorded for monster AI
-		// attributes
+		deserializeParameters->serializationBitstream[0].Read(bOldLife);
+
 		deserializeParameters->serializationBitstream[0].Read(bInSector);
 		deserializeParameters->serializationBitstream[0].Read(bFlashPortraitFrame);
-		deserializeParameters->serializationBitstream[0].Read(sFractLife); // fraction of life pts (in hundreths)
-		deserializeParameters->serializationBitstream[0].Read(bBleeding); // blood loss control variable
-		deserializeParameters->serializationBitstream[0].Read(bBreath); // current breath value
-		deserializeParameters->serializationBitstream[0].Read(bBreathMax); // max breath, affected by fatigue/sleep
+		deserializeParameters->serializationBitstream[0].Read(sFractLife);
+		deserializeParameters->serializationBitstream[0].Read(bBleeding);
+		deserializeParameters->serializationBitstream[0].Read(bBreath);
+		deserializeParameters->serializationBitstream[0].Read(bBreathMax);
 		deserializeParameters->serializationBitstream[0].Read(bStealthMode);
 
-		deserializeParameters->serializationBitstream[0].Read(sBreathRed); // current breath value
+		deserializeParameters->serializationBitstream[0].Read(sBreathRed);
 		deserializeParameters->serializationBitstream[0].Read(fDelayedMovement);
 
 		deserializeParameters->serializationBitstream[0].Read(ubWaitActionToDo);
 		deserializeParameters->serializationBitstream[0].Read(ubInsertionDirection);
-		// skills
+
 		//deserializeParameters->serializationBitstream[0].Read(opponent);
 		deserializeParameters->serializationBitstream[0].Read(bLastRenderVisibleValue);
 		deserializeParameters->serializationBitstream[0].Read(ubAttackingHand);
-		// traits
+
 		deserializeParameters->serializationBitstream[0].Read(sWeightCarriedAtTurnStart);
-		//deserializeParameters->serializationBitstream[0].Read(name);
-		deserializeParameters->serializationBitstream[0].Read(rname);
+		deserializeParameters->serializationBitstream[0].Read(rname); // Using RakString as intermediate entity
 		name = rname;
 
-		deserializeParameters->serializationBitstream[0].Read(bVisible); // to render or not to render...
+		deserializeParameters->serializationBitstream[0].Read(bVisible);
 
 
 		deserializeParameters->serializationBitstream[0].Read(bActive);
 
-		deserializeParameters->serializationBitstream[0].Read(bTeam); // Team identifier
+		deserializeParameters->serializationBitstream[0].Read(bTeam);
 
-		//NEW MOVEMENT INFORMATION for Strategic Movement
-		deserializeParameters->serializationBitstream[0].Read(ubGroupID); //the movement group the merc is currently part of.
-		deserializeParameters->serializationBitstream[0].Read(fBetweenSectors); //set when the group isn't actually in a sector.
-		//sSectorX and sSectorY will reflect the sector the
-		//merc was at last.
+		deserializeParameters->serializationBitstream[0].Read(ubGroupID);
+		deserializeParameters->serializationBitstream[0].Read(fBetweenSectors);
 
-		deserializeParameters->serializationBitstream[0].Read(ubMovementNoiseHeard);// 8 flags by direction
+		deserializeParameters->serializationBitstream[0].Read(ubMovementNoiseHeard);
 
-		// WORLD POSITION STUFF
 		deserializeParameters->serializationBitstream[0].Read(dXPos);
 		deserializeParameters->serializationBitstream[0].Read(dYPos);
 		deserializeParameters->serializationBitstream[0].Read(sInitialGridNo);
@@ -1941,11 +1872,11 @@ struct SOLDIERTYPE : public Replica3
 		deserializeParameters->serializationBitstream[0].Read(bDirection);
 		deserializeParameters->serializationBitstream[0].Read(sHeightAdjustment);
 		deserializeParameters->serializationBitstream[0].Read(sDesiredHeight);
-		deserializeParameters->serializationBitstream[0].Read(sTempNewGridNo); // New grid no for advanced animations
+		deserializeParameters->serializationBitstream[0].Read(sTempNewGridNo);
 		deserializeParameters->serializationBitstream[0].Read(bOverTerrainType);
 
-		deserializeParameters->serializationBitstream[0].Read(bCollapsed); // collapsed due to being out of APs
-		deserializeParameters->serializationBitstream[0].Read(bBreathCollapsed); // collapsed due to being out of APs
+		deserializeParameters->serializationBitstream[0].Read(bCollapsed);
+		deserializeParameters->serializationBitstream[0].Read(bBreathCollapsed);
 
 		deserializeParameters->serializationBitstream[0].Read(ubDesiredHeight);
 		deserializeParameters->serializationBitstream[0].Read(usPendingAnimation);
@@ -1953,8 +1884,8 @@ struct SOLDIERTYPE : public Replica3
 		deserializeParameters->serializationBitstream[0].Read(usAnimState);
 		deserializeParameters->serializationBitstream[0].Read(fNoAPToFinishMove);
 		deserializeParameters->serializationBitstream[0].Read(fPausedMove);
-		deserializeParameters->serializationBitstream[0].Read(fUIdeadMerc); // UI Flags for removing a newly dead merc
-		deserializeParameters->serializationBitstream[0].Read(fUICloseMerc); // UI Flags for closing panels
+		deserializeParameters->serializationBitstream[0].Read(fUIdeadMerc);
+		deserializeParameters->serializationBitstream[0].Read(fUICloseMerc);
 
 		deserializeParameters->serializationBitstream[0].Read(UpdateCounter);
 		deserializeParameters->serializationBitstream[0].Read(DamageCounter);
@@ -1964,24 +1895,24 @@ struct SOLDIERTYPE : public Replica3
 		deserializeParameters->serializationBitstream[0].Read(ubSkillTrait1);
 		deserializeParameters->serializationBitstream[0].Read(ubSkillTrait2);
 
-		deserializeParameters->serializationBitstream[0].Read(bDexterity); // dexterity (hand coord) value
+		deserializeParameters->serializationBitstream[0].Read(bDexterity);
 		deserializeParameters->serializationBitstream[0].Read(bWisdom);
 		//deserializeParameters->serializationBitstream[0].Read(attacker);
 		//deserializeParameters->serializationBitstream[0].Read(previous_attacker);
 		//deserializeParameters->serializationBitstream[0].Read(next_to_previous_attacker);
 		deserializeParameters->serializationBitstream[0].Read(fTurnInProgress);
 
-		deserializeParameters->serializationBitstream[0].Read(fIntendedTarget); // intentionally shot?
+		deserializeParameters->serializationBitstream[0].Read(fIntendedTarget);
 		deserializeParameters->serializationBitstream[0].Read(fPauseAllAnimation);
 
-		deserializeParameters->serializationBitstream[0].Read(bExpLevel); // general experience level
+		deserializeParameters->serializationBitstream[0].Read(bExpLevel);
 		deserializeParameters->serializationBitstream[0].Read(sInsertionGridNo);
 
 		deserializeParameters->serializationBitstream[0].Read(fContinueMoveAfterStanceChange);
 
 		//deserializeParameters->serializationBitstream[0].Read(AnimCache);
 
-		deserializeParameters->serializationBitstream[0].Read(bLife); // current life (hit points or health)
+		deserializeParameters->serializationBitstream[0].Read(bLife);
 		deserializeParameters->serializationBitstream[0].Read(bSide);
 		deserializeParameters->serializationBitstream[0].Read(bNewOppCnt);
 
@@ -1989,14 +1920,12 @@ struct SOLDIERTYPE : public Replica3
 		deserializeParameters->serializationBitstream[0].Read(usAniFrame);
 		deserializeParameters->serializationBitstream[0].Read(sAniDelay);
 
-		// MOVEMENT TO NEXT TILE HANDLING STUFF
-		deserializeParameters->serializationBitstream[0].Read(bAgility); // agility (speed) value
+		deserializeParameters->serializationBitstream[0].Read(bAgility);
 		deserializeParameters->serializationBitstream[0].Read(sDelayedMovementCauseGridNo);
 		deserializeParameters->serializationBitstream[0].Read(sReservedMovementGridNo);
 
 		deserializeParameters->serializationBitstream[0].Read(bStrength);
 
-		// Weapon Stuff
 		deserializeParameters->serializationBitstream[0].Read(sTargetGridNo);
 		deserializeParameters->serializationBitstream[0].Read(bTargetLevel);
 		deserializeParameters->serializationBitstream[0].Read(bTargetCubeLevel);
@@ -2019,16 +1948,11 @@ struct SOLDIERTYPE : public Replica3
 		deserializeParameters->serializationBitstream[0].Read(fShowLocator);
 		deserializeParameters->serializationBitstream[0].Read(fFlashPortrait);
 		deserializeParameters->serializationBitstream[0].Read(bMechanical);
-		deserializeParameters->serializationBitstream[0].Read(bLifeMax); // maximum life for this merc
+		deserializeParameters->serializationBitstream[0].Read(bLifeMax);
 
 		//deserializeParameters->serializationBitstream[0].Read(face);
 
-
-		// PALETTE MANAGEMENT STUFF
-		//deserializeParameters->serializationBitstream[0].Read(HeadPal);
-		//deserializeParameters->serializationBitstream[0].Read(PantsPal);
-		//deserializeParameters->serializationBitstream[0].Read(VestPal);
-		//deserializeParameters->serializationBitstream[0].Read(SkinPal);
+		// Using RakString as intermediate entity
 		deserializeParameters->serializationBitstream[0].Read(rHeadPal);
 		deserializeParameters->serializationBitstream[0].Read(rPantsPal);
 		deserializeParameters->serializationBitstream[0].Read(rVestPal);
@@ -2038,7 +1962,7 @@ struct SOLDIERTYPE : public Replica3
 		VestPal = rVestPal;
 		SkinPal = rSkinPal;
 
-		//deserializeParameters->serializationBitstream[0].Read(pShades); // Shading tables
+		//deserializeParameters->serializationBitstream[0].Read(pShades);
 		//deserializeParameters->serializationBitstream[0].Read(pGlowShades);
 		deserializeParameters->serializationBitstream[0].Read(bMedical);
 		deserializeParameters->serializationBitstream[0].Read(fBeginFade);
@@ -2052,7 +1976,6 @@ struct SOLDIERTYPE : public Replica3
 		deserializeParameters->serializationBitstream[0].Read(bReverse);
 		//deserializeParameters->serializationBitstream[0].Read(pLevelNode);
 
-		// WALKING STUFF
 		deserializeParameters->serializationBitstream[0].Read(bDesiredDirection);
 		deserializeParameters->serializationBitstream[0].Read(sDestXPos);
 		deserializeParameters->serializationBitstream[0].Read(sDestYPos);
@@ -2060,15 +1983,14 @@ struct SOLDIERTYPE : public Replica3
 		deserializeParameters->serializationBitstream[0].Read(sFinalDestination);
 		deserializeParameters->serializationBitstream[0].Read(bLevel);
 
-		// PATH STUFF
 		deserializeParameters->serializationBitstream[0].Read(ubPathingData);
 		deserializeParameters->serializationBitstream[0].Read(ubPathDataSize);
 		deserializeParameters->serializationBitstream[0].Read(ubPathIndex);
 		deserializeParameters->serializationBitstream[0].Read(sBlackList);
 		deserializeParameters->serializationBitstream[0].Read(bAimTime);
 		deserializeParameters->serializationBitstream[0].Read(bShownAimTime);
-		deserializeParameters->serializationBitstream[0].Read(bPathStored); // good for AI to reduct redundancy
-		deserializeParameters->serializationBitstream[0].Read(bHasKeys); // allows AI controlled dudes to open locked doors
+		deserializeParameters->serializationBitstream[0].Read(bPathStored);
+		deserializeParameters->serializationBitstream[0].Read(bHasKeys);
 
 		deserializeParameters->serializationBitstream[0].Read(ubStrategicInsertionCode);
 		deserializeParameters->serializationBitstream[0].Read(usStrategicInsertionData);
@@ -2086,11 +2008,9 @@ struct SOLDIERTYPE : public Replica3
 		deserializeParameters->serializationBitstream[0].Read(bBulletsLeft);
 		deserializeParameters->serializationBitstream[0].Read(ubSuppressionPoints);
 
-		// STUFF FOR RANDOM ANIMATIONS
 		deserializeParameters->serializationBitstream[0].Read(uiTimeOfLastRandomAction);
 
-		// AI STUFF
-		deserializeParameters->serializationBitstream[0].Read(bOppList); // AI knowledge database
+		deserializeParameters->serializationBitstream[0].Read(bOppList);
 		deserializeParameters->serializationBitstream[0].Read(bLastAction);
 		deserializeParameters->serializationBitstream[0].Read(bAction);
 		deserializeParameters->serializationBitstream[0].Read(usActionData);
@@ -2107,10 +2027,10 @@ struct SOLDIERTYPE : public Replica3
 		deserializeParameters->serializationBitstream[0].Read(bUnderFire);
 		deserializeParameters->serializationBitstream[0].Read(bShock);
 		deserializeParameters->serializationBitstream[0].Read(bBypassToGreen);
-		deserializeParameters->serializationBitstream[0].Read(bDominantDir); // AI main direction to face...
-		deserializeParameters->serializationBitstream[0].Read(bPatrolCnt); // number of patrol gridnos
-		deserializeParameters->serializationBitstream[0].Read(bNextPatrolPnt); // index to next patrol gridno
-		deserializeParameters->serializationBitstream[0].Read(usPatrolGrid);// AI list for ptr->orders==PATROL
+		deserializeParameters->serializationBitstream[0].Read(bDominantDir);
+		deserializeParameters->serializationBitstream[0].Read(bPatrolCnt);
+		deserializeParameters->serializationBitstream[0].Read(bNextPatrolPnt);
+		deserializeParameters->serializationBitstream[0].Read(usPatrolGrid);
 		deserializeParameters->serializationBitstream[0].Read(sNoiseGridno);
 		deserializeParameters->serializationBitstream[0].Read(ubNoiseVolume);
 		deserializeParameters->serializationBitstream[0].Read(bLastAttackHit);
@@ -2181,7 +2101,6 @@ struct SOLDIERTYPE : public Replica3
 		deserializeParameters->serializationBitstream[0].Read(sPanelFaceX);
 		deserializeParameters->serializationBitstream[0].Read(sPanelFaceY);
 
-		// QUOTE STUFF
 		deserializeParameters->serializationBitstream[0].Read(bNumHitsThisTurn);
 		deserializeParameters->serializationBitstream[0].Read(usQuoteSaidFlags);
 		deserializeParameters->serializationBitstream[0].Read(fCloseCall);
@@ -2197,7 +2116,7 @@ struct SOLDIERTYPE : public Replica3
 		deserializeParameters->serializationBitstream[0].Read(bAimShotLocation);
 		deserializeParameters->serializationBitstream[0].Read(ubHitLocation);
 
-		//deserializeParameters->serializationBitstream[0].Read(effect_shade); // Shading table for effects
+		//deserializeParameters->serializationBitstream[0].Read(effect_shade);
 
 		deserializeParameters->serializationBitstream[0].Read(sSpreadLocations);
 		deserializeParameters->serializationBitstream[0].Read(fDoSpread);
@@ -2206,26 +2125,26 @@ struct SOLDIERTYPE : public Replica3
 		deserializeParameters->serializationBitstream[0].Read(sForcastGridno);
 		deserializeParameters->serializationBitstream[0].Read(sZLevelOverride);
 		deserializeParameters->serializationBitstream[0].Read(bMovedPriorToInterrupt);
-		deserializeParameters->serializationBitstream[0].Read(iEndofContractTime); // time, in global time(resolution, minutes) that merc will leave, or if its a M.E.R.C. merc it will be set to -1. -2 for NPC and player generated
+		deserializeParameters->serializationBitstream[0].Read(iEndofContractTime);
 		deserializeParameters->serializationBitstream[0].Read(iStartContractTime);
-		deserializeParameters->serializationBitstream[0].Read(iTotalContractLength); // total time of AIM mercs contract or the time since last paid for a M.E.R.C. merc
-		deserializeParameters->serializationBitstream[0].Read(iNextActionSpecialData); // AI special action data record for the next action
-		deserializeParameters->serializationBitstream[0].Read(ubWhatKindOfMercAmI); //Set to the type of character it is
-		deserializeParameters->serializationBitstream[0].Read(bAssignment); // soldiers current assignment
-		deserializeParameters->serializationBitstream[0].Read(fForcedToStayAwake); // forced by player to stay awake, reset to false, the moment they are set to rest or sleep
-		deserializeParameters->serializationBitstream[0].Read(bTrainStat); // current stat soldier is training
-		deserializeParameters->serializationBitstream[0].Read(sSector); // position on the Stategic Map
-		deserializeParameters->serializationBitstream[0].Read(iVehicleId); // the id of the vehicle the char is in
-		//deserializeParameters->serializationBitstream[0].Read(pMercPath); // Path Structure
-		deserializeParameters->serializationBitstream[0].Read(fHitByGasFlags); // flags
-		deserializeParameters->serializationBitstream[0].Read(usMedicalDeposit); // is there a medical deposit on merc
-		deserializeParameters->serializationBitstream[0].Read(usLifeInsurance); // is there life insurance taken out on merc
+		deserializeParameters->serializationBitstream[0].Read(iTotalContractLength);
+		deserializeParameters->serializationBitstream[0].Read(iNextActionSpecialData);
+		deserializeParameters->serializationBitstream[0].Read(ubWhatKindOfMercAmI);
+		deserializeParameters->serializationBitstream[0].Read(bAssignment);
+		deserializeParameters->serializationBitstream[0].Read(fForcedToStayAwake);
+		deserializeParameters->serializationBitstream[0].Read(bTrainStat);
+		deserializeParameters->serializationBitstream[0].Read(sSector);
+		deserializeParameters->serializationBitstream[0].Read(iVehicleId);
+		//deserializeParameters->serializationBitstream[0].Read(pMercPath);
+		deserializeParameters->serializationBitstream[0].Read(fHitByGasFlags);
+		deserializeParameters->serializationBitstream[0].Read(usMedicalDeposit);
+		deserializeParameters->serializationBitstream[0].Read(usLifeInsurance);
 
 		deserializeParameters->serializationBitstream[0].Read(iStartOfInsuranceContract);
-		deserializeParameters->serializationBitstream[0].Read(uiLastAssignmentChangeMin); // timestamp of last assignment change in minutes
+		deserializeParameters->serializationBitstream[0].Read(uiLastAssignmentChangeMin);
 		deserializeParameters->serializationBitstream[0].Read(iTotalLengthOfInsuranceContract);
 
-		deserializeParameters->serializationBitstream[0].Read(ubSoldierClass); //admin, elite, troop (creature types?)
+		deserializeParameters->serializationBitstream[0].Read(ubSoldierClass);
 		deserializeParameters->serializationBitstream[0].Read(ubAPsLostToSuppression);
 		deserializeParameters->serializationBitstream[0].Read(fChangingStanceDueToSuppression);
 		//deserializeParameters->serializationBitstream[0].Read(suppressor);
@@ -2244,8 +2163,8 @@ struct SOLDIERTYPE : public Replica3
 		deserializeParameters->serializationBitstream[0].Read(uiChangeMedicalTime);
 		deserializeParameters->serializationBitstream[0].Read(uiChangeMechanicalTime);
 
-		deserializeParameters->serializationBitstream[0].Read(uiUniqueSoldierIdValue); // the unique value every instance of a soldier gets - 1 is the first valid value
-		deserializeParameters->serializationBitstream[0].Read(bBeingAttackedCount); // Being attacked counter
+		deserializeParameters->serializationBitstream[0].Read(uiUniqueSoldierIdValue);
+		deserializeParameters->serializationBitstream[0].Read(bBeingAttackedCount);
 
 		deserializeParameters->serializationBitstream[0].Read(bNewItemCount);
 		deserializeParameters->serializationBitstream[0].Read(bNewItemCycleCount);
@@ -2294,11 +2213,11 @@ struct SOLDIERTYPE : public Replica3
 		deserializeParameters->serializationBitstream[0].Read(bSleepDrugCounter);
 		deserializeParameters->serializationBitstream[0].Read(ubMilitiaKills);
 
-		deserializeParameters->serializationBitstream[0].Read(bFutureDrugEffect); // value to represent effect of a needle
-		deserializeParameters->serializationBitstream[0].Read(bDrugEffectRate); // represents rate of increase and decrease of effect
-		deserializeParameters->serializationBitstream[0].Read(bDrugEffect); // value that affects AP & morale calc ( -ve is poorly )
-		deserializeParameters->serializationBitstream[0].Read(bDrugSideEffectRate); // duration of negative AP and morale effect
-		deserializeParameters->serializationBitstream[0].Read(bDrugSideEffect); // duration of negative AP and morale effect
+		deserializeParameters->serializationBitstream[0].Read(bFutureDrugEffect);
+		deserializeParameters->serializationBitstream[0].Read(bDrugEffectRate);
+		deserializeParameters->serializationBitstream[0].Read(bDrugEffect);
+		deserializeParameters->serializationBitstream[0].Read(bDrugSideEffectRate);
+		deserializeParameters->serializationBitstream[0].Read(bDrugSideEffect);
 
 		deserializeParameters->serializationBitstream[0].Read(bBlindedCounter);
 		deserializeParameters->serializationBitstream[0].Read(fMercCollapsedFlag);
