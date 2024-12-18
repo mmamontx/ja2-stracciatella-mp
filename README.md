@@ -20,8 +20,9 @@ Roadmap (Milestones):
 3. Moving to another sector:
     1. From the tactical screen.
     2. From the strategic screen.
-4. Full demo - from the helicopter in Omerta to Drassen capture.
-5. All the rest.
+4. Saving and loading.
+5. Full demo - from the helicopter in Omerta to Drassen capture.
+6. All the rest.
 
 Backlog:
 
@@ -30,7 +31,9 @@ Backlog:
     - Ensure that every merc action is properly reflected on another side.
     - Let only server start game - grey out time compression for clients. Automatically broadcast game start from server. Add 'ready' buttons (like it is done in 1.13)?
     - Probably it makes sense to consider placing mercs of every player to a separate squad.
+    - Replicate all SOLDIERTYPE pointers (see in the bottom).
 - Low priority:
+    - Root-cause how come the animation is not loaded (see in the bottom).
     - Clear the written message in the box after it's sent to the chat (investigate the issue).
     - Fix the initial game connection screen (place the new buttons more friendly and add captions). Grey out game preferences when client checkbox is marked.
     - Remove intro movies when the game is started (for debugging purposes).
@@ -38,7 +41,9 @@ Backlog:
 
 Things worth mentioning and "dark knowledge":
 
+- For some reason the client doesn't have animations in place when the tactical screen is loading. By default it causes failure so there is a workaround introduced that skips the failure and loads the missing animation instead.
 - The original GROUP struct in JA2Types.h has to be renamed to GROUP_JA2 since it caused name conflicts with some standard library included by RakNet and, hence, won't compile. It's not very elegant solution since it caused dramatic amount of misleading changes to occur, but at least it is straightforward and simple. For some reason I didn't manage to do it another way (spent too much time for this).
+- Pointers inside SOLDIERTYPE are not replicated. If they are used on the client side it would cause null pointer dereferences (crashes).
 - There is a custom HireRandomMercs() function that is automatically called in the game beggining to hire mercs (accelerates debugging so one doesn't have to always visit AIM). This code is only executed for server, the client receives replicated mercs.
 - Helicopter drop-off animation is disabled (accelerates debugging).
 - For now the enemies have been disabled - until I start implementing the battle/turn-based mode.

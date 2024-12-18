@@ -228,7 +228,9 @@ static INT8   gbNumMercsUntilWaitingOver       = 0;
 static UINT32 guiWaitingForAllMercsToExitTimer = 0;
 BOOLEAN       gfKillingGuysForLosingBattle     = FALSE;
 
-int ii; // Global variable for BASE macro
+// Global variables for iterations within macroses
+int ii;
+int jj;
 
 
 static INT32 GetFreeMercSlot(void)

@@ -13,6 +13,7 @@
 #include "Item_Types.h"
 #include "Timer_Control.h"
 #include "GameSettings.h"
+#include "Shading.h"
 #include "ReplicaManager3.h"
 
 using namespace RakNet;
@@ -2074,6 +2075,7 @@ struct SOLDIERTYPE : public Replica3
 
 		deserializeParameters->serializationBitstream[0].Read(fForceShade);
 		//deserializeParameters->serializationBitstream[0].Read(pForcedShade);
+		pForcedShade = White16BPPPalette; // NOTE: Hardcoding to the local resource copy (it seems that the pointer always points there anyway)
 
 		deserializeParameters->serializationBitstream[0].Read(bDisplayDamageCount);
 		deserializeParameters->serializationBitstream[0].Read(fDisplayDamage);

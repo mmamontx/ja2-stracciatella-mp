@@ -141,7 +141,7 @@ extern SOLDIERTYPE Menptr[TOTAL_SOLDIERS];
 
 static inline SOLDIERTYPE& GetMan(UINT const idx)
 {
-	Assert(idx < lengthof(Menptr)); // FIXME: For client do assertion based on replica array size
+	Assert(idx < lengthof(Menptr));
 	if (IS_VALID_CLIENT) return *((SOLDIERTYPE*)gReplicaList[idx]);
 	return Menptr[idx];
 }
@@ -200,6 +200,7 @@ static inline BOOLEAN IsTeamActive(const UINT team)
 //		++iter)                                                                      \
 //		if (!iter->bActive) continue; else
 extern int ii;
+extern int jj;
 #define BASE_FOR_EACH_IN_TEAM(type, iter, team)                                      \
 	ii = gTacticalStatus.Team[(team)].bFirstID; \
 	for (type* iter = ((IS_VALID_CLIENT) ? ((type*)gReplicaList[gTacticalStatus.Team[(team)].bFirstID]) : (&Menptr[gTacticalStatus.Team[(team)].bFirstID])),    \
@@ -214,8 +215,8 @@ extern int ii;
 //	for (type* iter = Menptr; iter != Menptr + MAX_NUM_SOLDIERS; ++iter) \
 //		if (!iter->bActive) continue; else
 #define BASE_FOR_EACH_SOLDIER(type, iter)                  \
-	ii = 0; \
-	for (type* iter = ((IS_VALID_CLIENT) ? ((type*)gReplicaList[0]) : Menptr); ((IS_VALID_CLIENT) ? (ii < MAX_NUM_SOLDIERS) : (iter != Menptr + MAX_NUM_SOLDIERS)); ((IS_VALID_CLIENT) ? (++ii, iter = ((type*)gReplicaList[ii])) : ++iter)) \
+	jj = 0; \
+	for (type* iter = ((IS_VALID_CLIENT) ? ((type*)gReplicaList[0]) : Menptr); ((IS_VALID_CLIENT) ? (jj < MAX_NUM_SOLDIERS) : (iter != Menptr + MAX_NUM_SOLDIERS)); ((IS_VALID_CLIENT) ? (++jj, iter = ((type*)gReplicaList[jj])) : ++iter)) \
 		if (!iter->bActive) continue; else
 #define FOR_EACH_SOLDIER( iter) BASE_FOR_EACH_SOLDIER(      SOLDIERTYPE, iter)
 #define CFOR_EACH_SOLDIER(iter) BASE_FOR_EACH_SOLDIER(const SOLDIERTYPE, iter)
