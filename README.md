@@ -37,9 +37,12 @@ Backlog:
 - Low priority:
     - Root-cause: how come the animation is not loaded for the client (see in the bottom).
     - Clear the written message in the box after it's sent to the chat (investigate and fix the issue).
+    - Fix player name appearance in the chat on client side.
+    - Make messages from client be broadcasted and received from the server before they appear in the chat on client side.
     - Fix the initial game connection screen (place the new buttons more friendly and add captions). Grey out game preferences when the client mode checkbox is marked.
     - Remove intro movies when the game is started (for debugging purposes).
     - Do the connection and auto-hiring earlier - before the laptop is open.
+    - Verify successful connection before changing gConnected on client side.
     - Handle server disconnection on client side.
     - Refactor and sync with JA2 Stracciatella master.
 
@@ -50,7 +53,7 @@ Things worth mentioning and "dark knowledge":
 For debugging purposes:
 
 - There is a custom function - HireRandomMercs() - that is automatically called in the beginning (accelerates debugging so one doesn't have to always visit AIM). This code is only executed for the server, the client receives replicated mercs.
-- Helicopter drop-off animation is disabled (accelerates debugging).
-- The enemies are disabled - until implementation of the battle/turn-based mode is started.
+- Helicopter drop-off animation is disabled (see the FIXME in Merc_Entering.cc) - accelerates debugging.
+- The enemies are disabled (see gEnemyEnabled var) - until implementation of the battle/turn-based mode is started.
 
 Contact: mmamontx@gmail.com

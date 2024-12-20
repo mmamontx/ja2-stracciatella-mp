@@ -207,7 +207,7 @@ DWORD WINAPI replicamgr(LPVOID lpParam)
 	int idx;
 	while (1)
 	{
-		Sleep(1000); // Not sure if the period can affect sync delay, if so - it should be reduced
+		Sleep(1000); // NOTE: It doesn't affect object replication sync delay, but it may have some other effect - keep this in mind
 	}
 	return 0;
 }

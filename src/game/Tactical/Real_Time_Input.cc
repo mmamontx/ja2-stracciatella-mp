@@ -186,7 +186,7 @@ static void QueryRTLeftButton(UIEventKind* const puiNewEvent)
 
 
 							case MOVE_MODE:
-								
+
 								gfUICanBeginAllMoveCycle = TRUE;
 
 								if ( !HandleCheckForExitArrowsInput( FALSE ) &&
@@ -234,7 +234,6 @@ static void QueryRTLeftButton(UIEventKind* const puiNewEvent)
 														{
 															*puiNewEvent = C_WAIT_FOR_CONFIRM;
 															gfPlotNewMovement = TRUE;
-															//SLOGI("gfPlotNewMovement = TRUE");
 														}
 													}
 												}

@@ -511,7 +511,7 @@ DWORD WINAPI server_packet(LPVOID lpParam)
 				// This tells the server that a client has connected
 				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_NEW_INCOMING_CONNECTION");
 				break;
-			case ID_USER_PACKET_NAME:
+			case ID_USER_PACKET_NAME: // This message and below are custom messages of JA2 Stacciatella Cooperative
 			{
 				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_USER_PACKET_NAME");
 				struct USER_PACKET_NAME* up;
@@ -555,7 +555,7 @@ DWORD WINAPI server_packet(LPVOID lpParam)
 			p = gNetworkOptions.peer->Receive();
 		}
 
-		Sleep(33); // ~30 FPS
+		Sleep(33); // NOTE: ~30 FPS, can be improved if needed
 	}
 
 	return 0;
@@ -634,17 +634,15 @@ DWORD WINAPI client_packet(LPVOID lpParam)
 				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_REPLICA_MANAGER_DOWNLOAD_COMPLETE");
 
 				gReplicaManager.GetReferencedReplicaList(gReplicaList);
-				//for (int idx = 0; idx < 2; idx++)
-				//{
-				//	printf("gReplicaList[%d] = %p\n", idx, gReplicaList[idx]);
-				//}
+				/*for (int idx = 0; idx < 2; idx++)
+				{
+					printf("gReplicaList[%d] = %p\n", idx, gReplicaList[idx]);
+				}*/
 
 				FOR_EACH_IN_TEAM(s, OUR_TEAM) // Below are actions that were supposed to be done when hiring mercs through AIM
 				{
 					gfAtLeastOneMercWasHired = true; // Ugly, but should handle the case when the server doesn't have any characters yet on client connection
-					//printf("s->face = %p\n", s->face);
 					InitSoldierFace(*s); // 'face' has to be initialized locally since originally it points to the host memory and causes an exception
-					//printf("!s->face = %p\n", s->face);
 					AddStrategicEvent(EVENT_DELAYED_HIRING_OF_MERC, (STARTING_TIME + FIRST_ARRIVAL_DELAY) / NUM_SEC_IN_MIN, s->ubID); // Place to the helicopter
 					EVENT_InitNewSoldierAnim(s, STANDING, Random(10), TRUE); // Initialize animation locally
 					CreateSoldierPalettes(*s); // Initialize palette locally
@@ -679,7 +677,7 @@ DWORD WINAPI client_packet(LPVOID lpParam)
 			p = gNetworkOptions.peer->Receive();
 		}
 
-		Sleep(33); // ~30 FPS
+		Sleep(33); // NOTE: ~30 FPS, can be improved if needed
 	}
 
 	return 0;

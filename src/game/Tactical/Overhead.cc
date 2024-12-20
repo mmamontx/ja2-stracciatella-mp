@@ -413,9 +413,6 @@ void InitOverhead()
 	std::fill(std::begin(AwaySlots), std::end(AwaySlots), nullptr);
 	std::fill(std::begin(Menptr), std::end(Menptr), SOLDIERTYPE{});
 
-	//for (int i = 0; i < 2; i++)
-	//	printf("&(Menptr[%d]) = %p\n", i, &(Menptr[i]));
-
 	TacticalStatusType& t = gTacticalStatus;
 	t = TacticalStatusType{};
 	t.uiFlags                 = 0x000000004; // TURNBASED, for save game compatibility
@@ -597,7 +594,6 @@ void ExecuteOverhead(void)
 		for (UINT32 cnt = 0; cnt < guiNumMercSlots; ++cnt)
 		{
 			SOLDIERTYPE* pSoldier = MercSlots[cnt];
-			//printf("ExecuteOverhead() MercSlots[%d] = %p\n", cnt, MercSlots[cnt]);
 
 			if (pSoldier != NULL)
 			{
