@@ -39,13 +39,13 @@ Backlog:
     - Clear the written message in the box after it's sent to the chat (investigate and fix the issue).
     - Fix the initial game connection screen (place the new buttons more friendly and add captions). Grey out game preferences when the client mode checkbox is marked.
     - Remove intro movies when the game is started (for debugging purposes).
-    - Rename GROUP_JA2 back to GROUP (see in the bottom).
+    - Do the connection and auto-hiring earlier - before the laptop is open.
+    - Handle server disconnection on client side.
     - Refactor and sync with JA2 Stracciatella master.
 
 Things worth mentioning and "dark knowledge":
 
 - For some reason the client doesn't have animations in place when the tactical screen is loading. By default it causes failure, so there is a workaround introduced that skips the failure and loads the missing animation instead.
-- The original GROUP struct in JA2Types.h has to be renamed to GROUP_JA2 since it caused name conflicts with some standard library included by RakNet and, hence, won't compile. It's not a very elegant solution since it caused a dramatic amount of misleading changes to occur, but at least it is straightforward and simple. For some reason I didn't manage to do it another way (spent too much time struggling with new issues that occured).
 
 For debugging purposes:
 
