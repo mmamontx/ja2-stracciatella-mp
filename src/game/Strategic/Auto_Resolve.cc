@@ -331,7 +331,7 @@ void EliminateAllEnemies(const SGPSector& ubSector)
 		//Remove the mobile forces here, but only if battle is over.
 		FOR_EACH_GROUP_SAFE(i)
 		{
-			GROUP_JA2& g = *i;
+			GROUP& g = *i;
 			if (g.fPlayer)                continue;
 			if (g.ubSector != ubSector) continue;
 			RemoveGroupFromStrategicAILists(g);
@@ -2131,7 +2131,7 @@ static void CalculateAutoResolveInfo(void)
 	gpAR->ubMercs = 0;
 	CFOR_EACH_GROUP(i)
 	{
-		GROUP_JA2 const& g = *i;
+		GROUP const& g = *i;
 		if (!PlayerGroupInvolvedInThisCombat(g)) continue;
 
 		CFOR_EACH_PLAYER_IN_GROUP(pPlayer, &g)

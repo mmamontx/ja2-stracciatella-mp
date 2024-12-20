@@ -186,7 +186,7 @@ static void QueryRTLeftButton(UIEventKind* const puiNewEvent)
 
 
 							case MOVE_MODE:
-
+								
 								gfUICanBeginAllMoveCycle = TRUE;
 
 								if ( !HandleCheckForExitArrowsInput( FALSE ) &&

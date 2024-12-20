@@ -13,10 +13,10 @@
 #define SOUTH_MOVE  18
 
 
-INT32 FindStratPath(INT16 sStart, INT16 sDestination, GROUP_JA2 const&, BOOLEAN fTacticalTraversal);
+INT32 FindStratPath(INT16 sStart, INT16 sDestination, GROUP const&, BOOLEAN fTacticalTraversal);
 
 // build a stategic path
-PathSt* BuildAStrategicPath(INT16 iStartSectorNum, INT16 iEndSectorNum, GROUP_JA2 const&, BOOLEAN fTacticalTraversal);
+PathSt* BuildAStrategicPath(INT16 iStartSectorNum, INT16 iEndSectorNum, GROUP const&, BOOLEAN fTacticalTraversal);
 
 
 // append onto path list
@@ -39,16 +39,16 @@ INT16 GetLastSectorIdInCharactersPath(const SOLDIERTYPE* pCharacter);
 PathSt* CopyPaths(PathSt* src);
 
 // rebuild way points for strategic mapscreen path changes
-void RebuildWayPointsForGroupPath(PathSt* pHeadOfPath, GROUP_JA2&);
+void RebuildWayPointsForGroupPath(PathSt* pHeadOfPath, GROUP&);
 
 // clear strategic movement (mercpaths and waypoints) for this soldier, and his group (including its vehicles)
 void ClearMvtForThisSoldierAndGang( SOLDIERTYPE *pSoldier );
 
 // start movement of this group to this sector...not to be used by the player merc groups.
-BOOLEAN MoveGroupFromSectorToSector(GROUP_JA2&, const SGPSector& sStart, const SGPSector& sDest);
+BOOLEAN MoveGroupFromSectorToSector(GROUP&, const SGPSector& sStart, const SGPSector& sDest);
 
-BOOLEAN MoveGroupFromSectorToSectorButAvoidPlayerInfluencedSectors(GROUP_JA2&, const SGPSector& sStart, const SGPSector& sDest);
-BOOLEAN MoveGroupFromSectorToSectorButAvoidPlayerInfluencedSectorsAndStopOneSectorBeforeEnd(GROUP_JA2&, const SGPSector& sStart, const SGPSector& sDest);
+BOOLEAN MoveGroupFromSectorToSectorButAvoidPlayerInfluencedSectors(GROUP&, const SGPSector& sStart, const SGPSector& sDest);
+BOOLEAN MoveGroupFromSectorToSectorButAvoidPlayerInfluencedSectorsAndStopOneSectorBeforeEnd(GROUP&, const SGPSector& sStart, const SGPSector& sDest);
 
 
 // get length of path
@@ -56,13 +56,13 @@ INT32 GetLengthOfPath(PathSt* pHeadPath);
 INT32 GetLengthOfMercPath(const SOLDIERTYPE* pSoldier);
 
 PathSt* GetSoldierMercPathPtr(SOLDIERTYPE const*);
-PathSt* GetGroupMercPathPtr(GROUP_JA2 const&);
+PathSt* GetGroupMercPathPtr(GROUP const&);
 
-GROUP_JA2* GetSoldierGroup(SOLDIERTYPE const&);
+GROUP* GetSoldierGroup(SOLDIERTYPE const&);
 
 // clears this groups strategic movement (mercpaths and waypoints), include those in the vehicle structs(!)
-void ClearMercPathsAndWaypointsForAllInGroup(GROUP_JA2&);
+void ClearMercPathsAndWaypointsForAllInGroup(GROUP&);
 
-void AddSectorToFrontOfMercPathForAllSoldiersInGroup(GROUP_JA2 *pGroup, const SGPSector& sMap);
+void AddSectorToFrontOfMercPathForAllSoldiersInGroup(GROUP *pGroup, const SGPSector& sMap);
 
 #endif

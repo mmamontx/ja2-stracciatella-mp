@@ -4,8 +4,10 @@
 #include "Button_System.h"
 #include "MessageBoxScreen.h"
 #include "ScreenIDs.h"
-#include "JA2Types.h"
+#define GROUP GROUP_FOO
 #include "ReplicaManager3.h"
+#undef GROUP
+#include "JA2Types.h"
 #include <string_theory/string>
 
 using namespace RakNet;

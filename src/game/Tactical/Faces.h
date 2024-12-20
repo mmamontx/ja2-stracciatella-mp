@@ -139,7 +139,7 @@ struct FACETYPE
 		} trigger;
 		struct // Used for FACE_TRIGGER_PREBATTLE_INT
 		{
-			GROUP_JA2* group;
+			GROUP* group;
 		} initiating_battle;
 	} u;
 };

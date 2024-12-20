@@ -469,7 +469,7 @@ INT32 GetNumberOfMercsInUpdateList();
 
 extern MOUSE_REGION gMapStatusBarsRegion;
 
-void RandomMercInGroupSaysQuote(GROUP_JA2 const&, UINT16 quote_num);
+void RandomMercInGroupSaysQuote(GROUP const&, UINT16 quote_num);
 
 void MakeDialogueEventShowContractMenu(SOLDIERTYPE&);
 

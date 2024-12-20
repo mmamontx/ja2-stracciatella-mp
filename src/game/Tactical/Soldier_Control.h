@@ -7,14 +7,16 @@
 #define MAXPATROLGRIDS  10  // *** THIS IS A DUPLICATION - MUST BE MOVED !
 
 #include "Animation_Cache.h"
-#include "JA2Types.h"
 #include "Keys.h"
 #include "Overhead_Types.h"
 #include "Item_Types.h"
 #include "Timer_Control.h"
 #include "GameSettings.h"
 #include "Shading.h"
+#define GROUP GROUP_FOO
 #include "ReplicaManager3.h"
+#undef GROUP
+#include "JA2Types.h"
 
 using namespace RakNet;
 

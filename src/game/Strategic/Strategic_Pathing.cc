@@ -185,7 +185,7 @@ static INT16 const diStratDelta[]=
 
 // this will find if a shortest strategic path
 
-INT32 FindStratPath(INT16 const sStart, INT16 const sDestination, GROUP_JA2 const& g, BOOLEAN const fTacticalTraversal)
+INT32 FindStratPath(INT16 const sStart, INT16 const sDestination, GROUP const& g, BOOLEAN const fTacticalTraversal)
 {
 	INT32 iCnt,ndx,insertNdx,qNewNdx;
 	INT32 iDestX,iDestY,locX,locY,dx,dy;
@@ -266,7 +266,7 @@ INT32 FindStratPath(INT16 const sStart, INT16 const sDestination, GROUP_JA2 cons
 	pathQB[ndx].pathNdx		= trailStratTreedxB;
 	trailStratTreedxB++;
 
-	const GROUP_JA2* const heli_group = iHelicopterVehicleId != -1 ?
+	const GROUP* const heli_group = iHelicopterVehicleId != -1 ?
 		GetGroup(GetHelicopter().ubMovementGroup) : 0;
 
 	do
@@ -441,7 +441,7 @@ INT32 FindStratPath(INT16 const sStart, INT16 const sDestination, GROUP_JA2 cons
 }
 
 
-PathSt* BuildAStrategicPath(INT16 const start_sector, INT16 const end_sector, GROUP_JA2 const& g, BOOLEAN const fTacticalTraversal)
+PathSt* BuildAStrategicPath(INT16 const start_sector, INT16 const end_sector, GROUP const& g, BOOLEAN const fTacticalTraversal)
 {
 	if (end_sector < MAP_WORLD_X - 1) return NULL;
 
@@ -796,7 +796,7 @@ PathSt* CopyPaths(PathSt* src)
 }
 
 
-void RebuildWayPointsForGroupPath(PathSt* const pHeadOfPath, GROUP_JA2& g)
+void RebuildWayPointsForGroupPath(PathSt* const pHeadOfPath, GROUP& g)
 {
 	INT32 iDelta = 0;
 	INT32 iOldDelta = 0;
@@ -900,7 +900,7 @@ void RebuildWayPointsForGroupPath(PathSt* const pHeadOfPath, GROUP_JA2& g)
 // clear strategic movement (mercpaths and waypoints) for this soldier, and his group (including its vehicles)
 void ClearMvtForThisSoldierAndGang( SOLDIERTYPE *pSoldier )
 {
-	GROUP_JA2 *pGroup = NULL;
+	GROUP *pGroup = NULL;
 
 
 	// check if valid grunt
@@ -914,7 +914,7 @@ void ClearMvtForThisSoldierAndGang( SOLDIERTYPE *pSoldier )
 }
 
 
-BOOLEAN MoveGroupFromSectorToSector(GROUP_JA2& g, const SGPSector& sStart, const SGPSector& sDest)
+BOOLEAN MoveGroupFromSectorToSector(GROUP& g, const SGPSector& sStart, const SGPSector& sDest)
 {
 	PathSt* pNode = BuildAStrategicPath(sStart.AsStrategicIndex(), sDest.AsStrategicIndex(), g, FALSE);
 
@@ -933,7 +933,7 @@ BOOLEAN MoveGroupFromSectorToSector(GROUP_JA2& g, const SGPSector& sStart, const
 }
 
 
-static BOOLEAN MoveGroupFromSectorToSectorButAvoidLastSector(GROUP_JA2& g, const SGPSector& sStart, const SGPSector& sDest)
+static BOOLEAN MoveGroupFromSectorToSectorButAvoidLastSector(GROUP& g, const SGPSector& sStart, const SGPSector& sDest)
 {
 	PathSt* pNode = BuildAStrategicPath(sStart.AsStrategicIndex(), sDest.AsStrategicIndex(), g, FALSE);
 
@@ -955,7 +955,7 @@ static BOOLEAN MoveGroupFromSectorToSectorButAvoidLastSector(GROUP_JA2& g, const
 }
 
 
-BOOLEAN MoveGroupFromSectorToSectorButAvoidPlayerInfluencedSectors(GROUP_JA2& g, const SGPSector& sStart, const SGPSector& sDest)
+BOOLEAN MoveGroupFromSectorToSectorButAvoidPlayerInfluencedSectors(GROUP& g, const SGPSector& sStart, const SGPSector& sDest)
 {
 	// init sectors with soldiers in them
 	InitSectorsWithSoldiersList( );
@@ -986,7 +986,7 @@ BOOLEAN MoveGroupFromSectorToSectorButAvoidPlayerInfluencedSectors(GROUP_JA2& g,
 }
 
 
-BOOLEAN MoveGroupFromSectorToSectorButAvoidPlayerInfluencedSectorsAndStopOneSectorBeforeEnd(GROUP_JA2& g, const SGPSector& sStart, const SGPSector& sDest)
+BOOLEAN MoveGroupFromSectorToSectorButAvoidPlayerInfluencedSectorsAndStopOneSectorBeforeEnd(GROUP& g, const SGPSector& sStart, const SGPSector& sDest)
 {
 	// init sectors with soldiers in them
 	InitSectorsWithSoldiersList( );
@@ -1059,7 +1059,7 @@ PathSt* GetSoldierMercPathPtr(SOLDIERTYPE const* const s)
 }
 
 
-PathSt* GetGroupMercPathPtr(GROUP_JA2 const& g)
+PathSt* GetGroupMercPathPtr(GROUP const& g)
 {
 	Assert(g.fPlayer);
 
@@ -1077,7 +1077,7 @@ PathSt* GetGroupMercPathPtr(GROUP_JA2 const& g)
 }
 
 
-GROUP_JA2* GetSoldierGroup(SOLDIERTYPE const& s)
+GROUP* GetSoldierGroup(SOLDIERTYPE const& s)
 {
 	UINT8 const group_id =
 		/* In a vehicle? */
@@ -1094,7 +1094,7 @@ static void ClearPathForSoldier(SOLDIERTYPE* pSoldier);
 
 
 // clears this groups strategic movement (mercpaths and waypoints), include those in the vehicle structs(!)
-void ClearMercPathsAndWaypointsForAllInGroup(GROUP_JA2& g)
+void ClearMercPathsAndWaypointsForAllInGroup(GROUP& g)
 {
 	SOLDIERTYPE *pSoldier = NULL;
 
@@ -1153,7 +1153,7 @@ static void ClearPathForSoldier(SOLDIERTYPE* pSoldier)
 static void AddSectorToFrontOfMercPath(PathSt** ppMercPath, const SGPSector& sMap);
 
 
-void AddSectorToFrontOfMercPathForAllSoldiersInGroup(GROUP_JA2 *pGroup, const SGPSector& sMap)
+void AddSectorToFrontOfMercPathForAllSoldiersInGroup(GROUP *pGroup, const SGPSector& sMap)
 {
 	SOLDIERTYPE *pSoldier = NULL;
 

@@ -175,7 +175,7 @@ void InitializeHelicopter( void );
 
 bool IsSkyriderFlyingInSector(const SGPSector& sMap);
 
-bool IsGroupTheHelicopterGroup(GROUP_JA2 const&);
+bool IsGroupTheHelicopterGroup(GROUP const&);
 
 INT16 GetNumSafeSectorsInPath();
 

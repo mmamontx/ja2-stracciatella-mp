@@ -171,7 +171,7 @@ static INT32 GarrisonReinforcementsRequested(INT32 iGarrisonID, UINT8* pubExtraR
 
 static INT32 PatrolReinforcementsRequested(PATROL_GROUP const* const pg)
 {
-	GROUP_JA2* const g = GetGroup(pg->ubGroupID);
+	GROUP* const g = GetGroup(pg->ubGroupID);
 	INT32 size = pg->bSize;
 	if (g) size -= g->ubGroupSize;
 	return size;
@@ -223,7 +223,7 @@ static BOOLEAN PlayerForceTooStrong(UINT8 ubSectorID, UINT16 usOffensePoints, UI
 }
 
 
-static void SendReinforcementsForGarrison(INT32 iDstGarrisonID, UINT16 usDefencePoints, GROUP_JA2** pOptionalGroup);
+static void SendReinforcementsForGarrison(INT32 iDstGarrisonID, UINT16 usDefencePoints, GROUP** pOptionalGroup);
 
 
 static void RequestAttackOnSector(UINT8 ubSectorID, UINT16 usDefencePoints)
@@ -262,10 +262,10 @@ static bool AdjacentSectorIsImportantAndUndefended(UINT8 const sector_id)
 }
 
 
-static void ReassignAIGroup(GROUP_JA2** pGroup);
+static void ReassignAIGroup(GROUP** pGroup);
 
 
-static void ValidateGroup(GROUP_JA2* pGroup)
+static void ValidateGroup(GROUP* pGroup)
 {
 	if (!pGroup->ubSector.IsValid())
 	{
@@ -300,7 +300,7 @@ static void ValidateGroup(GROUP_JA2* pGroup)
 }
 
 
-static void ValidateLargeGroup(GROUP_JA2* pGroup)
+static void ValidateLargeGroup(GROUP* pGroup)
 {
 		if( pGroup->ubGroupSize > 25 )
 		{
@@ -526,7 +526,7 @@ void InitStrategicAI()
 		/* Note on adding patrol groups: The patrol group can't actually start on
 		 * the first waypoint, so we set it to the second way point for
 		 * initialization, and then add the waypoints from 0 up */
-		GROUP_JA2&      g  = *CreateNewEnemyGroupDepartingFromSector(pg.ubSectorID[1], 0, n_troops, 0);
+		GROUP&      g  = *CreateNewEnemyGroupDepartingFromSector(pg.ubSectorID[1], 0, n_troops, 0);
 		ENEMYGROUP& eg = *g.pEnemyGroup;
 
 		if (i == 3 || i == 4)
@@ -593,7 +593,7 @@ BOOLEAN OkayForEnemyToMoveThroughSector( UINT8 ubSectorID )
 }
 
 
-static BOOLEAN EnemyPermittedToAttackSector(GROUP_JA2** pGroup, UINT8 ubSectorID)
+static BOOLEAN EnemyPermittedToAttackSector(GROUP** pGroup, UINT8 ubSectorID)
 {
 	SECTORINFO *pSector;
 	BOOLEAN fPermittedToAttack = TRUE;
@@ -604,7 +604,7 @@ static BOOLEAN EnemyPermittedToAttackSector(GROUP_JA2** pGroup, UINT8 ubSectorID
 	{
 		if( gGarrisonGroup[ pSector->ubGarrisonID ].ubPendingGroupID )
 		{
-			GROUP_JA2 *pPendingGroup;
+			GROUP *pPendingGroup;
 			pPendingGroup = GetGroup( gGarrisonGroup[ pSector->ubGarrisonID ].ubPendingGroupID );
 			if( pPendingGroup == *pGroup )
 			{
@@ -676,10 +676,10 @@ enum SAIMOVECODE
 	EVASIVE,
 	STAGE
 };
-static void MoveSAIGroupToSector(GROUP_JA2**, UINT8 sector, SAIMOVECODE, UINT8 intention);
+static void MoveSAIGroupToSector(GROUP**, UINT8 sector, SAIMOVECODE, UINT8 intention);
 
 
-static BOOLEAN HandlePlayerGroupNoticedByPatrolGroup(const GROUP_JA2* const pPlayerGroup, GROUP_JA2* pEnemyGroup)
+static BOOLEAN HandlePlayerGroupNoticedByPatrolGroup(const GROUP* const pPlayerGroup, GROUP* pEnemyGroup)
 {
 	UINT16 usDefencePoints;
 	UINT16 usOffensePoints;
@@ -721,14 +721,14 @@ static BOOLEAN HandlePlayerGroupNoticedByPatrolGroup(const GROUP_JA2* const pPla
 }
 
 
-static void ConvertGroupTroopsToComposition(GROUP_JA2* pGroup, INT32 iCompositionID);
+static void ConvertGroupTroopsToComposition(GROUP* pGroup, INT32 iCompositionID);
 static void RemoveSoldiersFromGarrisonBasedOnComposition(INT32 iGarrisonID, UINT8 ubSize);
 
 
-static void HandlePlayerGroupNoticedByGarrison(const GROUP_JA2* const pPlayerGroup, const UINT8 ubSectorID)
+static void HandlePlayerGroupNoticedByGarrison(const GROUP* const pPlayerGroup, const UINT8 ubSectorID)
 {
 	SECTORINFO *pSector;
-	GROUP_JA2 *pGroup;
+	GROUP *pGroup;
 	INT32 iReinforcementsApproved;
 	UINT16 usOffensePoints, usDefencePoints;
 	UINT8 ubEnemies;
@@ -778,7 +778,7 @@ static void HandlePlayerGroupNoticedByGarrison(const GROUP_JA2* const pPlayerGro
 }
 
 
-static BOOLEAN HandleMilitiaNoticedByPatrolGroup(UINT8 ubSectorID, GROUP_JA2* pEnemyGroup)
+static BOOLEAN HandleMilitiaNoticedByPatrolGroup(UINT8 ubSectorID, GROUP* pEnemyGroup)
 {
 	//For now, automatically attack.
 	UINT16 usDefencePoints;
@@ -871,7 +871,7 @@ static BOOLEAN AttemptToNoticeAdjacentGroupSucceeds(void)
 }
 
 
-static BOOLEAN HandleEmptySectorNoticedByPatrolGroup(GROUP_JA2* pGroup, UINT8 ubEmptySectorID)
+static BOOLEAN HandleEmptySectorNoticedByPatrolGroup(GROUP* pGroup, UINT8 ubEmptySectorID)
 {
 	SGPSector sSector(ubEmptySectorID);
 	UINT8 ubGarrisonID = SectorInfo[ubEmptySectorID].ubGarrisonID;
@@ -901,7 +901,7 @@ static BOOLEAN HandleEmptySectorNoticedByPatrolGroup(GROUP_JA2* pGroup, UINT8 ub
 static void HandleEmptySectorNoticedByGarrison(UINT8 ubGarrisonSectorID, UINT8 ubEmptySectorID)
 {
 	SECTORINFO *pSector;
-	GROUP_JA2 *pGroup;
+	GROUP *pGroup;
 	UINT8 ubAvailableTroops;
 	UINT8 ubSrcGarrisonID = 255, ubDstGarrisonID = 255;
 
@@ -973,7 +973,7 @@ static BOOLEAN ReinforcementsApproved(INT32 iGarrisonID, UINT16* pusDefencePoint
 }
 
 
-static void EliminateSurplusTroopsForGarrison(GROUP_JA2* pGroup, SECTORINFO* pSector);
+static void EliminateSurplusTroopsForGarrison(GROUP* pGroup, SECTORINFO* pSector);
 static void RecalculateGarrisonWeight(INT32 iGarrisonID);
 static void RecalculatePatrolWeight(PATROL_GROUP&);
 
@@ -983,10 +983,10 @@ static void RecalculatePatrolWeight(PATROL_GROUP&);
 //RETURNS TRUE if the group is deleted or told to move somewhere else.
 //This is important as the calling function will need
 //to abort processing of the group for obvious reasons.
-static BOOLEAN EvaluateGroupSituation(GROUP_JA2* pGroup)
+static BOOLEAN EvaluateGroupSituation(GROUP* pGroup)
 {
 	SECTORINFO *pSector;
-	GROUP_JA2 *pPatrolGroup;
+	GROUP *pPatrolGroup;
 	UINT32 i;
 
 	if( !gfQueenAIAwake )
@@ -1151,10 +1151,10 @@ static BOOLEAN EvaluateGroupSituation(GROUP_JA2* pGroup)
 }
 
 
-static bool EnemyNoticesPlayerArrival(GROUP_JA2 const& pg, UINT8 const x, UINT8 const y)
+static bool EnemyNoticesPlayerArrival(GROUP const& pg, UINT8 const x, UINT8 const y)
 {
 	SGPSector sMap(x, y);
-	GROUP_JA2* const eg = FindEnemyMovementGroupInSector(sMap);
+	GROUP* const eg = FindEnemyMovementGroupInSector(sMap);
 	if (eg && AttemptToNoticeAdjacentGroupSucceeds())
 	{
 		HandlePlayerGroupNoticedByPatrolGroup(&pg, eg);
@@ -1173,11 +1173,11 @@ static bool EnemyNoticesPlayerArrival(GROUP_JA2 const& pg, UINT8 const x, UINT8 
 }
 
 
-static void SendGroupToPool(GROUP_JA2** pGroup);
+static void SendGroupToPool(GROUP** pGroup);
 
 
 //returns TRUE if the group was deleted.
-BOOLEAN StrategicAILookForAdjacentGroups( GROUP_JA2 *pGroup )
+BOOLEAN StrategicAILookForAdjacentGroups( GROUP *pGroup )
 {
 	UINT8 ubSectorID;
 	if( !gfQueenAIAwake )
@@ -1214,7 +1214,7 @@ BOOLEAN StrategicAILookForAdjacentGroups( GROUP_JA2 *pGroup )
 	{	//The enemy group has arrived at a new sector and now controls it.
 		//Look in each of the four directions, and the alertness rating will
 		//determine the chance to detect any players that may exist in that sector.
-		GROUP_JA2* pEnemyGroup = pGroup;
+		GROUP* pEnemyGroup = pGroup;
 		if( GroupAtFinalDestination( pEnemyGroup ) )
 		{
 			return EvaluateGroupSituation( pEnemyGroup );
@@ -1223,7 +1223,7 @@ BOOLEAN StrategicAILookForAdjacentGroups( GROUP_JA2 *pGroup )
 		if (pEnemyGroup->ubSector.y > 1 && EnemyPermittedToAttackSector(&pEnemyGroup, (UINT8)(ubSectorID - 16)))
 		{
 			SGPSector up(pEnemyGroup->ubSector.x, pEnemyGroup->ubSector.y - 1);
-			GROUP_JA2* const pPlayerGroup = FindPlayerMovementGroupInSector(up);
+			GROUP* const pPlayerGroup = FindPlayerMovementGroupInSector(up);
 			if( pPlayerGroup && AttemptToNoticeAdjacentGroupSucceeds() )
 			{
 				return HandlePlayerGroupNoticedByPatrolGroup( pPlayerGroup, pEnemyGroup );
@@ -1241,7 +1241,7 @@ BOOLEAN StrategicAILookForAdjacentGroups( GROUP_JA2 *pGroup )
 		if (pEnemyGroup && pEnemyGroup->ubSector.x > 1 && EnemyPermittedToAttackSector(&pEnemyGroup, (UINT8)(ubSectorID - 1)))
 		{
 			SGPSector left(pEnemyGroup->ubSector.x - 1, pEnemyGroup->ubSector.y);
-			GROUP_JA2* const pPlayerGroup = FindPlayerMovementGroupInSector(left);
+			GROUP* const pPlayerGroup = FindPlayerMovementGroupInSector(left);
 			if( pPlayerGroup && AttemptToNoticeAdjacentGroupSucceeds() )
 			{
 				return HandlePlayerGroupNoticedByPatrolGroup( pPlayerGroup, pEnemyGroup );
@@ -1259,7 +1259,7 @@ BOOLEAN StrategicAILookForAdjacentGroups( GROUP_JA2 *pGroup )
 		if( pEnemyGroup && pEnemyGroup->ubSector.y < 16 && EnemyPermittedToAttackSector( &pEnemyGroup, (UINT8)(ubSectorID + 16) ) )
 		{
 			SGPSector down(pEnemyGroup->ubSector.x, pEnemyGroup->ubSector.y + 1);
-			GROUP_JA2* const pPlayerGroup = FindPlayerMovementGroupInSector(down);
+			GROUP* const pPlayerGroup = FindPlayerMovementGroupInSector(down);
 			if( pPlayerGroup && AttemptToNoticeAdjacentGroupSucceeds() )
 			{
 				return HandlePlayerGroupNoticedByPatrolGroup( pPlayerGroup, pEnemyGroup );
@@ -1277,7 +1277,7 @@ BOOLEAN StrategicAILookForAdjacentGroups( GROUP_JA2 *pGroup )
 		if( pEnemyGroup && pEnemyGroup->ubSector.x < 16 && EnemyPermittedToAttackSector( &pEnemyGroup, (UINT8)(ubSectorID + 1) ) )
 		{
 			SGPSector right(pEnemyGroup->ubSector.x + 1, pEnemyGroup->ubSector.y);
-			GROUP_JA2* const pPlayerGroup = FindPlayerMovementGroupInSector(right);
+			GROUP* const pPlayerGroup = FindPlayerMovementGroupInSector(right);
 			if( pPlayerGroup && AttemptToNoticeAdjacentGroupSucceeds() )
 			{
 				return HandlePlayerGroupNoticedByPatrolGroup( pPlayerGroup, pEnemyGroup );
@@ -1305,7 +1305,7 @@ BOOLEAN StrategicAILookForAdjacentGroups( GROUP_JA2 *pGroup )
 		 * new presence.
 		 * NOTE: Always returns false because it is the player group that we are
 		 *       handling.  We don't mess with the player group here! */
-		GROUP_JA2 const& pg = *pGroup;
+		GROUP const& pg = *pGroup;
 		if (pg.ubSector.z != 0) return FALSE;
 		UINT8 const x = pg.ubSector.x;
 		UINT8 const y = pg.ubSector.y;
@@ -1333,7 +1333,7 @@ void CheckEnemyControlledSector( UINT8 ubSectorID )
 	{
 		if( gGarrisonGroup[ pSector->ubGarrisonID ].ubPendingGroupID )
 		{ //Look for a staging group.
-			GROUP_JA2 *pGroup;
+			GROUP *pGroup;
 			pGroup = GetGroup( gGarrisonGroup[ pSector->ubGarrisonID ].ubPendingGroupID );
 			if( pGroup )
 			{ //We have a staging group
@@ -1408,7 +1408,7 @@ void CheckEnemyControlledSector( UINT8 ubSectorID )
 }
 
 
-void RemoveGroupFromStrategicAILists(GROUP_JA2 const& g)
+void RemoveGroupFromStrategicAILists(GROUP const& g)
 {
 	UINT8 const group_id = g.ubGroupID;
 	for (size_t i = 0; i < gPatrolGroup.size(); ++i)
@@ -1526,10 +1526,10 @@ void RecalculateSectorWeight( UINT8 ubSectorID )
 }
 
 
-static void TagSAIGroupWithGracePeriod(GROUP_JA2 const&);
+static void TagSAIGroupWithGracePeriod(GROUP const&);
 
 
-void RecalculateGroupWeight(GROUP_JA2 const& g)
+void RecalculateGroupWeight(GROUP const& g)
 {
 	for (size_t i = 0; i != gPatrolGroup.size(); ++i)
 	{
@@ -1656,11 +1656,11 @@ static INT32 ChooseSuitableGarrisonToProvideReinforcements(INT32 iDstGarrisonID,
 }
 
 
-static void SendReinforcementsForGarrison(INT32 iDstGarrisonID, UINT16 usDefencePoints, GROUP_JA2** pOptionalGroup)
+static void SendReinforcementsForGarrison(INT32 iDstGarrisonID, UINT16 usDefencePoints, GROUP** pOptionalGroup)
 {
 	INT32 iChance, iRandom, iSrcGarrisonID;
 	INT32 iMaxReinforcementsAllowed, iReinforcementsAvailable, iReinforcementsRequested, iReinforcementsApproved;
-	GROUP_JA2 *pGroup;
+	GROUP *pGroup;
 	UINT8 ubNumExtraReinforcements;
 	UINT8 ubGroupSize;
 	BOOLEAN fLimitMaxTroopsAllowable = FALSE;
@@ -1848,9 +1848,9 @@ static void SendReinforcementsForGarrison(INT32 iDstGarrisonID, UINT16 usDefence
 }
 
 
-static void SendReinforcementsForPatrol(INT32 iPatrolID, GROUP_JA2** pOptionalGroup)
+static void SendReinforcementsForPatrol(INT32 iPatrolID, GROUP** pOptionalGroup)
 {
-	GROUP_JA2 *pGroup;
+	GROUP *pGroup;
 	INT32 iRandom, iWeight;
 	UINT32 uiSrcGarrisonID;
 	INT32 iReinforcementsAvailable, iReinforcementsRequested, iReinforcementsApproved;
@@ -2468,7 +2468,7 @@ void LoadStrategicAI(HWFILE const hFile)
 			//possible for them to spawn there!
 			FOR_EACH_GROUP_SAFE(i)
 			{
-				GROUP_JA2& g = *i;
+				GROUP& g = *i;
 				if (g.fPlayer)         continue;
 				if (g.ubSector != meduna) continue;
 				if (g.ubPrev.IsValid()) continue;
@@ -2700,7 +2700,7 @@ static void EvolveQueenPriorityPhase(BOOLEAN fForceChange)
 
 void ExecuteStrategicAIAction(UINT16 usActionCode, const SGPSector* sMap)
 {
-	GROUP_JA2 *pGroup, *pPendingGroup = NULL;
+	GROUP *pGroup, *pPendingGroup = NULL;
 	SECTORINFO *pSector;
 	UINT8 ubSectorID;
 	UINT8 ubNumSoldiers;
@@ -2906,7 +2906,7 @@ void StrategicHandleQueenLosingControlOfSector(const SGPSector& sSector)
 		}
 		if( gGarrisonGroup[ pSector->ubGarrisonID ].ubPendingGroupID )
 		{
-			GROUP_JA2 *pGroup;
+			GROUP *pGroup;
 			pGroup = GetGroup( gGarrisonGroup[ pSector->ubGarrisonID ].ubPendingGroupID );
 			if( pGroup )
 			{
@@ -2930,7 +2930,7 @@ static UINT8 SectorDistance(const SGPSector& sSector, UINT8 ubSectorID2)
 static void RequestHighPriorityGarrisonReinforcements(size_t iGarrisonID, UINT8 ubSoldiersRequested)
 {
 	size_t i, uiBestIndex;
-	GROUP_JA2 *pGroup;
+	GROUP *pGroup;
 	UINT8 ubBestDist, ubDist;
 	//AssertMsg( gPatrolGroup.size() == GCM->getPatrolGroups().size(), "Strategic AI -- Patrol group definition mismatch." );
 	ubBestDist = 255;
@@ -2957,7 +2957,7 @@ static void RequestHighPriorityGarrisonReinforcements(size_t iGarrisonID, UINT8 
 		pGroup = GetGroup( gPatrolGroup[ uiBestIndex ].ubGroupID );
 		if( pGroup->ubGroupSize > ubSoldiersRequested && pGroup->ubGroupSize - ubSoldiersRequested >= gubMinEnemyGroupSize )
 		{ //Split the group, and send to location
-			GROUP_JA2 *pNewGroup;
+			GROUP *pNewGroup;
 			pNewGroup = CreateNewEnemyGroupDepartingFromSector(pGroup->ubSector.AsByte(), 0, 0, 0);
 			//Transfer the troops from group to new group
 			if( pGroup->pEnemyGroup->ubNumTroops >= ubSoldiersRequested )
@@ -3062,7 +3062,7 @@ static void MassFortifyTowns(void)
 {
 	size_t i;
 	SECTORINFO *pSector;
-	GROUP_JA2 *pGroup;
+	GROUP *pGroup;
 	UINT8 ubNumTroops, ubDesiredTroops;
 	for( i = 0; i < gGarrisonGroup.size(); i++ )
 	{
@@ -3177,7 +3177,7 @@ static BOOLEAN PermittedToFillPatrolGroup(INT32 iPatrolID);
 
 static BOOLEAN PatrolRequestingMinimumReinforcements(INT32 iPatrolID)
 {
-	GROUP_JA2 *pGroup;
+	GROUP *pGroup;
 
 	if( gPatrolGroup[ iPatrolID ].ubPendingGroupID )
 	{
@@ -3203,7 +3203,7 @@ static BOOLEAN PatrolRequestingMinimumReinforcements(INT32 iPatrolID)
 }
 
 
-static void EliminateSurplusTroopsForGarrison(GROUP_JA2* pGroup, SECTORINFO* pSector)
+static void EliminateSurplusTroopsForGarrison(GROUP* pGroup, SECTORINFO* pSector)
 {
 	INT32 iTotal;
 	iTotal = pGroup->pEnemyGroup->ubNumTroops + pGroup->pEnemyGroup->ubNumElites + pGroup->pEnemyGroup->ubNumAdmins +
@@ -3339,7 +3339,7 @@ static void UpgradeAdminsToTroops()
 	// Check all moving enemy groups for administrators.
 	FOR_EACH_ENEMY_GROUP(i)
 	{
-		GROUP_JA2 const& g = *i;
+		GROUP const& g = *i;
 		if (g.ubGroupSize == 0) continue;
 		if (g.fVehicle)         continue;
 
@@ -3426,7 +3426,7 @@ size_t FindGarrisonIndexForGroupIDPending( UINT8 ubGroupID )
 }
 
 
-static void TransferGroupToPool(GROUP_JA2** pGroup)
+static void TransferGroupToPool(GROUP** pGroup)
 {
 	giReinforcementPool += (*pGroup)->ubGroupSize;
 	RemoveGroup(**pGroup);
@@ -3435,7 +3435,7 @@ static void TransferGroupToPool(GROUP_JA2** pGroup)
 
 
 //NOTE:  Make sure you call SetEnemyGroupSector() first if the group is between sectors!!  See example in ReassignAIGroup()...
-static void SendGroupToPool(GROUP_JA2** pGroup)
+static void SendGroupToPool(GROUP** pGroup)
 {
 	if ((*pGroup)->ubSector == meduna)
 	{
@@ -3449,7 +3449,7 @@ static void SendGroupToPool(GROUP_JA2** pGroup)
 }
 
 
-static void ReassignAIGroup(GROUP_JA2** pGroup)
+static void ReassignAIGroup(GROUP** pGroup)
 {
 	constexpr size_t NO_LAST_INDEX = static_cast<size_t>(-1);
 
@@ -3582,7 +3582,7 @@ static void ReassignAIGroup(GROUP_JA2** pGroup)
 
 /* When an enemy AI group is eliminated by the player, apply a grace period in
  * which the group isn't allowed to be filled for several days. */
-static void TagSAIGroupWithGracePeriod(GROUP_JA2 const& g)
+static void TagSAIGroupWithGracePeriod(GROUP const& g)
 {
 	size_t const patrol_id = FindPatrolGroupIndexForGroupID(g.ubGroupID);
 	if (patrol_id == (size_t)-1) return;
@@ -3601,7 +3601,7 @@ static BOOLEAN PermittedToFillPatrolGroup(INT32 iPatrolID)
 	return iDay >= iDayAllowed;
 }
 
-void RepollSAIGroup( GROUP_JA2 *pGroup )
+void RepollSAIGroup( GROUP *pGroup )
 {
 	UINT32 i;
 	Assert( !pGroup->fPlayer );
@@ -3655,7 +3655,7 @@ static void CalcNumTroopsBasedOnComposition(UINT8* pubNumTroops, UINT8* pubNumEl
 }
 
 
-static void ConvertGroupTroopsToComposition(GROUP_JA2* pGroup, INT32 iCompositionID)
+static void ConvertGroupTroopsToComposition(GROUP* pGroup, INT32 iCompositionID)
 {
 	Assert( pGroup );
 	Assert( !pGroup->fPlayer );
@@ -3733,10 +3733,10 @@ static void RemoveSoldiersFromGarrisonBasedOnComposition(INT32 iGarrisonID, UINT
 }
 
 
-static void MoveSAIGroupToSector(GROUP_JA2** const pGroup, UINT8 const sector, SAIMOVECODE const move_code, UINT8 const intention)
+static void MoveSAIGroupToSector(GROUP** const pGroup, UINT8 const sector, SAIMOVECODE const move_code, UINT8 const intention)
 {
 	SGPSector sSector(sector);
-	GROUP_JA2& g = **pGroup;
+	GROUP& g = **pGroup;
 
 	if (g.fBetweenSectors) SetEnemyGroupSector(g, g.ubSector.AsByte());
 
@@ -3805,7 +3805,7 @@ static void ReinitializeUnvisitedGarrisons(void)
 {
 	SECTORINFO *pSector;
 	ARMY_COMPOSITION *pArmyComp;
-	GROUP_JA2 *pGroup;
+	GROUP *pGroup;
 	UINT32 i, cnt, uiEliteChance, uiAdminChance;
 
 	//Recreate the compositions

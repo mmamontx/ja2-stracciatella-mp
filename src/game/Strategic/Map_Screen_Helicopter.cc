@@ -319,7 +319,7 @@ static RefuelSite const* FindClosestRefuelSite(bool const must_be_available)
 
 	VEHICLETYPE const& v        				= GetHelicopter();
 	INT16 sectorID = v.sSector.AsStrategicIndex();
-	GROUP_JA2& g														= *GetGroup(v.ubMovementGroup);
+	GROUP& g														= *GetGroup(v.ubMovementGroup);
 	// find shortest distance to refuel site
 	for (INT32 i = 0; i < NUMBER_OF_REFUEL_SITES; ++i)
 	{
@@ -550,7 +550,7 @@ void SetUpHelicopterForMovement( void )
 	if (v.ubMovementGroup == 0)
 	{
 		// get the vehicle a mvt group
-		GROUP_JA2& g = *CreateNewVehicleGroupDepartingFromSector(v.sSector);
+		GROUP& g = *CreateNewVehicleGroupDepartingFromSector(v.sSector);
 		v.ubMovementGroup = g.ubGroupID;
 
 		// add everyone in vehicle to this mvt group
@@ -1210,7 +1210,7 @@ bool IsSkyriderFlyingInSector(const SGPSector& sMap)
 	return sMap == v.sSector;
 }
 
-bool IsGroupTheHelicopterGroup(GROUP_JA2 const& g)
+bool IsGroupTheHelicopterGroup(GROUP const& g)
 {
 	if (iHelicopterVehicleId == -1) return false;
 	VEHICLETYPE const& v = GetHelicopter();
@@ -1225,7 +1225,7 @@ INT16 GetNumSafeSectorsInPath()
 
 	VEHICLETYPE const& v      = GetHelicopter();
 	INT32       const  sector = v.sSector.AsStrategicIndex();
-	GROUP_JA2*      const  g      = GetGroup(v.ubMovementGroup);
+	GROUP*      const  g      = GetGroup(v.ubMovementGroup);
 	UINT32             n      = 0;
 
 	if (PathSt const* i = v.pMercPath)
@@ -1287,7 +1287,7 @@ INT16 GetNumUnSafeSectorsInPath( void )
 	INT32 const iHeliSector = v.sSector.AsStrategicIndex();
 
 	// get chopper's group ptr
-	GROUP_JA2* const pGroup = GetGroup(v.ubMovementGroup);
+	GROUP* const pGroup = GetGroup(v.ubMovementGroup);
 
 	const PathSt* pNode = v.pMercPath;
 
@@ -1430,7 +1430,7 @@ static void MakeHeliReturnToBase(void)
 		RefuelSite const& refuel_site = NearestRefuelPoint(true);
 
 		ClearStrategicPathList(v.pMercPath, v.ubMovementGroup);
-		GROUP_JA2& g = *GetGroup(v.ubMovementGroup);
+		GROUP& g = *GetGroup(v.ubMovementGroup);
 		v.pMercPath = BuildAStrategicPath( sectorID, refuel_site.sector, g, FALSE);
 		RebuildWayPointsForGroupPath(v.pMercPath, g);
 

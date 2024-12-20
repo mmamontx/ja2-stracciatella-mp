@@ -1085,7 +1085,7 @@ static void DrawCharacterInfo(SOLDIERTYPE const& s)
 
 		default:
 		{
-			GROUP_JA2 const* const g = GetSoldierGroup(s);
+			GROUP const* const g = GetSoldierGroup(s);
 			if (g && PlayerGroupInMotion(g))
 			{ // Show ETA
 				UINT32 const arrival_time = GetWorldTotalMin() + CalculateTravelTimeOfGroup(g);
@@ -1219,7 +1219,7 @@ INT32 GetPathTravelTimeDuringPlotting(PathSt* pPath)
 	INT32 iTravelTime = 0;
 	WAYPOINT pCurrent;
 	WAYPOINT pNext;
-	GROUP_JA2 *pGroup;
+	GROUP *pGroup;
 	UINT8 ubGroupId = 0;
 	BOOLEAN fSkipFirstNode = FALSE;
 
@@ -3012,7 +3012,7 @@ static void Teleport()
 	// check to see if this person is moving, if not...then assign them to mvt group
 	if (s.ubGroupID  == 0)
 	{
-		GROUP_JA2& g = *CreateNewPlayerGroupDepartingFromSector(s.sSector);
+		GROUP& g = *CreateNewPlayerGroupDepartingFromSector(s.sSector);
 		AddPlayerToGroup(g, s);
 	}
 
@@ -7657,7 +7657,7 @@ static void ExplainWhySkyriderCantFly(void)
 
 static UINT8 PlayerMercsInHelicopterSector()
 {
-	GROUP_JA2& g = *GetGroup(GetHelicopter().ubMovementGroup);
+	GROUP& g = *GetGroup(GetHelicopter().ubMovementGroup);
 	if (g.fBetweenSectors) return 0;
 	return PlayerMercsInSector(g.ubSector);
 }
@@ -8010,7 +8010,7 @@ ST::string GetMapscreenMercDestinationString(SOLDIERTYPE const& s)
 			 * sector, so show that as his destination individual soldiers don't
 			 * store previous/next sector coordinates, must go to his group for that
 			 */
-			GROUP_JA2 const& g = *GetSoldierGroup(s);
+			GROUP const& g = *GetSoldierGroup(s);
 			sSector = g.ubNext;
 		}
 		return ST::format("{}{}", pMapVertIndex[sSector.y], pMapHortIndex[sSector.x]);

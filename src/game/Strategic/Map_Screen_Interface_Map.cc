@@ -765,7 +765,7 @@ static void ShowTeamAndVehicles()
 {
 	// Go through each sector, display the on duty, assigned, and vehicles
 	INT32              icon_pos = 0;
-	GROUP_JA2 const* const g        = gfDisplayPotentialRetreatPaths ? gpBattleGroup : 0;
+	GROUP const* const g        = gfDisplayPotentialRetreatPaths ? gpBattleGroup : 0;
 	SGPSector sector(1, 1, iCurrentMapSectorZ);
 	for (sector.x = 1; sector.x != MAP_WORLD_X - 1; ++sector.x)
 	{
@@ -2284,7 +2284,7 @@ void DisplayPositionOfHelicopter( void )
 		// check if mvt group
 		if (v.ubMovementGroup != 0)
 		{
-			const GROUP_JA2* const pGroup = GetGroup(v.ubMovementGroup);
+			const GROUP* const pGroup = GetGroup(v.ubMovementGroup);
 
 			if (pGroup->uiTraverseTime > 0 && pGroup->uiTraverseTime != TRAVERSE_TIME_IMPOSSIBLE)
 			{
@@ -2403,7 +2403,7 @@ BOOLEAN CheckForClickOverHelicopterIcon(const SGPSector& sClicked)
 
 	// figure out over which sector the helicopter APPEARS to be to the player (because we slide it smoothly across the
 	// map, unlike groups travelling on the ground, it can appear over its next sector while it's not there yet.
-	GROUP_JA2 const* const pGroup = GetGroup(v.ubMovementGroup);
+	GROUP const* const pGroup = GetGroup(v.ubMovementGroup);
 	Assert( pGroup );
 
 	if ( pGroup->fBetweenSectors )

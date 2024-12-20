@@ -86,7 +86,7 @@ VEHICLETYPE& GetVehicle(INT32 vehicle_id);
 void SetUpMvtGroupForVehicle(SOLDIERTYPE*);
 
 // find vehicle id of group with this vehicle
-VEHICLETYPE& GetVehicleFromMvtGroup(GROUP_JA2 const&);
+VEHICLETYPE& GetVehicleFromMvtGroup(GROUP const&);
 
 // kill everyone in vehicle
 BOOLEAN KillAllInVehicle(VEHICLETYPE const&);
@@ -145,7 +145,7 @@ BOOLEAN IsSoldierInThisVehicleSquad(const SOLDIERTYPE* pSoldier, INT8 bSquadNumb
 
 SOLDIERTYPE*  PickRandomPassengerFromVehicle( SOLDIERTYPE *pSoldier );
 
-bool DoesVehicleGroupHaveAnyPassengers(GROUP_JA2 const&);
+bool DoesVehicleGroupHaveAnyPassengers(GROUP const&);
 
 void SetSoldierExitHelicopterInsertionData(SOLDIERTYPE*);
 

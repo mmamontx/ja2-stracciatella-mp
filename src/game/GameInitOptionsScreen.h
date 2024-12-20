@@ -2,7 +2,9 @@
 #define GAME_INIT_OPTIONS_SCREEN_H
 
 #include "ScreenIDs.h"
+#define GROUP GROUP_FOO
 #include "RakPeerInterface.h"
+#undef GROUP
 
 using namespace RakNet;
 

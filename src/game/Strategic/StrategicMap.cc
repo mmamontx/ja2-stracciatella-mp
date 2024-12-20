@@ -134,7 +134,7 @@ BOOLEAN gfGettingNameFromSaveLoadScreen;
 SGPSector gWorldSector(0, 0, -1);
 
 static SGPSector gsAdjacentSector;
-static GROUP_JA2* gpAdjacentGroup = 0;
+static GROUP* gpAdjacentGroup = 0;
 static UINT8  gubAdjacentJumpCode;
 static UINT32 guiAdjacentTraverseTime;
 UINT8			gubTacticalDirection;
@@ -1441,7 +1441,7 @@ void JumpIntoAdjacentSector( UINT8 ubTacticalDirection, UINT8 ubJumpCode, INT16 
 	Assert( pValidSoldier );
 
 	//Now, determine the traversal time.
-	GROUP_JA2* const pGroup = GetGroup(pValidSoldier->ubGroupID);
+	GROUP* const pGroup = GetGroup(pValidSoldier->ubGroupID);
 	AssertMsg(pGroup, ST::format("{} is not in a valid group(pSoldier->ubGroupID is {})", pValidSoldier->name, pValidSoldier->ubGroupID));
 
 	// If we are going through an exit grid, don't get traversal direction!
@@ -1611,14 +1611,14 @@ void HandleSoldierLeavingSectorByThemSelf( SOLDIERTYPE *pSoldier )
 	if( pSoldier->ubGroupID == 0 )
 	{
 		// create independant group
-		GROUP_JA2& g = *CreateNewPlayerGroupDepartingFromSector(pSoldier->sSector);
+		GROUP& g = *CreateNewPlayerGroupDepartingFromSector(pSoldier->sSector);
 		AddPlayerToGroup(g, *pSoldier);
 	}
 }
 
 
 static void DoneFadeOutExitGridSector(void);
-static void HandlePotentialMoraleHitForSkimmingSectors(GROUP_JA2* pGroup);
+static void HandlePotentialMoraleHitForSkimmingSectors(GROUP* pGroup);
 
 
 void AllMercsWalkedToExitGrid()
@@ -2108,7 +2108,7 @@ BOOLEAN OKForSectorExit( INT8 bExitDirection, UINT16 usAdditionalData, UINT32 *p
 			}
 			else
 			{
-				GROUP_JA2 *pGroup;
+				GROUP *pGroup;
 
 				// ATE: Dont's assume exit grids here...
 				if ( bExitDirection != -1 )
@@ -2170,7 +2170,7 @@ BOOLEAN OKForSectorExit( INT8 bExitDirection, UINT16 usAdditionalData, UINT32 *p
 		}
 		if ( bExitDirection != -1 )
 		{
-			GROUP_JA2 *pGroup;
+			GROUP *pGroup;
 			//Now, determine if this is a valid path.
 			pGroup = GetGroup( pValidSoldier->ubGroupID );
 			AssertMsg(pGroup, ST::format("{} is not in a valid group (pSoldier->ubGroupID is {})", pValidSoldier->name, pValidSoldier->ubGroupID));
@@ -3398,7 +3398,7 @@ void SetupProfileInsertionDataForSoldier(const SOLDIERTYPE* const s)
 }
 
 
-static void HandlePotentialMoraleHitForSkimmingSectors(GROUP_JA2* pGroup)
+static void HandlePotentialMoraleHitForSkimmingSectors(GROUP* pGroup)
 {
 	if ( !gTacticalStatus.fHasEnteredCombatModeSinceEntering && gTacticalStatus.fEnemyInSector )
 	{

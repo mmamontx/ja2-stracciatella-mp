@@ -47,7 +47,7 @@ void InitSquads()
 		std::fill_n(Squad[iCounter].begin(), gamepolicy(squad_size), nullptr);
 
 		// create mvt groups
-		GROUP_JA2* const g = CreateNewPlayerGroupDepartingFromSector(SGPSector(1, 1));
+		GROUP* const g = CreateNewPlayerGroupDepartingFromSector(SGPSector(1, 1));
 		g->fPersistant = TRUE;
 		SquadMovementGroups[iCounter] = g->ubGroupID;
 
@@ -137,12 +137,12 @@ BOOLEAN AddCharacterToSquad(SOLDIERTYPE* const s, INT8 const bSquadValue)
 			if (s->bAssignment >= ON_DUTY && s->bAssignment != VEHICLE)
 			{
 				// if valid group, delete it
-				GROUP_JA2* const pGroup = GetGroup(s->ubGroupID);
+				GROUP* const pGroup = GetGroup(s->ubGroupID);
 				if (pGroup) RemoveGroup(*pGroup);
 			}
 		}
 
-		GROUP_JA2& g = *GetGroup(SquadMovementGroups[bSquadValue]);
+		GROUP& g = *GetGroup(SquadMovementGroups[bSquadValue]);
 		if (s->bAssignment != VEHICLE || s->iVehicleId == -1)
 		{
 			AddPlayerToGroup(g, *s);
@@ -162,7 +162,7 @@ BOOLEAN AddCharacterToSquad(SOLDIERTYPE* const s, INT8 const bSquadValue)
 			if (fNewSquad)
 			{
 				// set mvt group for
-				GROUP_JA2 const* const pGroup = GetGroup(GetHelicopter().ubMovementGroup);
+				GROUP const* const pGroup = GetGroup(GetHelicopter().ubMovementGroup);
 				Assert(pGroup);
 				if (pGroup)
 				{
@@ -304,7 +304,7 @@ BOOLEAN RemoveCharacterFromSquads(SOLDIERTYPE* const s)
 
 			if (s->fBetweenSectors && s->uiStatusFlags & SOLDIER_VEHICLE)
 			{
-				GROUP_JA2& g = *CreateNewPlayerGroupDepartingFromSector(s->sSector);
+				GROUP& g = *CreateNewPlayerGroupDepartingFromSector(s->sSector);
 				AddPlayerToGroup(g, *s);
 			}
 
@@ -911,7 +911,7 @@ void CheckSquadMovementGroups()
 		if (GetGroup(*i)) continue;
 
 		// recreate group
-		GROUP_JA2* const g = CreateNewPlayerGroupDepartingFromSector(SGPSector(1, 1));
+		GROUP* const g = CreateNewPlayerGroupDepartingFromSector(SGPSector(1, 1));
 		g->fPersistant = TRUE;
 		*i = g->ubGroupID;
 	}
