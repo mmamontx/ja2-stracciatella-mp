@@ -2496,11 +2496,15 @@ void RadioSightings(SOLDIERTYPE* const pSoldier, SOLDIERTYPE* const about, UINT8
 	// hang a pointer to the start of this guy's opponents in the public opplist
 	pbPublOL = &(gbPublicOpplist[ubTeamToRadioTo][start]);
 
-	SOLDIERTYPE* pOpponent = &GetMan(start);
+	//SOLDIERTYPE* pOpponent = &GetMan(start);
+	SOLDIERTYPE* pOpponent;
 
 	// loop through every one of this guy's opponents
-	for (iLoop = start; iLoop < end; iLoop++,pOpponent++,pPersOL++,pbPublOL++)
+	//for (iLoop = start; iLoop < end; iLoop++,pOpponent++,pPersOL++,pbPublOL++)
+	// Simplify the loop by removing the pointer iteration - for some reason it causes non-deterministic crashes when working with replicated objects
+	for (iLoop = start; iLoop < end; iLoop++,pPersOL++,pbPublOL++)
 	{
+		pOpponent = &GetMan(iLoop);
 		fContactSeen = FALSE;
 		SLOGD("RS: checking {}", pOpponent->ubID);
 
