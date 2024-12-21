@@ -27,6 +27,7 @@
 #include "UILayout.h"
 #include "Utils/Text_Input.h"
 #include "HImage.h"
+#include "Coop/Coop.h"
 
 #include <string_theory/string>
 

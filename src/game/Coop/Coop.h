@@ -1,14 +1,11 @@
-#ifndef GAME_INIT_OPTIONS_SCREEN_H
-#define GAME_INIT_OPTIONS_SCREEN_H
+#ifndef COOP_H
+#define COOP_H
 
-#include "ScreenIDs.h"
 #define GROUP GROUP_FOO
 #include "RakPeerInterface.h"
 #undef GROUP
 
 using namespace RakNet;
-
-ScreenID GameInitOptionsScreenHandle(void);
 
 #define ID_USER_PACKET_NAME    ID_USER_PACKET_ENUM
 #define ID_USER_PACKET_MESSAGE (ID_USER_PACKET_ENUM + 1)

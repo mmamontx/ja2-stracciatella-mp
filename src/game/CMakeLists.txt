@@ -1,3 +1,4 @@
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Coop")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Editor")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Laptop")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/RakNet")
