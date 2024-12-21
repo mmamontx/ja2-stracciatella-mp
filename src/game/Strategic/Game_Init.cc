@@ -61,7 +61,7 @@
 #include "Timer_Control.h"
 #include "Vehicles.h"
 #include "WorldDef.h"
-#include "GameInitOptionsScreen.h"
+#include "Coop/Coop.h"
 #include "NetworkIDManager.h"
 #include <stdexcept>
 #include <string_theory/format>

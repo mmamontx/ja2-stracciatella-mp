@@ -3,7 +3,7 @@
 
 #include "Debug.h"
 #include "Soldier_Control.h"
-#include "GameInitOptionsScreen.h"
+#include "Coop/Coop.h"
 #include "MapScreen.h"
 
 

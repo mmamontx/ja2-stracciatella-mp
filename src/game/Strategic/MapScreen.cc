@@ -80,7 +80,7 @@
 #include "VSurface.h"
 #include "Utils/Text_Input.h"
 #include "RakNet/MessageIdentifiers.h"
-#include "GameInitOptionsScreen.h"
+#include "Coop/Coop.h"
 #include "Strategic.h"
 #include "Game_Init.h"
 
