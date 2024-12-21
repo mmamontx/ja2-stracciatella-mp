@@ -45,7 +45,6 @@ Basically, JA2 Stracciatella cooperative should be the same thing as the singlep
     - Do the connection and auto-hiring earlier - before the laptop is open.
     - Verify successful connection before changing gConnected on client side.
     - Handle server disconnection on client side.
-    - Refactor and sync with JA2 Stracciatella master.
 
 Things worth mentioning and "dark knowledge":
 
