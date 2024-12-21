@@ -1,7 +1,6 @@
 #include "Interface_Dialogue.h"
 
 #include "AI.h"
-#include "AIInternals.h"
 #include "Animation_Control.h"
 #include "Animation_Data.h"
 #include "Arms_Dealer_Init.h"
@@ -1559,6 +1558,23 @@ static void DoneFadeOutActionBasement(void);
 static void DoneFadeOutActionLeaveBasement(void);
 static void CarmenLeavesSectorCallback(void);
 
+namespace {
+// Handles both NPC_ACTION_WALTER_GIVEN_MONEY_INITIALLY and
+// NPC_ACTION_WALTER_GIVEN_MONEY.
+void WalterGivenMoney(NPCAction actionCode, NpcActionParamsModel const& params)
+{
+	if (gMercProfiles[WALTER].iBalance >= params.getAmount(WALTER_BRIBE_AMOUNT))
+	{
+		TriggerNPCRecord(WALTER, 16);
+	}
+	else
+	{
+		TriggerNPCRecord(WALTER,
+			actionCode == NPC_ACTION_WALTER_GIVEN_MONEY_INITIALLY ? 14 : 15);
+	}
+}
+}
+
 
 void HandleNPCDoAction( UINT8 ubTargetNPC, UINT16 usActionCode, UINT8 ubQuoteNum )
 {
@@ -1732,11 +1748,13 @@ void HandleNPCDoAction( UINT8 ubTargetNPC, UINT16 usActionCode, UINT8 ubQuoteNum
 							if ( bOldSlot != NO_SLOT  )
 							{
 								// rearrange profile... NB # of guns can only be 1 so this is easy
-								p.inv[bOldSlot]        = NOTHING;
-								p.bInvNumber[bOldSlot] = 0;
-
 								p.inv[bNewSlot]        = usGun;
 								p.bInvNumber[bNewSlot] = 1;
+								p.bInvStatus[bNewSlot] = p.bInvStatus[bOldSlot];
+
+								p.inv[bOldSlot]        = NOTHING;
+								p.bInvNumber[bOldSlot] = 0;
+								p.bInvStatus[bOldSlot] = 0;
 							}
 						}
 					}
@@ -2589,12 +2607,27 @@ void HandleNPCDoAction( UINT8 ubTargetNPC, UINT16 usActionCode, UINT8 ubQuoteNum
 					case JOHN:
 						UnRecruitEPC( MARY );
 						break;
+					case SKYRIDER:
+						if (ubQuoteNum == 15) // quote triggered by proximity to the helicopter
+						{
+							// make him always appear at his map editor placement spot in the airport sector
+							gMercProfiles[SKYRIDER].fUseProfileInsertionInfo = FALSE;
+						}
+						break;
+					case JOEY:
+						if (ubQuoteNum == 9) // quote triggered by proximity to Martha
+						{
+							// since he has no map editor placement in Cambria, make him spawn in the room he was sent to
+							gMercProfiles[JOEY].usStrategicInsertionData = 18326;
+						}
+						break;
 				}
-				break;
-
-			case NPC_ACTION_REMOVE_DOREEN:
-				// make Doreen disappear next time we do a sector traversal
-				gMercProfiles[ DOREEN ].sSector = SGPSector();
+				if ((ubTargetNPC == JOHN || ubTargetNPC == MARY) && ubQuoteNum == 13) // quote triggered by proximity to the airplane
+				{
+					// make them disappear after unloading the sector
+					gMercProfiles[JOHN].sSector = SGPSector();
+					gMercProfiles[MARY].sSector = SGPSector();
+				}
 				break;
 
 			case NPC_ACTION_FREE_KIDS:
@@ -4026,24 +4059,8 @@ add_log:
 			}
 
 			case NPC_ACTION_WALTER_GIVEN_MONEY_INITIALLY:
-				if ( gMercProfiles[ WALTER ].iBalance >= params->getGridNo(WALTER_BRIBE_AMOUNT) )
-				{
-					TriggerNPCRecord( WALTER, 16 );
-				}
-				else
-				{
-					TriggerNPCRecord( WALTER, 14 );
-				}
-				break;
 			case NPC_ACTION_WALTER_GIVEN_MONEY:
-				if ( gMercProfiles[ WALTER ].iBalance >= params->getGridNo(WALTER_BRIBE_AMOUNT) )
-				{
-					TriggerNPCRecord( WALTER, 16 );
-				}
-				else
-				{
-					TriggerNPCRecord( WALTER, 15 );
-				}
+				WalterGivenMoney(static_cast<NPCAction>(usActionCode), *params);
 				break;
 			default:
 				SLOGD("No code support for NPC action {}", usActionCode);

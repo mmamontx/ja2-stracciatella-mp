@@ -1,7 +1,7 @@
 #pragma once
 
+#include "Arms_Dealer.h"
 #include "ContentMusic.h"
-
 #include "Facts.h"
 #include "ItemSystem.h"
 #include "MercSystem.h"
@@ -21,10 +21,13 @@ class CacheSectorsModel;
 class CreatureLairModel;
 class DealerInventory;
 class DealerModel;
+class ExplosionAnimationModel;
 class FactParamsModel;
 class GamePolicy;
+class SmokeEffectModel;
 class GarrisonGroupModel;
 class IMPPolicy;
+class ExplosiveCalibreModel;
 class LoadingScreenModel;
 class MercProfile;
 class MercProfileInfo;
@@ -45,6 +48,7 @@ class UndergroundSectorModel;
 class VehicleModel;
 struct AmmoTypeModel;
 struct CalibreModel;
+struct ExplosiveModel;
 struct LoadingScreen;
 struct MagazineModel;
 struct RPCSmallFaceModel;
@@ -52,6 +56,8 @@ struct WeaponModel;
 struct ARMY_COMPOSITION;
 struct PATROL_GROUP;
 struct GARRISON_GROUP;
+struct NPCQuoteInfo;
+enum class SmokeEffectID;
 
 class ContentManager : public ItemSystem, public MercSystem
 {
@@ -81,6 +87,9 @@ public:
 	/* Open a game resource file for reading. */
 	/* Note: filename is passed by value here, it will be moved to SGPFile. */
 	virtual SGPFile* openGameResForReading(ST::string filename) const = 0;
+
+	/* Open a game resource file for reading, evaluating all layers, I will return highest priority layer first. */
+	virtual std::vector<std::unique_ptr<SGPFile>> openGameResForReadingOnAllLayers(const ST::string& filename) const = 0;
 
 	/* Checks if a game resource exists. */
 	virtual bool doesGameResExists(const ST::string& filename) const = 0;
@@ -114,16 +123,22 @@ public:
 
 	virtual const AmmoTypeModel* getAmmoType(uint8_t index) = 0;
 
+	virtual const SmokeEffectModel* getSmokeEffect(SmokeEffectID id) const = 0;
+
+	virtual const ExplosionAnimationModel* getExplosionAnimation(uint8_t id) = 0;
+	virtual const ExplosiveModel* getExplosive(uint16_t index) = 0;
+	virtual const ExplosiveModel* getExplosiveByName(const ST::string &name) = 0;
+
 	virtual const std::vector<std::vector<const WeaponModel*> > & getNormalGunChoice() const = 0;
 	virtual const std::vector<std::vector<const WeaponModel*> > & getExtendedGunChoice() const = 0;
 	virtual const std::vector<GARRISON_GROUP>& getGarrisonGroups() const = 0;
 	virtual const std::vector<PATROL_GROUP>& getPatrolGroups() const = 0;
 	virtual const std::vector<ARMY_COMPOSITION>& getArmyCompositions() const = 0;
 
-	virtual const DealerModel* getDealer(uint8_t dealerID) const = 0;
+	virtual const DealerModel* getDealer(ArmsDealerID dealerID) const = 0;
 	virtual const std::vector<const DealerModel*>& getDealers() const = 0;
 
-	virtual const DealerInventory* getDealerInventory(int dealerId) const = 0;
+	virtual const DealerInventory* getDealerInventory(ArmsDealerID dealerId) const = 0;
 	virtual const DealerInventory* getBobbyRayNewInventory() const = 0;
 	virtual const DealerInventory* getBobbyRayUsedInventory() const = 0;
 	virtual const std::vector<const ShippingDestinationModel*>& getShippingDestinations() const = 0;
@@ -155,6 +170,7 @@ public:
 	virtual       int8_t getControllingSamSite(uint8_t sectorId) const = 0;
 
 	virtual const TownModel* getTown(int8_t townId) const = 0;
+	virtual const TownModel* getTownByName(const ST::string& name) const = 0;
 	virtual const std::map<int8_t, const TownModel*>& getTowns() const = 0;
 	virtual const ST::string getTownName(uint8_t townId) const = 0;
 	virtual const ST::string getTownLocative(uint8_t townId) const = 0;
@@ -165,6 +181,9 @@ public:
 	virtual       int16_t getSectorLandType(uint8_t sectorID, uint8_t sectorLevel) const = 0;
 	virtual const std::map<uint8_t, const NpcPlacementModel*>& listNpcPlacements() const = 0;
 	virtual const NpcPlacementModel* getNpcPlacement(uint8_t profileId) const = 0;
+
+	virtual const NPCQuoteInfo* getScriptRecords(uint8_t profileId) const = 0;
+	virtual const NPCQuoteInfo* getScriptRecords(uint8_t profileId, uint8_t meanwhileId) const = 0;
 
 	/* Params for the given NPC_ACTION if found, or return an empty instance */
 	virtual const NpcActionParamsModel* getNpcActionParams(uint16_t actionCode) const = 0;
@@ -177,6 +196,9 @@ public:
 
 	//returns the full list of character profiles
 	virtual const std::vector<const MercProfile*>& listMercProfiles() const = 0;
+
+	/* Resets named characters' structs with values initially extracted from mercs-profiles.json (previously prof.dat) */
+	virtual void resetMercProfileStructs() const = 0;
 
 	/* Gets eyes and mouths offsets for the RPC small portraits. Returns null if none defined. */
 	virtual const RPCSmallFaceModel* getRPCSmallFaceOffsets(uint8_t profileID) const = 0;

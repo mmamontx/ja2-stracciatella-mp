@@ -4,15 +4,15 @@
  * of this class or inheriting from it there should not be any reason to
  * include this file instead of ContentManager.h.
  */
-#include "game/GameRes.h"
+#include "GameRes.h"
 
 #include "ContentManager.h"
 #include "ContentMusic.h"
 #include "IEDT.h"
 #include "IGameDataLoader.h"
-#include "StringEncodingTypes.h"
-#include "RustInterface.h"
 #include "ItemStrings.h"
+#include "RustInterface.h"
+#include "StringEncodingTypes.h"
 
 #include <string_theory/string>
 
@@ -31,7 +31,7 @@ public:
 	void logConfiguration() const override;
 
 	/** Load the game data. */
-	bool loadGameData();
+	virtual bool loadGameData();
 
 	/** Get map file path. */
 	virtual ST::string getMapPath(const ST::string& mapName) const override;
@@ -63,6 +63,9 @@ public:
 	/* Open a game resource file for reading. */
 	virtual SGPFile* openGameResForReading(ST::string filename) const override;
 
+	/* Open a game resource file for reading, evaluating all layers, I will return highest priority layer first. */
+	virtual std::vector<std::unique_ptr<SGPFile>> openGameResForReadingOnAllLayers(const ST::string& filename) const override;
+
 	/* Checks if a game resource exists. */
 	virtual bool doesGameResExists(const ST::string& filename) const override;
 
@@ -89,7 +92,15 @@ public:
 
 	virtual const AmmoTypeModel* getAmmoType(uint8_t index) override;
 
+	virtual const SmokeEffectModel* getSmokeEffect(SmokeEffectID id) const override;
+
+	virtual const ExplosionAnimationModel* getExplosionAnimation(uint8_t id) override;
+	virtual const ExplosiveModel* getExplosive(uint16_t index) override;
+	virtual const ExplosiveModel* getExplosiveByName(const ST::string &name) override;
+
+	virtual ItemRange getItems() const override;
 	virtual const ItemModel* getItem(uint16_t index) const override;
+	virtual const ItemModel* getItem(uint16_t itemIndex, ItemSystem::nothrow_t const&) const noexcept override;
 	virtual const ItemModel* getItemByName(const ST::string &internalName) const override;
 	virtual const ItemModel* getKeyItemForKeyId(uint16_t usKeyItem) const override;
 	virtual std::vector<ST::string> getAllSmallInventoryGraphicPaths() const override;
@@ -101,11 +112,11 @@ public:
 	virtual const std::vector<PATROL_GROUP>& getPatrolGroups() const override;
 	virtual const std::vector<ARMY_COMPOSITION>& getArmyCompositions() const override;
 
-	virtual const DealerInventory* getDealerInventory(int dealerId) const override;
+	virtual const DealerInventory* getDealerInventory(ArmsDealerID dealerId) const override;
 	virtual const DealerInventory* getBobbyRayNewInventory() const override;
 	virtual const DealerInventory* getBobbyRayUsedInventory() const override;
 
-	virtual const DealerModel* getDealer(uint8_t dealerID) const override;
+	virtual const DealerModel* getDealer(ArmsDealerID dealerID) const override;
 	virtual const std::vector<const DealerModel*> & getDealers() const override;
 
 	virtual const std::vector<const ShippingDestinationModel*>& getShippingDestinations() const override;
@@ -139,6 +150,7 @@ public:
 	virtual const SamSiteModel* findSamSiteBySector(uint8_t sectorId) const override;
 	virtual       int8_t getControllingSamSite(uint8_t sectorId) const override;
 	virtual const TownModel* getTown(int8_t townId) const  override;
+	virtual const TownModel* getTownByName(const ST::string& name) const  override;
 	virtual const std::map<int8_t, const TownModel*>& getTowns() const override;
 	virtual const ST::string getTownName(uint8_t townId) const override;
 	virtual const ST::string getTownLocative(uint8_t townId) const override;
@@ -153,7 +165,11 @@ public:
 	virtual const RPCSmallFaceModel* getRPCSmallFaceOffsets(uint8_t profileID) const override;
 	virtual const std::vector<const MERCListingModel*>& getMERCListings() const override;
 	virtual const std::vector<const MercProfile*>& listMercProfiles() const override;
+	virtual void resetMercProfileStructs() const override;
 	virtual const VehicleModel* getVehicle(uint8_t vehicleID) const override;
+
+	const NPCQuoteInfo* getScriptRecords(uint8_t profileId) const override;
+	const NPCQuoteInfo* getScriptRecords(uint8_t profileId, uint8_t meanwhileId) const override;
 
 	virtual const LoadingScreen* getLoadingScreenForSector(uint8_t sectorId, uint8_t sectorLevel, bool isNight) const override;
 	virtual const LoadingScreen* getLoadingScreen(uint8_t index) const override;
@@ -194,14 +210,23 @@ protected:
 
 	std::vector<AmmoTypeModel const *> m_ammoTypes;
 
+	std::map<std::pair<uint8_t, uint8_t>, std::unique_ptr<NPCQuoteInfo const []>> m_scriptRecordsMeanwhiles;
+	                          std::vector<std::unique_ptr<NPCQuoteInfo const []>> m_scriptRecords;
+							              std::unique_ptr<NPCQuoteInfo const []>  m_scriptRecordsRecruited;
+
 	/** Mapping of calibre names to objects. */
 	std::map<ST::string, const AmmoTypeModel*> m_ammoTypeMap;
 	std::map<ST::string, const CalibreModel*> m_calibreMap;
 	std::map<ST::string, const MagazineModel*> m_magazineMap;
 	std::map<ST::string, const WeaponModel*> m_weaponMap;
+	std::map<ST::string, const ExplosiveModel*> m_explosiveMap;
 	std::map<ST::string, const ItemModel*> m_itemMap;
 	std::map<uint16_t, uint16_t> m_mapItemReplacements;
 	std::multimap<MusicMode, const ST::string> m_musicMap;
+
+	std::vector<const SmokeEffectModel*> m_smokeEffects;
+	std::vector<const ExplosionAnimationModel*> m_explosionAnimations;
+	std::vector<const ExplosiveCalibreModel*> m_explosiveCalibres;
 
 	std::vector<std::vector<const WeaponModel*> > mNormalGunChoice;
 	std::vector<std::vector<const WeaponModel*> > mExtendedGunChoice;
@@ -251,12 +276,21 @@ protected:
 	std::vector<const MercProfile*> m_mercProfiles;
 	std::map<uint8_t, const MercProfileInfo*> m_mercProfileInfo;
 	std::map<UINT32, UINT16> m_translationTable;
+	std::vector<std::unique_ptr<const MERCPROFILESTRUCT>> m_mercStructs;
 
 	RustPointer<Vfs> m_vfs;
 
+	bool loadGameData(const VanillaItemStrings& vanillaItemStrings);
+	/* Extracts the content that requires load precedence and it can't be resolved
+	   by changing the order of execution of other functions. */
+	bool loadPrioritizedData();
 	bool loadWeapons(const VanillaItemStrings& vanillaItemStrings);
+	bool loadSmokeEffects();
+	bool loadExplosionAnimations();
+	bool loadExplosives(const VanillaItemStrings& vanillaItemStrings, const std::vector<const ExplosionAnimationModel*>& animations);
 	bool loadItems(const VanillaItemStrings& vanillaItemStrings);
 	bool loadMagazines(const VanillaItemStrings& vanillaItemStrings);
+	bool loadExplosiveCalibres();
 	bool loadCalibres();
 	bool loadAmmoTypes();
 	bool loadArmyData();
@@ -276,8 +310,8 @@ protected:
 	bool loadMercsData();
 	void loadVehicles();
 	void loadTranslationTable();
+	void loadAllScriptRecords();
 
-	JsonValue readJsonFromString(const ST::string& jsonData, const ST::string& label) const;
 	JsonValue readJsonDataFileWithSchema(const ST::string& jsonPath) const;
 
 

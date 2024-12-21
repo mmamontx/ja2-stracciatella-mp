@@ -1,6 +1,7 @@
 #pragma once
+#include "ContentManager.h"
+#include "Soldier_Profile.h"
 #include "JA2Types.h"
-#include <functional>
 
 enum class MercType : int8_t;
 class MercProfileInfo;
@@ -54,6 +55,11 @@ public:
 
 	// allow implicit conversion to MERCPROFILESTRUCT. Same as getStruct()
 	operator MERCPROFILESTRUCT&() const;
+
+	JsonValue serializeStruct(const ContentManager* contentManager) const;
+	JsonValue serializeStructRelations(const ContentManager* contentManager) const;
+	static std::unique_ptr<MERCPROFILESTRUCT> deserializeStruct(const JsonValue& json, const ContentManager* contentManager);
+	static void deserializeStructRelations(MERCPROFILESTRUCT* prof, const JsonObject& json, const ContentManager* contentManager);
 
 protected:
 	const ProfileID m_profileID;

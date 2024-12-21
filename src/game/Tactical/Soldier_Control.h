@@ -255,6 +255,8 @@ enum InvSlotPos
 	NUM_INV_SLOTS,
 };
 
+extern UINT8 gubItemDroppableFlag[NUM_INV_SLOTS];
+
 //used for color codes, but also shows the enemy type for debugging purposes
 enum SoldierClass
 {

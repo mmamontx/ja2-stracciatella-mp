@@ -44,9 +44,7 @@ struct HistoryUnit
 #define TOP_DIVLINE_Y			(STD_SCREEN_Y + 101)
 #define TITLE_X				(STD_SCREEN_X + 140)
 #define TITLE_Y				(STD_SCREEN_Y + 33 )
-#define PAGE_SIZE			22
 #define RECORD_Y			TOP_DIVLINE_Y
-#define RECORD_HISTORY_WIDTH		200
 #define PAGE_NUMBER_X			TOP_X+20
 #define PAGE_NUMBER_Y			TOP_Y+33
 #define HISTORY_DATE_X			PAGE_NUMBER_X+85
@@ -60,7 +58,7 @@ struct HistoryUnit
 #define RECORD_HEADER_Y			(STD_SCREEN_Y + 90)
 
 
-#define NUM_RECORDS_PER_PAGE		PAGE_SIZE
+#define NUM_RECORDS_PER_PAGE		(22)
 #define SIZE_OF_HISTORY_FILE_RECORD	( sizeof( UINT8 ) + sizeof( UINT8 ) + sizeof( UINT32 ) + sizeof( UINT16 ) + sizeof( UINT16 ) + sizeof( UINT8 ) + sizeof( UINT8 ) )
 
 // button positions
@@ -379,20 +377,20 @@ static void DisplayHistoryListHeaders(void)
 	// this procedure will display the headers to each column in History
 	SetFontAttributes(HISTORY_TEXT_FONT, FONT_BLACK, NO_SHADOW);
 
-	INT16 usX;
-	INT16 usY;
-
 	// the date header
-	FindFontCenterCoordinates(RECORD_DATE_X + 5,0,RECORD_DATE_WIDTH,0, pHistoryHeaders[0], HISTORY_TEXT_FONT,&usX, &usY);
-	MPrint(usX, RECORD_HEADER_Y, pHistoryHeaders[0]);
+	int x{ RECORD_DATE_X + 5 };
+	MPrint(x, RECORD_HEADER_Y, pHistoryHeaders[0], CenterAlign(RECORD_DATE_WIDTH));
 
-	// the date header
-	FindFontCenterCoordinates(RECORD_DATE_X + RECORD_DATE_WIDTH + 5,0,RECORD_LOCATION_WIDTH,0, pHistoryHeaders[ 3 ], HISTORY_TEXT_FONT,&usX, &usY);
-	MPrint(usX, RECORD_HEADER_Y, pHistoryHeaders[3]);
+	// Location header
+	x += RECORD_DATE_WIDTH;
+	MPrint(x, RECORD_HEADER_Y, pHistoryHeaders[3], CenterAlign(RECORD_LOCATION_WIDTH));
 
 	// event header
-	FindFontCenterCoordinates(RECORD_DATE_X + RECORD_DATE_WIDTH + RECORD_LOCATION_WIDTH + 5,0,RECORD_LOCATION_WIDTH,0, pHistoryHeaders[ 3 ], HISTORY_TEXT_FONT,&usX, &usY);
-	MPrint(usX, RECORD_HEADER_Y, pHistoryHeaders[4]);
+	x += RECORD_LOCATION_WIDTH;
+	// 471 is the width in pixels of one row (the width of guiSHADELINE index 0).
+	constexpr int RECORD_EVENT_WIDTH{ 471 - RECORD_DATE_WIDTH - RECORD_LOCATION_WIDTH };
+	MPrint(x, RECORD_HEADER_Y, pHistoryHeaders[4], CenterAlign(RECORD_EVENT_WIDTH));
+
 	// reset shadow
 	SetFontShadow(DEFAULT_SHADOW);
 }

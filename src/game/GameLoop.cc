@@ -21,7 +21,6 @@
 #include "HelpScreen.h"
 #include "SaveLoadGame.h"
 #include "Options_Screen.h"
-#include "Video.h"
 #include "Button_System.h"
 #include "Font_Control.h"
 #include "UILayout.h"
@@ -114,8 +113,7 @@ try
 	InputAtom InputEvent;
 	ScreenID uiOldScreen = guiCurrentScreen;
 
-	SGPPoint MousePos;
-	GetMousePos(&MousePos);
+	auto const MousePos{ GetMousePos() };
 	// Hook into mouse stuff for MOVEMENT MESSAGES
 	MouseSystemHook(MOUSE_POS, 0, MousePos.iX, MousePos.iY);
 	MusicPoll();
@@ -213,7 +211,10 @@ try
 		guiCurrentScreen = uiOldScreen;
 	}
 
-	RefreshScreen();
+	// Call the special version of RefreshScreen that respects the
+	// user defined FPS limit in game.json.
+	extern void RefreshScreenCapped();
+	RefreshScreenCapped();
 
 	guiGameCycleCounter++;
 

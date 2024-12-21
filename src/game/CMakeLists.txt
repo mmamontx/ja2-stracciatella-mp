@@ -43,9 +43,16 @@ if (WITH_UNITTESTS)
         ${LOCAL_JA2_SOURCES}
         ${CMAKE_CURRENT_SOURCE_DIR}/SaveLoadGame_unittest.cc
         ${CMAKE_CURRENT_SOURCE_DIR}/SaveLoadGameStates_unittest.cc
-        ${CMAKE_CURRENT_SOURCE_DIR}/VanillaDataStructures_unittest.cc
     )
 endif()
+
+set_property(
+    SOURCE
+        ${CMAKE_CURRENT_SOURCE_DIR}/LoadSaveEMail.cc
+        ${CMAKE_CURRENT_SOURCE_DIR}/LoadSaveTacticalStatusType.cc
+    DIRECTORY ${CMAKE_SOURCE_DIR}
+    PROPERTY UNITY_GROUP "LoadSaveDataTypes"
+)
 
 set(JA2_SOURCES
     ${JA2_SOURCES}

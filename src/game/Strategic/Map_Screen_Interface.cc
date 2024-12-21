@@ -6,6 +6,7 @@
 #include "Finances.h"
 #include "Font.h"
 #include "Font_Control.h"
+#include "GameLoop.h"
 #include "Game_Clock.h"
 #include "Game_Event_Hook.h"
 #include "Game_Init.h"
@@ -38,6 +39,7 @@
 #include "RenderWorld.h"
 #include "SAM_Sites.h"
 #include "SamSiteModel.h"
+#include "ScreenIDs.h"
 #include "ShippingDestinationModel.h"
 #include "Soldier_Macros.h"
 #include "SoundMan.h"
@@ -59,8 +61,6 @@
 #include <iterator>
 #include <string_theory/format>
 #include <string_theory/string>
-struct FACETYPE;
-struct PopUpBox;
 
 // number of LINKED LISTS for sets of leave items (each slot holds an unlimited # of items)
 #define NUM_LEAVE_LIST_SLOTS 20
@@ -801,18 +801,23 @@ void EnableTeamInfoPanels( void )
 void DoMapMessageBoxWithRect(MessageBoxStyleID ubStyle, const ST::string& str, ScreenID uiExitScreen, MessageBoxFlags usFlags, MSGBOX_CALLBACK ReturnCallback, const SGPBox* centering_rect)
 {	// reset the highlighted line
 	giHighLine = -1;
+
+	// Suppresses the cursor interaction over the map ofArulco, checked
+	// by CanDrawSectorCursor().
+	guiPendingScreen = MSG_BOX_SCREEN;
+
+	// Force redraw.
+	MapScreenHandle();
+
 	DoMessageBox(ubStyle, str, uiExitScreen, usFlags, ReturnCallback, centering_rect);
 }
 
 
 void DoMapMessageBox(MessageBoxStyleID ubStyle, const ST::string& str, ScreenID uiExitScreen, MessageBoxFlags usFlags, MSGBOX_CALLBACK ReturnCallback)
 {
-	// reset the highlighted line
-	giHighLine = -1;
-
 	// do message box and return
 	SGPBox const centering_rect = { 0, 0, SCREEN_WIDTH, INV_INTERFACE_START_Y };
-	DoMessageBox(ubStyle, str, uiExitScreen, usFlags, ReturnCallback, &centering_rect);
+	DoMapMessageBoxWithRect(ubStyle, str, uiExitScreen, usFlags, ReturnCallback, &centering_rect);
 }
 
 
@@ -1319,18 +1324,6 @@ void FindAndSetThisContractSoldier( SOLDIERTYPE *pSoldier )
 }
 
 
-void HandleMAPUILoseCursorFromOtherScreen( void )
-{
-	// rerender map without cursors
-	fMapPanelDirty = TRUE;
-
-	if ( fInMapMode )
-	{
-		RenderMapRegionBackground( );
-	}
-}
-
-
 void UpdateMapScreenAssignmentPositions( void )
 {
 	// set the position of the pop up boxes
@@ -1462,9 +1455,7 @@ BOOLEAN MapscreenCanPassItemToChar(const SOLDIERTYPE* const pNewSoldier)
 	if ( fShowMapInventoryPool && !gpItemPointerSoldier && fMapInventoryItem )
 	{
 		// disallow passing items to anyone not in that sector
-		if (pNewSoldier->sSector.x != sSelMap.x ||
-			pNewSoldier->sSector.y != sSelMap.y ||
-			pNewSoldier->sSector.z != ( INT8 )( iCurrentMapSectorZ ) )
+		if (pNewSoldier->sSector != sSelMap)
 		{
 			return( FALSE );
 		}
@@ -2191,13 +2182,13 @@ static void ClearMouseRegionsForMoveBox(void);
 static void CreatePopUpBoxForMovementBox(void);
 
 
-void CreateDestroyMovementBox( INT16 sSectorX, INT16 sSectorY, INT16 sSectorZ )
+void CreateDestroyMovementBox([[maybe_unused]] SGPSector const& sector)
 {
 	static BOOLEAN fCreated = FALSE;
 
 
 	// not allowed for underground movement!
-	Assert( sSectorZ == 0 );
+	Assert(sector.z == 0);
 
 	if (fShowMapScreenMovementList && !fCreated)
 	{
@@ -2262,7 +2253,7 @@ void SetUpMovingListsForSector(const SGPSector& sSector)
 	}
 
 	fShowMapScreenMovementList = TRUE;
-	CreateDestroyMovementBox(sSector.x, sSector.y, sSector.z);
+	CreateDestroyMovementBox(sSector);
 }
 
 
@@ -3024,11 +3015,11 @@ void ReBuildMoveBox( void )
 
 	// stop showing the box
 	fShowMapScreenMovementList = FALSE;
-	CreateDestroyMovementBox( sSelMap.x, sSelMap.y, ( INT16 )iCurrentMapSectorZ );
+	CreateDestroyMovementBox(sSelMap);
 
 	// show the box
 	fShowMapScreenMovementList = TRUE;
-	CreateDestroyMovementBox( sSelMap.x, sSelMap.y, ( INT16 )iCurrentMapSectorZ );
+	CreateDestroyMovementBox(sSelMap);
 	ShowBox( ghMoveBox );
 	MarkAllBoxesAsAltered( );
 }

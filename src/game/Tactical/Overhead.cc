@@ -90,6 +90,7 @@
 #include "End_Game.h"
 #include "Strategic_Status.h"
 #include "PreBattle_Interface.h"
+#include "SmokeEffects.h"
 
 #include "ContentManager.h"
 #include "GameInstance.h"
@@ -1527,37 +1528,22 @@ BOOLEAN HandleGotoNewGridNo(SOLDIERTYPE* pSoldier, BOOLEAN* pfKeepMoving, BOOLEA
 					bPosOfMask = NO_SLOT;
 				}
 
-				EXPLOSIVETYPE const* pExplosive = 0;
-				if (!AM_A_ROBOT(pSoldier))
-				{
-					if (gpWorldLevelData[pSoldier->sGridNo].ubExtFlags[pSoldier->bLevel] & MAPELEMENT_EXT_TEARGAS)
-					{
-						if (!(pSoldier->fHitByGasFlags & HIT_BY_TEARGAS) && bPosOfMask == NO_SLOT)
-						{
-							// check for gas mask
-							pExplosive = &Explosive[GCM->getItem(TEARGAS_GRENADE)->getClassIndex()];
-						}
-					}
-					if (gpWorldLevelData[pSoldier->sGridNo].ubExtFlags[pSoldier->bLevel] & MAPELEMENT_EXT_MUSTARDGAS)
-					{
-						if (!(pSoldier->fHitByGasFlags & HIT_BY_MUSTARDGAS) && bPosOfMask == NO_SLOT)
-						{
-							pExplosive = &Explosive[GCM->getItem(MUSTARD_GRENADE)->getClassIndex()];
-						}
-					}
+				auto smokeEffectID = GetSmokeEffectOnTile(pSoldier->sGridNo, pSoldier->bLevel);
+				auto smokeEffect = GCM->getSmokeEffect(smokeEffectID);
+				Assert(smokeEffect != nullptr);
+
+				// check the cases where we dont take damage
+				auto ignoredByGasMask = bPosOfMask != NO_SLOT && !smokeEffect->getIgnoresGasMask();
+				auto ignoredForRobot = AM_A_ROBOT(pSoldier) && !smokeEffect->getAffectsRobot();
+				if (ignoredByGasMask || ignoredForRobot) {
+					smokeEffect = nullptr;
 				}
-				if (gpWorldLevelData[pSoldier->sGridNo].ubExtFlags[pSoldier->bLevel] & MAPELEMENT_EXT_CREATUREGAS)
-				{
-					if (!(pSoldier->fHitByGasFlags & HIT_BY_CREATUREGAS)) // gas mask doesn't help vs creaturegas
-					{
-						pExplosive = &Explosive[GCM->getItem(SMALL_CREATURE_GAS)->getClassIndex()];
-					}
-				}
-				if (pExplosive)
+
+				if (smokeEffect && smokeEffect->dealsAnyDamage() && !IsSoldierAlreadyAffectedBySmokeEffect(pSoldier, smokeEffect))
 				{
 					EVENT_StopMerc(pSoldier);
 					fDontContinue = TRUE;
-					DishOutGasDamage(pSoldier, pExplosive, TRUE, FALSE, pExplosive->ubDamage + PreRandom(pExplosive->ubDamage), 100 * (pExplosive->ubStunDamage + PreRandom(pExplosive->ubStunDamage / 2)), NULL);
+					DishOutGasDamage(pSoldier, smokeEffect, TRUE, FALSE, NULL);
 				}
 			}
 
@@ -1997,7 +1983,7 @@ static BOOLEAN HandleAtNewGridNo(SOLDIERTYPE* pSoldier, BOOLEAN* pfKeepMoving)
 				if (CheckFact(FACT_JOEY_NEAR_MARTHA, 0))
 				{
 					EVENT_StopMerc(pSoldier);
-					TriggerNPCRecord(JOEY, 9);
+					TriggerNPCRecord(JOEY, 10);
 				}
 			}
 
@@ -2299,12 +2285,12 @@ void HandlePlayerTeamMemberDeath(SOLDIERTYPE* pSoldier)
 		{
 			if (s->bInSector && s->bLife >= OKLIFE)
 			{
-				const INT8 bBuddyIndex = WhichBuddy(s->ubProfile, pSoldier->ubProfile);
+				const BuddySlot bBuddyIndex = WhichBuddy(s->ubProfile, pSoldier->ubProfile);
 				switch (bBuddyIndex)
 				{
-					case 0:  TacticalCharacterDialogue(s, QUOTE_BUDDY_ONE_KILLED);            break;
-					case 1:  TacticalCharacterDialogue(s, QUOTE_BUDDY_TWO_KILLED);            break;
-					case 2:  TacticalCharacterDialogue(s, QUOTE_LEARNED_TO_LIKE_MERC_KILLED); break;
+					case BUDDY_SLOT1:           TacticalCharacterDialogue(s, QUOTE_BUDDY_ONE_KILLED);            break;
+					case BUDDY_SLOT2:           TacticalCharacterDialogue(s, QUOTE_BUDDY_TWO_KILLED);            break;
+					case LEARNED_TO_LIKE_SLOT:  TacticalCharacterDialogue(s, QUOTE_LEARNED_TO_LIKE_MERC_KILLED); break;
 					default: break;
 				}
 			}
@@ -3155,14 +3141,7 @@ static INT16 NewOKDestinationAndDirection(const SOLDIERTYPE* pCurrSoldier, INT16
 //Kris:
 BOOLEAN FlatRoofAboveGridNo(INT32 iMapIndex)
 {
-	for (const LEVELNODE* i = gpWorldLevelData[iMapIndex].pRoofHead; i; i = i->pNext)
-	{
-		if (i->usIndex == NO_TILE) continue;
-
-		const UINT32 uiTileType = GetTileType(i->usIndex);
-		if (uiTileType >= FIRSTROOF && uiTileType <= LASTROOF) return TRUE;
-	}
-	return FALSE;
+	return TypeRangeExistsInRoofLayer(iMapIndex, FIRSTROOF, LASTROOF) != nullptr;
 }
 
 
@@ -4061,8 +4040,6 @@ void ExitCombatMode( )
 	}
 
 	// Change music modes
-	gfForceMusicToTense = TRUE;
-
 	SetMusicMode( MUSIC_TACTICAL_ENEMYPRESENT );
 
 	BetweenTurnsVisibilityAdjustments();
@@ -4352,7 +4329,6 @@ BOOLEAN CheckForEndOfCombatMode( BOOLEAN fIncrementTurnsNotSeen )
 		}*/
 
 		// Begin tense music....
-		gfForceMusicToTense = TRUE;
 		SetMusicMode( MUSIC_TACTICAL_ENEMYPRESENT );
 
 		return( TRUE );
@@ -6217,7 +6193,6 @@ static void HandleBrothelWallDestroyed(INT16 const sSectorX, INT16 const sSector
 }
 
 #ifdef WITH_UNITTESTS
-#undef FAIL
 #include "gtest/gtest.h"
 
 TEST(Overhead, asserts)

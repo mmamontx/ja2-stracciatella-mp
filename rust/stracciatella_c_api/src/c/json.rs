@@ -9,6 +9,10 @@ use super::{common::*, vec::VecCString};
 pub struct RJsonValue(pub Value);
 
 impl RJsonValue {
+    pub fn from_value(value: Value) -> Self {
+        RJsonValue(value)
+    }
+
     fn deserialize(value: &str) -> Result<Self, String> {
         let value = de::from_string(value)?;
 
