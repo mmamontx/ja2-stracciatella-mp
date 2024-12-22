@@ -1,10 +1,9 @@
 #ifndef __OVERHEAD_H
 #define __OVERHEAD_H
 
+#include "Coop/Coop.h"
 #include "Debug.h"
 #include "Soldier_Control.h"
-#include "Coop/Coop.h"
-#include "MapScreen.h"
 
 
 #define MAX_REALTIME_SPEED_VAL		10
@@ -136,8 +135,6 @@ extern const char* const gzActionStr[];
 
 // Soldier List used for all soldier overhead interaction
 extern SOLDIERTYPE Menptr[TOTAL_SOLDIERS];
-
-#define IS_VALID_CLIENT ((gGameOptions.fNetwork) && (gConnected) && (gReplicaList.Size() != 0))
 
 static inline SOLDIERTYPE& GetMan(UINT const idx)
 {

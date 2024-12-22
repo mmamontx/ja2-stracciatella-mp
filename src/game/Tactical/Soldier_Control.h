@@ -7,16 +7,16 @@
 #define MAXPATROLGRIDS  10  // *** THIS IS A DUPLICATION - MUST BE MOVED !
 
 #include "Animation_Cache.h"
+#include "GameSettings.h"
+#include "JA2Types.h"
 #include "Keys.h"
 #include "Overhead_Types.h"
-#include "Item_Types.h"
-#include "Timer_Control.h"
-#include "GameSettings.h"
-#include "Shading.h"
-#define GROUP GROUP_FOO
+#define GROUP GROUP_JA2
 #include "ReplicaManager3.h"
 #undef GROUP
-#include "JA2Types.h"
+#include "Shading.h"
+#include "Item_Types.h"
+#include "Timer_Control.h"
 
 using namespace RakNet;
 
@@ -1378,7 +1378,7 @@ struct SOLDIERTYPE : public Replica3
 		serializeParameters->outputBitstream[0].Write(sWeightCarriedAtTurnStart);
 		rname = name.c_str(); // Using RakString as intermediate entity
 		serializeParameters->outputBitstream[0].Write(rname);
-		
+
 		serializeParameters->outputBitstream[0].Write(bVisible);
 
 		serializeParameters->outputBitstream[0].Write(bActive);

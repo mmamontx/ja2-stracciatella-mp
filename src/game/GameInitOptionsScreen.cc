@@ -1,5 +1,6 @@
 #include "Button_Sound_Control.h"
 #include "Button_System.h"
+#include "Coop/Coop.h"
 #include "Cursor_Control.h"
 #include "Cursors.h"
 #include "Directories.h"
@@ -8,6 +9,7 @@
 #include "Font_Control.h"
 #include "Options_Screen.h"
 #include "GameSettings.h"
+#include "HImage.h"
 #include "Input.h"
 #include "Intro.h"
 #include "MainMenuScreen.h"
@@ -26,8 +28,6 @@
 #include "WordWrap.h"
 #include "UILayout.h"
 #include "Utils/Text_Input.h"
-#include "HImage.h"
-#include "Coop/Coop.h"
 
 #include <string_theory/string>
 
@@ -146,10 +146,6 @@ static UINT8 gubGameOptionScreenHandler = GIO_NOTHING;
 static ScreenID gubGIOExitScreen = GAME_INIT_OPTIONS_SCREEN;
 
 static SGPVObject* guiGIOMainBackGroundImage;
-
-NETWORK_OPTIONS gNetworkOptions;
-BOOL gConnected = FALSE;
-BOOL gEnemyEnabled = TRUE;
 
 
 // Done Button

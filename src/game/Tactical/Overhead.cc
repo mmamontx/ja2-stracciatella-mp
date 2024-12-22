@@ -233,7 +233,6 @@ BOOLEAN       gfKillingGuysForLosingBattle     = FALSE;
 int ii;
 int jj;
 
-
 static INT32 GetFreeMercSlot(void)
 {
 	for (UINT32 i = 0; i < guiNumMercSlots; ++i)

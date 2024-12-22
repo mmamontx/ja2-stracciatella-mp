@@ -107,7 +107,6 @@
 #include "WorldDat.h"
 #include "WorldDef.h"
 #include "WorldMan.h"
-#include "Coop/Coop.h"
 
 #include <string_theory/format>
 #include <string_theory/string>

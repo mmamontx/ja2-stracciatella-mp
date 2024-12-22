@@ -61,19 +61,13 @@
 #include "Timer_Control.h"
 #include "Vehicles.h"
 #include "WorldDef.h"
-#include "Coop/Coop.h"
-#include "NetworkIDManager.h"
 #include <stdexcept>
 #include <string_theory/format>
-
-using namespace RakNet;
 
 void InitScriptingEngine();
 
 UINT8			gubScreenCount=0;
 
-ReplicaManager3Sample gReplicaManager;
-NetworkIDManager gNetworkIdManager;
 
 static void InitNPCs()
 {
@@ -201,16 +195,6 @@ void ShutdownStrategicLayer()
 	KillStrategicAI();
 }
 
-
-DWORD WINAPI replicamgr(LPVOID lpParam)
-{
-	int idx;
-	while (1)
-	{
-		Sleep(1000); // NOTE: It doesn't affect object replication sync delay, but it may have some other effect - keep this in mind
-	}
-	return 0;
-}
 
 void InitNewGame()
 {
