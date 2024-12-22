@@ -259,7 +259,8 @@ void InitNewGame()
 		}
 
 		SetLaptopExitScreen(INIT_SCREEN);
-		SetPendingNewScreen(LAPTOP_SCREEN);
+		//SetPendingNewScreen(LAPTOP_SCREEN);
+		SetPendingNewScreen(MAP_SCREEN); // It is more natural for MP to start in the lobby
 		gubScreenCount = 1;
 
 		// Set the fact the game is in progress
