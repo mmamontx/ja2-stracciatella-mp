@@ -11,7 +11,7 @@ Basically, JA2 Stracciatella cooperative should be the same thing as the singlep
 - Introduce as little custom code as possible.
 - Stick to the original JA2 (JA2 Stracciatella) code. Leverage the original design and implement on top of its ideas.
 - All the new weapons and extra features of 1.13 and other modifications on top of the vanilla JA2 (JA2 Stracciatella vanilla) are outside of the scope of this project.
-- Assimilate with coding styles that surround introduced changes. Don't try to unify or refactor unless it's really necessary - it is outside of the scope as well.
+- The axioms of style from the original CONTRIBUTING.md of JA2S mostly remain valid (except for the rule about dead code - some of the original lines are commented out and remain for reference and convenient roll back). Assimilate with coding styles that surround introduced changes. Don't try to unify or refactor unless it's really necessary - it is outside of the scope as well.
 
 ## Roadmap (Milestones) - from the player perspective
 
@@ -31,9 +31,9 @@ Basically, JA2 Stracciatella cooperative should be the same thing as the singlep
 - Regular priority:
     - Make client actions be processed on the server (i.e., so that the clients can trigger actions and observe their effect via the replication mechanism).
     - Let only the server start game (like it is done in 1.13) - grey out time compression for clients. Automatically broadcast and trigger game start from server to everyone.
-    - Add 'ready' buttons in the lobby (like it is done in 1.13)? Think whether it's needed first.
-    - Maybe it makes sense to consider placing mercs of every player in a separate squad. Think whether it's needed first.
-    - Replicate all SOLDIERTYPE pointers.
+    - Add 'ready' buttons in the lobby (like it is done in 1.13).
+    - Assign every player to a separate squad (first - automatically give a single squad, then - introduce a control so that the server can do it manually and assign multiple squads to a single player). Only the server should be able to assign mercs to the squads. Prevent selecting and controlling mercs from squads of other players.
+    - Replicate all SOLDIERTYPE pointers that it makes sense to.
 - Low priority:
     - Root-cause: how come the animation is not loaded for the client (see in the bottom).
     - Clear the written message in the box after it's sent to the chat (investigate and fix the issue).
