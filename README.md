@@ -20,9 +20,9 @@ Basically, JA2 Stracciatella cooperative should be the same thing as the singlep
     1. In the real-time mode. So that players can observe actions of each other and interact. (The object replication concept works well, but now only server can affect object parameters - i.e. do any action that is reflected on other sides. Need to offload client actions to the server side so it can then be broadcasted to everyone.)
     2. In the battle/turn-based mode.
 3. Moving to another sector:
-    1. From the tactical screen. Alpha demo.
+    1. From the tactical screen.
     2. From the strategic screen.
-4. Saving and loading.
+4. Saving and loading. Alpha demo.
 5. Full demo - from the helicopter in Omerta to Drassen capture.
 6. All the rest.
 
@@ -30,12 +30,10 @@ Basically, JA2 Stracciatella cooperative should be the same thing as the singlep
 
 - Regular priority:
     - Make client actions be processed on the server (i.e., so that the clients can trigger actions and observe their effect via the replication mechanism).
-    - Let only the server start game - grey out time compression for clients. Automatically broadcast and trigger game start from server to everyone.
+    - Let only the server start game (like it is done in 1.13) - grey out time compression for clients. Automatically broadcast and trigger game start from server to everyone.
     - Add 'ready' buttons in the lobby (like it is done in 1.13)? Think whether it's needed first.
     - Maybe it makes sense to consider placing mercs of every player in a separate squad. Think whether it's needed first.
     - Replicate all SOLDIERTYPE pointers.
-    - Fix "burst fatality" crash.
-    - Investigate (and fix if needed) AnimCache memset() crash.
 - Low priority:
     - Root-cause: how come the animation is not loaded for the client (see in the bottom).
     - Clear the written message in the box after it's sent to the chat (investigate and fix the issue).
@@ -46,10 +44,14 @@ Basically, JA2 Stracciatella cooperative should be the same thing as the singlep
     - Do the connection and auto-hiring earlier - before the laptop is open.
     - Verify successful connection before changing gConnected on client side.
     - Handle server disconnection on client side.
+    - Fix "burst fatality" crash.
+    - Investigate (and fix if needed) AnimCache memset() crash.
 
 Things worth mentioning and "dark knowledge":
 
 - For some reason the client doesn't have animations in place when the tactical screen is loading. By default it causes failure, so there is a workaround introduced that skips the failure and loads the missing animation instead.
+- Starting screen is the strategic map (lobby) instead of the laptop.
+- The intro videos at the beginning of the game are disabled.
 
 For debugging purposes:
 

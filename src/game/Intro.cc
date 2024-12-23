@@ -139,7 +139,9 @@ static void EnterIntroScreen(void)
 	iFirstVideoID = GetNextIntroVideo( SMKINTRO_FIRST_VIDEO );
 
 
-	if( iFirstVideoID != -1 )
+	// The 2nd condition below disables the intro videos at the beginning of the game
+	//if( iFirstVideoID != -1 )
+	if(( iFirstVideoID != -1 ) && ( iFirstVideoID != SMKINTRO_REBEL_CRDT ))
 	{
 
 		StartPlayingIntroFlic( iFirstVideoID );
