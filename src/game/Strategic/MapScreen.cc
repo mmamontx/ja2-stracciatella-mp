@@ -85,6 +85,16 @@
 
 using namespace RakNet;
 
+#define NUM_MP_BUTTONS 2
+#define MP_BTN_Y (162 + 106)
+
+#define PLAYER_X 12
+#define READY_X  124
+
+BUTTON_PICS *giMapMPButtonImage[NUM_MP_BUTTONS];
+INT gMapMPButtonsX[NUM_MP_BUTTONS] = {PLAYER_X, READY_X};
+GUIButtonRef giMapMPButton[NUM_MP_BUTTONS];
+
 #define MAX_SORT_METHODS					6
 
 // Fonts
@@ -1406,6 +1416,8 @@ ScreenID MapScreenHandle(void)
 
 		// handle the sort buttons
 		AddTeamPanelSortButtonsForMapScreen( );
+
+		AddMPButtonsForMapScreen();
 
 		// load bottom graphics
 		LoadMapScreenInterfaceBottom( );
@@ -3061,6 +3073,7 @@ static void GetMapKeyboardInput()
 				// Sending the message to others
 				struct USER_PACKET_MESSAGE up;
 				up.id = ID_USER_PACKET_MESSAGE;
+				up.service = FALSE;
 				strcpy(up.message, str.c_str());
 				gNetworkOptions.peer->Send((char*)&up, sizeof(up), MEDIUM_PRIORITY, RELIABLE, 0, UNASSIGNED_RAKNET_GUID, true);
 
@@ -3140,6 +3153,8 @@ void EndMapScreen( BOOLEAN fDuringFade )
 
 	// remove team panel sort button
 	RemoveTeamPanelSortButtonsForMapScreen( );
+
+	RemoveMPButtonsForMapScreen();
 
 	// for th merc insurance help text
 	CreateDestroyInsuranceMouseRegionForMercs( FALSE );
@@ -6399,6 +6414,72 @@ static void AddTeamPanelSortButtonsForMapScreen(void)
 }
 
 
+void MPReadyButtonCallback(GUI_BUTTON* btn, INT32 reason)
+{
+	int iIndex = btn->GetUserData();
+
+	if (reason & MSYS_CALLBACK_REASON_LBUTTON_DWN) {
+		btn->uiFlags |= (BUTTON_CLICKED_ON);
+	} else if (reason & MSYS_CALLBACK_REASON_LBUTTON_UP) {
+		if (iIndex == 1) {
+			gReady = !gReady;
+
+			if (IS_VALID_CLIENT) { // We are client - sending ready status message to the server
+				struct USER_PACKET_READY p;
+				p.id = ID_USER_PACKET_READY;
+				p.ready = gReady;
+				gNetworkOptions.peer->Send((char*)&p, sizeof(p), MEDIUM_PRIORITY, RELIABLE, 0, UNASSIGNED_RAKNET_GUID, true);
+			} else if (!(gGameOptions.fNetwork)) { // We are server
+				struct USER_PACKET_MESSAGE up_broadcast;
+				char str[256];
+
+				// Broadcasting that the server (name) is ready (or not ready)
+				sprintf(str, "%s is %s.", gNetworkOptions.name.c_str(), gReady ? "ready" : "not ready");
+				up_broadcast.id = ID_USER_PACKET_MESSAGE;
+				up_broadcast.service = TRUE;
+				strcpy(up_broadcast.message, str);
+				gNetworkOptions.peer->Send((char*)&up_broadcast, sizeof(up_broadcast), MEDIUM_PRIORITY, RELIABLE, 0, UNASSIGNED_RAKNET_GUID, true);
+
+				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, str); // Duplicating to the server chat
+
+				int total_ready = gReady ? 1 : 0; // 1 more if the server is ready
+
+				for (std::list<struct PLAYER>::iterator it = gPlayers.begin(); it != gPlayers.end(); it++)
+					if (it->ready)
+						total_ready++;
+
+				// Broadcasting the cumulative ready status
+				sprintf(str, "Ready: %d/%d", total_ready, (int)(gPlayers.size()) + 1); // 1 more for the server
+				strcpy(up_broadcast.message, str);
+				gNetworkOptions.peer->Send((char*)&up_broadcast, sizeof(up_broadcast), MEDIUM_PRIORITY, RELIABLE, 0, UNASSIGNED_RAKNET_GUID, true);
+
+				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, str); // Duplicating to the server chat
+			}
+		}
+	}
+
+	InvalidateRegion(btn->Area.RegionTopLeftX, btn->Area.RegionTopLeftY, btn->Area.RegionBottomRightX, btn->Area.RegionBottomRightY);
+}
+
+
+void AddMPButtonsForMapScreen(void)
+{
+	int iImageIndex[NUM_MP_BUTTONS] = {0, 5};
+	int iPressedIndex[NUM_MP_BUTTONS] = {0, 6};
+
+	for (int iCounter = 0; iCounter < NUM_MP_BUTTONS; iCounter++)
+	{
+		giMapMPButtonImage[iCounter] = LoadButtonImage("INTERFACE\\MPGOLDPIECEBUTTONS.sti",
+			-1, iImageIndex[iCounter], -1, iPressedIndex[iCounter], -1);
+
+		giMapMPButton[iCounter] = QuickCreateButton(giMapMPButtonImage[iCounter], gMapMPButtonsX[iCounter],
+			(INT16)(MP_BTN_Y), MSYS_PRIORITY_HIGHEST - 5, (GUI_CALLBACK)MPReadyButtonCallback);
+
+		giMapMPButton[iCounter]->SetUserData(iCounter);
+	}
+}
+
+
 static INT16 CalcLocationValueForChar(const SOLDIERTYPE*);
 static INT32 GetContractExpiryTime(const SOLDIERTYPE* s);
 static void SwapCharactersInList(INT32 iCharA, INT32 iCharB);
@@ -6589,6 +6670,17 @@ static void SwapCharactersInList(INT32 iCharA, INT32 iCharB)
 static void RemoveTeamPanelSortButtonsForMapScreen()
 {
 	FOR_EACH(GUIButtonRef, i, giMapSortButton) RemoveButton(*i);
+}
+
+
+void RemoveMPButtonsForMapScreen(void)
+{
+	for (int iCounter = 0; iCounter < NUM_MP_BUTTONS; iCounter++) {
+		UnloadButtonImage(giMapMPButtonImage[iCounter]);
+
+		if (iCounter < NUM_MP_BUTTONS)
+			RemoveButton(giMapMPButton[iCounter]);
+	}
 }
 
 

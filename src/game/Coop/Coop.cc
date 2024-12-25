@@ -16,6 +16,7 @@
 BOOL gConnected = FALSE;
 BOOL gEnemyEnabled = TRUE;
 BOOL gNetworkCreated = FALSE;
+BOOL gReady = FALSE;
 DataStructures::List<Replica3*> gReplicaList;
 NETWORK_OPTIONS gNetworkOptions;
 NetworkIDManager gNetworkIdManager;
@@ -135,6 +136,7 @@ DWORD WINAPI server_packet(LPVOID lpParam)
 				struct PLAYER player;
 				player.guid = p->guid;
 				strcpy(player.name, up->name);
+				player.ready = FALSE;
 				gPlayers.push_back(player);
 
 				break;
@@ -146,8 +148,48 @@ DWORD WINAPI server_packet(LPVOID lpParam)
 				up = (struct USER_PACKET_MESSAGE*)p->data;
 
 				for (std::list<struct PLAYER>::iterator it = gPlayers.begin(); it != gPlayers.end(); it++)
-					if (it->guid == p->guid)
-						ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, (ST::string)it->name + "> " + (ST::string)up->message);
+					if (it->guid == p->guid) {
+						ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, up->service ? ((ST::string)up->message) : ((ST::string)it->name + "> " + (ST::string)up->message));
+						break;
+					}
+
+				break;
+			}
+			case ID_USER_PACKET_READY:
+			{
+				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_USER_PACKET_READY");
+				struct USER_PACKET_READY* up;
+				struct USER_PACKET_MESSAGE up_broadcast;
+				char str[256];
+				int total_ready = gReady ? 1 : 0; // 1 more if the server is ready
+				up = (struct USER_PACKET_READY*)p->data;
+
+				for (std::list<struct PLAYER>::iterator it = gPlayers.begin(); it != gPlayers.end(); it++) {
+					if (it->guid == p->guid) {
+						it->ready = up->ready;
+
+						// Broadcasting the name of the person that is ready
+						sprintf(str, "%s is %s.", it->name, it->ready ? "ready" : "not ready");
+						up_broadcast.id = ID_USER_PACKET_MESSAGE;
+						up_broadcast.service = TRUE;
+						strcpy(up_broadcast.message, str);
+						gNetworkOptions.peer->Send((char*)&up_broadcast, sizeof(up_broadcast), MEDIUM_PRIORITY, RELIABLE, 0, UNASSIGNED_RAKNET_GUID, true);
+
+						ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, str); // Duplicating to the server chat
+					}
+
+					if (it->ready)
+						total_ready++;
+				}
+
+				// Broadcasting the cumulative ready status
+				sprintf(str, "Ready: %d/%d", total_ready, (int)(gPlayers.size()) + 1); // 1 more for the server
+				up_broadcast.id = ID_USER_PACKET_MESSAGE;
+				up_broadcast.service = TRUE;
+				strcpy(up_broadcast.message, str);
+				gNetworkOptions.peer->Send((char*)&up_broadcast, sizeof(up_broadcast), MEDIUM_PRIORITY, RELIABLE, 0, UNASSIGNED_RAKNET_GUID, true);
+
+				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, str); // Duplicating to the server chat
 
 				break;
 			}
@@ -264,7 +306,7 @@ DWORD WINAPI client_packet(LPVOID lpParam)
 				struct USER_PACKET_MESSAGE* up;
 				up = (struct USER_PACKET_MESSAGE*)p->data;
 
-				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, "?> " + (ST::string)up->message); // FIXME: As there is no gPlayers list the name is unknown and replaced with '?'
+				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, up->service ? ((ST::string)up->message) : ("?> " + (ST::string)up->message)); // FIXME: As there is no gPlayers list the name is unknown and replaced with '?'
 
 				break;
 			}

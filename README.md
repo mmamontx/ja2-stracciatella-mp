@@ -30,8 +30,7 @@ Basically, JA2 Stracciatella cooperative should be the same thing as the singlep
 
 - Regular priority:
     - Make client actions be processed on the server (i.e., so that the clients can trigger actions and observe their effect via the replication mechanism).
-    - Let only the server start game (like it is done in 1.13) - grey out time compression for clients. Automatically broadcast and trigger game start from server to everyone.
-    - Add 'ready' buttons in the lobby (like it is done in 1.13).
+    - Automatically broadcast and trigger game start from server to everyone.
     - Assign every player to a separate squad (first - automatically give a single squad, then - introduce a control so that the server can do it manually and assign multiple squads to a single player). Only the server should be able to assign mercs to the squads. Prevent selecting and controlling mercs from squads of other players.
     - Replicate all SOLDIERTYPE pointers that it makes sense to.
 - Low priority:
@@ -46,9 +45,14 @@ Basically, JA2 Stracciatella cooperative should be the same thing as the singlep
     - Handle server disconnection on client side.
     - Fix "burst fatality" crash.
     - Investigate (and fix if needed) AnimCache memset() crash.
+    - Fix columns width and add borders for MP buttons on the strategic screen. Adapt for all resolutions (including the widescreens).
+    - Add player names and the respective ready statuses to the columns.
+    - Verify repetitive starts and connections/disconnections within a single run.
+    - Fix gPlayers struct on disconnections.
 
 Things worth mentioning and "dark knowledge":
 
+- The modification requires images of buttons from 1.13 MP. They are located under the following path: Data/Interface/MPGOLDPIECEBUTTONS.sti
 - For some reason the client doesn't have animations in place when the tactical screen is loading. By default it causes failure, so there is a workaround introduced that skips the failure and loads the missing animation instead.
 - Starting screen is the strategic map (lobby) instead of the laptop.
 - The intro videos at the beginning of the game are disabled.

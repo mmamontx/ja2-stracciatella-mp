@@ -770,6 +770,15 @@ void EnableDisAbleMapScreenOptionsButton( BOOLEAN fEnable )
 
 BOOLEAN AllowedToTimeCompress( void )
 {
+	if (gGameOptions.fNetwork) { // We are client - can't time compress
+		return FALSE;
+	} else { // We are server
+		for (std::list<struct PLAYER>::iterator it = gPlayers.begin(); it != gPlayers.end(); it++)
+			if (!(it->ready))
+				return FALSE;
+		return gReady; // If every player (client) is ready then we check if the server is ready and, if so, enable time compression
+	}
+
 	// if already leaving, disallow any other attempts to exit
 	if ( fLeavingMapScreen )
 	{

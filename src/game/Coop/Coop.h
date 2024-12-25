@@ -12,6 +12,7 @@ using namespace RakNet;
 
 #define ID_USER_PACKET_NAME    ID_USER_PACKET_ENUM
 #define ID_USER_PACKET_MESSAGE (ID_USER_PACKET_ENUM + 1)
+#define ID_USER_PACKET_READY   (ID_USER_PACKET_ENUM + 2)
 
 #define MAX_NAME_LEN    16
 #define MAX_MESSAGE_LEN 128
@@ -36,12 +37,19 @@ struct USER_PACKET_NAME {
 
 struct USER_PACKET_MESSAGE {
 	unsigned char id;
+	BOOL service; // Service message - don't show the name before the message in the chat
 	char message[MAX_MESSAGE_LEN];
+};
+
+struct USER_PACKET_READY {
+	unsigned char id;
+	BOOL ready;
 };
 
 struct PLAYER {
 	RakNetGUID guid;
 	char name[MAX_NAME_LEN];
+	BOOL ready;
 };
 
 class SampleConnection : public Connection_RM3
@@ -77,6 +85,7 @@ class ReplicaManager3Sample : public ReplicaManager3
 extern BOOL gConnected;
 extern BOOL gEnemyEnabled;
 extern BOOL gNetworkCreated;
+extern BOOL gReady;
 extern DataStructures::List<Replica3*> gReplicaList;
 extern NETWORK_OPTIONS gNetworkOptions;
 extern NetworkIDManager gNetworkIdManager;

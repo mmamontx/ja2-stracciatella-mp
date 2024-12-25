@@ -41,6 +41,8 @@ extern BOOLEAN gfInChangeArrivalSectorMode;
 extern BOOLEAN gfSkyriderEmptyHelpGiven;
 
 
+void AddMPButtonsForMapScreen(void);
+void RemoveMPButtonsForMapScreen(void);
 void SetInfoChar(SOLDIERTYPE const*);
 void EndMapScreen( BOOLEAN fDuringFade );
 void ReBuildCharactersList( void );
