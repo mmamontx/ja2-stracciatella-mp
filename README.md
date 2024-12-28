@@ -39,8 +39,6 @@ Basically, JA2 Stracciatella cooperative should be the same thing as the singlep
     - Fix player name appearance in the chat on client side.
     - Make messages from client be broadcasted and received from the server before they appear in the chat on client side.
     - Fix the initial game connection screen (place the new buttons more friendly and add captions). Grey out game preferences when the client mode checkbox is marked.
-    - Remove intro movies when the game is started (for debugging purposes).
-    - Do the connection and auto-hiring earlier - before the laptop is open.
     - Verify successful connection before changing gConnected on client side.
     - Handle server disconnection on client side.
     - Fix "burst fatality" crash.
