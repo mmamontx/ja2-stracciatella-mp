@@ -1389,6 +1389,9 @@ ScreenID MapScreenHandle(void)
 	INT32 iCounter = 0;
 	static const SGPSector startSector(gamepolicy(start_sector));
 
+	if (gStarted)
+		RequestIncreaseInTimeCompression();
+
 	//DO NOT MOVE THIS FUNCTION CALL!!!
 	//This determines if the help screen should be active
 	if( ShouldTheHelpScreenComeUp( HelpScreenDetermineWhichMapScreenHelpToShow(), FALSE ) )
@@ -1669,10 +1672,10 @@ ScreenID MapScreenHandle(void)
 	if (!gfFirstMapscreenFrame)
 	{
 		if (!gfAtLeastOneMercWasHired)
-			if (!gGameOptions.fNetwork) // Create new objects for server only - they are supposed to be replicated
+			if (!(IS_CLIENT)) // Create new objects for server only - they are supposed to be replicated
 				HireRandomMercs(2); // FIXME: For debugging purposes only - to be removed
 
-		if ((gGameOptions.fNetwork) && (!gConnected)) { // If we are client - send connection request to the server
+		if ((IS_CLIENT) && (!gConnected)) { // If we are client - send connection request to the server
 			struct USER_PACKET_NAME p;
 			p.id = ID_USER_PACKET_NAME;
 			strcpy(p.name, gNetworkOptions.name.c_str());
@@ -1681,7 +1684,7 @@ ScreenID MapScreenHandle(void)
 		}
 
 		if (!gNetworkCreated) {
-			CreateThread(NULL, 0, gGameOptions.fNetwork ? client_packet : server_packet, NULL, 0, NULL);
+			CreateThread(NULL, 0, IS_CLIENT ? client_packet : server_packet, NULL, 0, NULL);
 
 			gNetworkCreated = TRUE;
 		}
@@ -6429,7 +6432,7 @@ void MPReadyButtonCallback(GUI_BUTTON* btn, INT32 reason)
 				p.id = ID_USER_PACKET_READY;
 				p.ready = gReady;
 				gNetworkOptions.peer->Send((char*)&p, sizeof(p), MEDIUM_PRIORITY, RELIABLE, 0, UNASSIGNED_RAKNET_GUID, true);
-			} else if (!(gGameOptions.fNetwork)) { // We are server
+			} else if (!(IS_CLIENT)) { // We are server
 				struct USER_PACKET_MESSAGE up_broadcast;
 				char str[256];
 

@@ -269,7 +269,7 @@ void InitNewGame()
 		gEnemyEnabled = FALSE; // FIXME: Disabling enemies for debugging purposes - to be removed
 		gNetworkOptions.peer = RakPeerInterface::GetInstance();
 
-		if (!gGameOptions.fNetwork)
+		if (!(IS_CLIENT))
 		{
 			ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, "We are server.");
 

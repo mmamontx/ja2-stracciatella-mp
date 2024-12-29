@@ -17,6 +17,7 @@ BOOL gConnected = FALSE;
 BOOL gEnemyEnabled = TRUE;
 BOOL gNetworkCreated = FALSE;
 BOOL gReady = FALSE;
+BOOL gStarted = FALSE;
 DataStructures::List<Replica3*> gReplicaList;
 NETWORK_OPTIONS gNetworkOptions;
 NetworkIDManager gNetworkIdManager;
@@ -307,6 +308,14 @@ DWORD WINAPI client_packet(LPVOID lpParam)
 				up = (struct USER_PACKET_MESSAGE*)p->data;
 
 				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, up->service ? ((ST::string)up->message) : ("?> " + (ST::string)up->message)); // FIXME: As there is no gPlayers list the name is unknown and replaced with '?'
+
+				break;
+			}
+			case ID_USER_PACKET_START:
+			{
+				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_USER_PACKET_START");
+
+				gStarted = TRUE;
 
 				break;
 			}

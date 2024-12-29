@@ -22,17 +22,18 @@ Basically, JA2 Stracciatella cooperative should be the same thing as the singlep
 3. Moving to another sector:
     1. From the tactical screen.
     2. From the strategic screen.
-4. Saving and loading. Alpha demo.
-5. Full demo - from the helicopter in Omerta to Drassen capture.
+4. Saving and loading.
+5. Full demo - from the helicopter in Omerta to Drassen capture. Alpha demo.
 6. All the rest.
 
 ## Backlog
 
 - Regular priority:
     - Make client actions be processed on the server (i.e., so that the clients can trigger actions and observe their effect via the replication mechanism).
-    - Automatically broadcast and trigger game start from server to everyone.
+    - Replicate ground items.
+    - Propagate time (including time compressions) from the server to clients.
+    - Replicate all SOLDIERTYPE pointers that it makes sense to. (Or wait until it will be resolved by itself.)
     - Assign every player to a separate squad (first - automatically give a single squad, then - introduce a control so that the server can do it manually and assign multiple squads to a single player). Only the server should be able to assign mercs to the squads. Prevent selecting and controlling mercs from squads of other players.
-    - Replicate all SOLDIERTYPE pointers that it makes sense to.
 - Low priority:
     - Root-cause: how come the animation is not loaded for the client (see in the bottom).
     - Clear the written message in the box after it's sent to the chat (investigate and fix the issue).

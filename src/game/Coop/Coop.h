@@ -6,6 +6,7 @@
 #include "RakPeerInterface.h"
 #include "ReplicaManager3.h"
 #undef GROUP
+#include "MessageIdentifiers.h"
 #include "Soldier_Control.h"
 
 using namespace RakNet;
@@ -13,6 +14,7 @@ using namespace RakNet;
 #define ID_USER_PACKET_NAME    ID_USER_PACKET_ENUM
 #define ID_USER_PACKET_MESSAGE (ID_USER_PACKET_ENUM + 1)
 #define ID_USER_PACKET_READY   (ID_USER_PACKET_ENUM + 2)
+#define ID_USER_PACKET_START   (ID_USER_PACKET_ENUM + 3)
 
 #define MAX_NAME_LEN    16
 #define MAX_MESSAGE_LEN 128
@@ -21,6 +23,7 @@ using namespace RakNet;
 
 #define KEY_RETURN 13
 
+#define IS_CLIENT       (gGameOptions.fNetwork)
 #define IS_VALID_CLIENT ((gGameOptions.fNetwork) && (gConnected) && (gReplicaList.Size() != 0))
 
 struct NETWORK_OPTIONS {
@@ -44,6 +47,10 @@ struct USER_PACKET_MESSAGE {
 struct USER_PACKET_READY {
 	unsigned char id;
 	BOOL ready;
+};
+
+struct USER_PACKET_START {
+	unsigned char id;
 };
 
 struct PLAYER {
@@ -86,6 +93,7 @@ extern BOOL gConnected;
 extern BOOL gEnemyEnabled;
 extern BOOL gNetworkCreated;
 extern BOOL gReady;
+extern BOOL gStarted;
 extern DataStructures::List<Replica3*> gReplicaList;
 extern NETWORK_OPTIONS gNetworkOptions;
 extern NetworkIDManager gNetworkIdManager;

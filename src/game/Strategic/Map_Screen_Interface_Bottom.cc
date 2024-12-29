@@ -770,8 +770,11 @@ void EnableDisAbleMapScreenOptionsButton( BOOLEAN fEnable )
 
 BOOLEAN AllowedToTimeCompress( void )
 {
-	if (gGameOptions.fNetwork) { // We are client - can't time compress
-		return FALSE;
+	if (IS_CLIENT) { // We are client - can't time compress
+		if (gStarted)
+			return TRUE;
+		else
+			return FALSE;
 	} else { // We are server
 		for (std::list<struct PLAYER>::iterator it = gPlayers.begin(); it != gPlayers.end(); it++)
 			if (!(it->ready))

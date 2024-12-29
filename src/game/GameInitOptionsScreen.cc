@@ -323,7 +323,7 @@ static void EnterGIOScreen()
 	{ // Check box to toggle Network options
 		INT16  const x = 0; // FIXME: Define a constant and set a proper position
 		INT16  const y = 75; // FIXME: Define a constant and set a proper position
-		size_t const def = gGameOptions.fNetwork ? GIO_CLIENT : GIO_SERVER;
+		size_t const def = IS_CLIENT ? GIO_CLIENT : GIO_SERVER;
 		MakeCheckBoxes(guiNetworkOptionToggles, lengthof(guiNetworkOptionToggles), x, y, BtnNetworkOptionsTogglesCallback, def);
 	}
 
