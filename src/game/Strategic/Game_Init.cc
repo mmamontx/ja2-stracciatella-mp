@@ -40,6 +40,7 @@
 #include "PreBattle_Interface.h"
 #include "Queen_Command.h"
 #include "Quests.h"
+#include "RakNet/RPC4Plugin.h"
 #include "Random.h"
 #include "SAM_Sites.h"
 #include "SaveLoadGameStates.h"
@@ -268,6 +269,10 @@ void InitNewGame()
 
 		gEnemyEnabled = FALSE; // FIXME: Disabling enemies for debugging purposes - to be removed
 		gNetworkOptions.peer = RakPeerInterface::GetInstance();
+
+		// Register RPC
+		gNetworkOptions.peer->AttachPlugin(&gRPC);
+		gRPC.RegisterSlot("HandleRPC", HandleRPC, 0);
 
 		if (!(IS_CLIENT))
 		{

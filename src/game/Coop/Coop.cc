@@ -7,6 +7,9 @@
 #include "Message.h"
 #include "Overhead.h"
 #include "RakNet/MessageIdentifiers.h"
+#define GROUP GROUP_JA2
+#include "RakNet/RPC4Plugin.h"
+#undef GROUP
 #include "Random.h"
 #include "Soldier_Profile.h"
 #include "Strategic.h"
@@ -17,11 +20,14 @@ BOOL gConnected = FALSE;
 BOOL gEnemyEnabled = TRUE;
 BOOL gNetworkCreated = FALSE;
 BOOL gReady = FALSE;
+BOOL gRPC_Exec = TRUE;
 BOOL gStarted = FALSE;
 DataStructures::List<Replica3*> gReplicaList;
 NETWORK_OPTIONS gNetworkOptions;
 NetworkIDManager gNetworkIdManager;
 ReplicaManager3Sample gReplicaManager;
+RPC4 gRPC;
+std::list<RPC_DATA> gRPC_Events;
 std::list<struct PLAYER> gPlayers;
 
 DWORD WINAPI replicamgr(LPVOID lpParam)
@@ -198,6 +204,9 @@ DWORD WINAPI server_packet(LPVOID lpParam)
 				// Changed scope of an object
 				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_REPLICA_MANAGER_SCOPE_CHANGE");
 				break;
+			case ID_RPC_PLUGIN:
+				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_RPC_PLUGIN");
+				break;
 			default:
 				char unknown_id[3];
 				itoa(SpacketIdentifier, unknown_id, 10);
@@ -335,4 +344,14 @@ DWORD WINAPI client_packet(LPVOID lpParam)
 	}
 
 	return 0;
+}
+
+void HandleRPC(RakNet::BitStream* bitStream, RakNet::Packet* packet)
+{
+	RPC_DATA data;
+	int offset = bitStream->GetReadOffset();
+	bool read = bitStream->ReadCompressed(data);
+	RakAssert(read);
+
+	gRPC_Events.push_back(data);
 }

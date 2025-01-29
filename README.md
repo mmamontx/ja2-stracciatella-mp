@@ -29,12 +29,14 @@ Basically, JA2 Stracciatella cooperative should be the same thing as the singlep
 ## Backlog
 
 - Regular priority:
-    - Make client actions be processed on the server (i.e., so that the clients can trigger actions and observe their effect via the replication mechanism).
+    - Implement remaining RPC actions from the client.
     - Replicate ground items.
     - Propagate time (including time compressions) from the server to clients.
+- Low priority:
+    - Fix the occasional crash on the client connection to the lobby.
     - Replicate all SOLDIERTYPE pointers that it makes sense to. (Or wait until it will be resolved by itself.)
     - Assign every player to a separate squad (first - automatically give a single squad, then - introduce a control so that the server can do it manually and assign multiple squads to a single player). Only the server should be able to assign mercs to the squads. Prevent selecting and controlling mercs from squads of other players.
-- Low priority:
+    - Reset the time compression button when a new player connects to the lobby.
     - Root-cause: how come the animation is not loaded for the client (see in the bottom).
     - Clear the written message in the box after it's sent to the chat (investigate and fix the issue).
     - Fix player name appearance in the chat on client side.
@@ -53,13 +55,16 @@ Things worth mentioning and "dark knowledge":
 
 - The modification requires images of buttons from 1.13 MP. They are located under the following path: Data/Interface/MPGOLDPIECEBUTTONS.sti
 - For some reason the client doesn't have animations in place when the tactical screen is loading. By default it causes failure, so there is a workaround introduced that skips the failure and loads the missing animation instead.
+
+Changes compared to the vanilla game (from the player perspective):
+
 - Starting screen is the strategic map (lobby) instead of the laptop.
 - The intro videos at the beginning of the game are disabled.
+- Helicopter drop-off animation is disabled (see the FIXME in Merc_Entering.cc) - it accelerates debugging, and it's overall questionable whether for multiplayer it makes sense to keep it enabled.
 
 For debugging purposes:
 
 - There is a custom function - HireRandomMercs() - that is automatically called in the beginning (accelerates debugging so one doesn't have to always visit AIM). This code is only executed for the server, the client receives replicated mercs.
-- Helicopter drop-off animation is disabled (see the FIXME in Merc_Entering.cc) - accelerates debugging.
 - The enemies are disabled (see gEnemyEnabled var) - until implementation of the battle/turn-based mode is started.
 
 Contact: mmamontx@gmail.com

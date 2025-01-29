@@ -493,13 +493,61 @@ ScreenID HandleTacticalUI(void)
 	// Clearing it does things like set first time flag, param variavles, etc
 	if ( uiNewEvent != guiOldEvent )
 	{
-		// Snap mouse back if it's that type
-		if ( gEvents[ guiOldEvent ].uiFlags & UIEVENT_SNAPMOUSE )
-		{
-			SimulateMouseMovement( (UINT32)gusSavedMouseX, (UINT32)gusSavedMouseY );
-		}
+		if (IS_CLIENT) { // Execute the new event remotely on the server side
+			SOLDIERTYPE* sel;
+			RakNet::BitStream testBs;
+			RPC_DATA data;
 
-		ClearEvent( &gEvents[ uiNewEvent ] );
+			data.puiNewEvent = uiNewEvent;
+
+			switch (uiNewEvent) {
+			case C_MOVE_MERC:
+				sel = GetSelectedMan();
+
+				data.id = Soldier2ID(sel);
+				data.usMapPos = guiCurrentCursorGridNo;
+				data.fUIMovementFast = sel->fUIMovementFast;
+
+				testBs.WriteCompressed(data);
+
+				gRPC.Signal("HandleRPC", &testBs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, gNetworkOptions.peer->GetSystemAddressFromIndex(0), false, false);
+
+				break;
+			// No need to implement:
+			case C_WAIT_FOR_CONFIRM:
+			case I_SELECT_MERC:
+			// TBD?
+			case A_CHANGE_TO_CONFIM_ACTION:
+			case A_END_ACTION:
+			case A_ON_TERRAIN:
+			case CA_MERC_SHOOT:
+			case M_CHANGE_TO_ACTION:
+			case M_CHANGE_TO_ADJPOS_MODE:
+			case M_ON_TERRAIN:
+			case PADJ_ADJUST_STANCE:
+			case LU_ENDUILOCK:
+				break;
+			default: // Other unimplemented event
+				SLOGI("uiNewEvent = {}", uiNewEvent);
+				break;
+			}
+		} else {
+			// Snap mouse back if it's that type
+			if (gEvents[guiOldEvent].uiFlags & UIEVENT_SNAPMOUSE)
+			{
+				SimulateMouseMovement((UINT32)gusSavedMouseX, (UINT32)gusSavedMouseY);
+			}
+
+			ClearEvent(&gEvents[uiNewEvent]);
+
+			gRPC_Exec = FALSE;
+		}
+	} else if (!(IS_CLIENT)) { // If there is no local event, a remote event can be executed (if there is one)
+		if (!(gRPC_Events.empty())) {
+			uiNewEvent = gRPC_Events.front().puiNewEvent;
+
+			gRPC_Exec = TRUE;
+		}
 	}
 
 	// Restore not scrolling from stance adjust....
@@ -1617,14 +1665,25 @@ static ScreenID UIHandleCMoveMerc(UI_EVENT* pUIEvent)
 	LEVELNODE *pIntTile;
 	INT16 sIntTileGridNo;
 	BOOLEAN fOldFastMove;
+	BOOLEAN fRemote = gRPC_Events.empty() ? FALSE : TRUE;
+	RPC_DATA data;
 
-	SOLDIERTYPE* const sel = GetSelectedMan();
+	SOLDIERTYPE* sel;
+	if (fRemote && gRPC_Exec) { // Check if there is a pending RPC from a client, and, if so, execute it (if permitted)
+		data = gRPC_Events.front();
+		sel = ID2Soldier(data.id);
+		sel->fUIMovementFast = data.fUIMovementFast;
+		gRPC_Events.pop_front();
+	} else {
+		sel = GetSelectedMan();
+	}
+
 	if (sel != NULL)
 	{
 		fAllMove = gfUIAllMoveOn;
 		gfUIAllMoveOn = FALSE;
 
-		const GridNo usMapPos = guiCurrentCursorGridNo;
+		const GridNo usMapPos = (fRemote && gRPC_Exec) ? data.usMapPos : guiCurrentCursorGridNo;
 		if (usMapPos == NOWHERE) return GAME_SCREEN;
 
 		// ERASE PATH

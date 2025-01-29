@@ -1,12 +1,15 @@
 #ifndef COOP_H
 #define COOP_H
 
+#include "Handle_UI.h"
 #define GROUP GROUP_JA2
 #include "NetworkIDManager.h"
+#include "RakNet/RPC4Plugin.h"
 #include "RakPeerInterface.h"
 #include "ReplicaManager3.h"
 #undef GROUP
 #include "MessageIdentifiers.h"
+#include "MouseSystem.h"
 #include "Soldier_Control.h"
 
 using namespace RakNet;
@@ -59,6 +62,13 @@ struct PLAYER {
 	BOOL ready;
 };
 
+struct RPC_DATA {
+	UIEventKind puiNewEvent;
+	SoldierID id;
+	GridNo usMapPos;
+	BOOLEAN fUIMovementFast;
+};
+
 class SampleConnection : public Connection_RM3
 {
 public:
@@ -93,17 +103,21 @@ extern BOOL gConnected;
 extern BOOL gEnemyEnabled;
 extern BOOL gNetworkCreated;
 extern BOOL gReady;
+extern BOOL gRPC_Exec; // So that remote events don't overwrite local events
 extern BOOL gStarted;
 extern DataStructures::List<Replica3*> gReplicaList;
 extern NETWORK_OPTIONS gNetworkOptions;
 extern NetworkIDManager gNetworkIdManager;
 extern ReplicaManager3Sample gReplicaManager;
+extern RPC4 gRPC;
+extern std::list<RPC_DATA> gRPC_Events;
 extern std::list<struct PLAYER> gPlayers;
 
-extern DWORD WINAPI client_packet(LPVOID lpParam);
-extern DWORD WINAPI replicamgr(LPVOID lpParam);
-extern DWORD WINAPI server_packet(LPVOID lpParam);
-extern unsigned char SGetPacketIdentifier(Packet* p);
 extern void HireRandomMercs(unsigned int n);
+extern void HandleRPC(RakNet::BitStream* bitStream, RakNet::Packet* packet);
+extern unsigned char SGetPacketIdentifier(Packet* p);
+extern DWORD WINAPI server_packet(LPVOID lpParam);
+extern DWORD WINAPI replicamgr(LPVOID lpParam);
+extern DWORD WINAPI client_packet(LPVOID lpParam);
 
 #endif
