@@ -1665,11 +1665,11 @@ static ScreenID UIHandleCMoveMerc(UI_EVENT* pUIEvent)
 	LEVELNODE *pIntTile;
 	INT16 sIntTileGridNo;
 	BOOLEAN fOldFastMove;
-	BOOLEAN fRemote = gRPC_Events.empty() ? FALSE : TRUE;
+	BOOLEAN fRemote = ((gRPC_Events.empty() == FALSE) && gRPC_Exec) ? TRUE : FALSE;
 	RPC_DATA data;
 
 	SOLDIERTYPE* sel;
-	if (fRemote && gRPC_Exec) { // Check if there is a pending RPC from a client, and, if so, execute it (if permitted)
+	if (fRemote) { // Check if there is a pending RPC from a client, and, if so, execute it (if permitted)
 		data = gRPC_Events.front();
 		sel = ID2Soldier(data.id);
 		sel->fUIMovementFast = data.fUIMovementFast;
@@ -1683,7 +1683,7 @@ static ScreenID UIHandleCMoveMerc(UI_EVENT* pUIEvent)
 		fAllMove = gfUIAllMoveOn;
 		gfUIAllMoveOn = FALSE;
 
-		const GridNo usMapPos = (fRemote && gRPC_Exec) ? data.usMapPos : guiCurrentCursorGridNo;
+		const GridNo usMapPos = fRemote ? data.usMapPos : guiCurrentCursorGridNo;
 		if (usMapPos == NOWHERE) return GAME_SCREEN;
 
 		// ERASE PATH
