@@ -29,6 +29,8 @@ using namespace RakNet;
 #define IS_CLIENT       (gGameOptions.fNetwork)
 #define IS_VALID_CLIENT ((gGameOptions.fNetwork) && (gConnected) && (gReplicaList.Size() != 0))
 
+#define RPC_READY ((gRPC_Events.empty() == FALSE) && gRPC_Exec)
+
 struct NETWORK_OPTIONS {
 	ST::string name;
 	ST::string ip;
@@ -65,8 +67,10 @@ struct PLAYER {
 struct RPC_DATA {
 	UIEventKind puiNewEvent;
 	SoldierID id;
+	SoldierID tgt_id;
 	GridNo usMapPos;
 	BOOLEAN fUIMovementFast;
+	INT8 bNewStance;
 };
 
 class SampleConnection : public Connection_RM3
@@ -113,11 +117,15 @@ extern RPC4 gRPC;
 extern std::list<RPC_DATA> gRPC_Events;
 extern std::list<struct PLAYER> gPlayers;
 
-extern void HireRandomMercs(unsigned int n);
-extern void HandleRPC(RakNet::BitStream* bitStream, RakNet::Packet* packet);
-extern unsigned char SGetPacketIdentifier(Packet* p);
-extern DWORD WINAPI server_packet(LPVOID lpParam);
-extern DWORD WINAPI replicamgr(LPVOID lpParam);
 extern DWORD WINAPI client_packet(LPVOID lpParam);
+extern DWORD WINAPI replicamgr(LPVOID lpParam);
+extern DWORD WINAPI server_packet(LPVOID lpParam);
+extern unsigned char SGetPacketIdentifier(Packet* p);
+extern void BeginSoldierClimbDownRoofRPC(RakNet::BitStream* bitStream, RakNet::Packet* packet);
+extern void BeginSoldierClimbFenceRPC(RakNet::BitStream* bitStream, RakNet::Packet* packet);
+extern void BeginSoldierClimbUpRoofRPC(RakNet::BitStream* bitStream, RakNet::Packet* packet);
+extern void HandleEventRPC(RakNet::BitStream* bitStream, RakNet::Packet* packet);
+extern void HireRandomMercs(unsigned int n);
+extern void UIHandleSoldierStanceChangeRPC(RakNet::BitStream* bitStream, RakNet::Packet* packet);
 
 #endif

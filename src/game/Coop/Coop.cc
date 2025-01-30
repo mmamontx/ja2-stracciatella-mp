@@ -346,7 +346,47 @@ DWORD WINAPI client_packet(LPVOID lpParam)
 	return 0;
 }
 
-void HandleRPC(RakNet::BitStream* bitStream, RakNet::Packet* packet)
+void BeginSoldierClimbUpRoofRPC(RakNet::BitStream* bitStream, RakNet::Packet* packet)
+{
+	RPC_DATA data;
+	int offset = bitStream->GetReadOffset();
+	bool read = bitStream->ReadCompressed(data);
+	RakAssert(read);
+
+	BeginSoldierClimbUpRoof(ID2Soldier(data.id));
+}
+
+void BeginSoldierClimbDownRoofRPC(RakNet::BitStream* bitStream, RakNet::Packet* packet)
+{
+	RPC_DATA data;
+	int offset = bitStream->GetReadOffset();
+	bool read = bitStream->ReadCompressed(data);
+	RakAssert(read);
+
+	BeginSoldierClimbDownRoof(ID2Soldier(data.id));
+}
+
+void BeginSoldierClimbFenceRPC(RakNet::BitStream* bitStream, RakNet::Packet* packet)
+{
+	RPC_DATA data;
+	int offset = bitStream->GetReadOffset();
+	bool read = bitStream->ReadCompressed(data);
+	RakAssert(read);
+
+	BeginSoldierClimbFence(ID2Soldier(data.id));
+}
+
+void UIHandleSoldierStanceChangeRPC(RakNet::BitStream* bitStream, RakNet::Packet* packet)
+{
+	RPC_DATA data;
+	int offset = bitStream->GetReadOffset();
+	bool read = bitStream->ReadCompressed(data);
+	RakAssert(read);
+
+	UIHandleSoldierStanceChange(ID2Soldier(data.id), data.bNewStance);
+}
+
+void HandleEventRPC(RakNet::BitStream* bitStream, RakNet::Packet* packet)
 {
 	RPC_DATA data;
 	int offset = bitStream->GetReadOffset();

@@ -495,12 +495,20 @@ ScreenID HandleTacticalUI(void)
 	{
 		if (IS_CLIENT) { // Execute the new event remotely on the server side
 			SOLDIERTYPE* sel;
-			RakNet::BitStream testBs;
+			RakNet::BitStream bs;
 			RPC_DATA data;
 
 			data.puiNewEvent = uiNewEvent;
 
 			switch (uiNewEvent) {
+			case A_CHANGE_TO_CONFIM_ACTION:
+				break;
+			case A_CHANGE_TO_MOVE:
+				break;
+			case A_END_ACTION: // The crosshair cursor is de-activated
+				break;
+			case A_ON_TERRAIN: // The crosshair cursor is activated
+				break;
 			case C_MOVE_MERC:
 				sel = GetSelectedMan();
 
@@ -508,28 +516,43 @@ ScreenID HandleTacticalUI(void)
 				data.usMapPos = guiCurrentCursorGridNo;
 				data.fUIMovementFast = sel->fUIMovementFast;
 
-				testBs.WriteCompressed(data);
+				bs.WriteCompressed(data);
 
-				gRPC.Signal("HandleRPC", &testBs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, gNetworkOptions.peer->GetSystemAddressFromIndex(0), false, false);
+				gRPC.Signal("HandleEventRPC", &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, gNetworkOptions.peer->GetSystemAddressFromIndex(0), false, false);
 
 				break;
-			// No need to implement:
 			case C_WAIT_FOR_CONFIRM:
-			case I_SELECT_MERC:
-			// TBD?
-			case A_CHANGE_TO_CONFIM_ACTION:
-			case A_END_ACTION:
-			case A_ON_TERRAIN:
+				break;
 			case CA_MERC_SHOOT:
-			case M_CHANGE_TO_ACTION:
-			case M_CHANGE_TO_ADJPOS_MODE:
-			case M_ON_TERRAIN:
-			case PADJ_ADJUST_STANCE:
+				sel = GetSelectedMan();
+
+				data.id = Soldier2ID(sel);
+				data.usMapPos = guiCurrentCursorGridNo;
+				data.tgt_id = Soldier2ID(gUIFullTarget);
+
+				bs.WriteCompressed(data);
+
+				gRPC.Signal("HandleEventRPC", &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, gNetworkOptions.peer->GetSystemAddressFromIndex(0), false, false);
+
+				break;
+			case HC_ON_TERRAIN: // The hand cursor is activated
+				break;
+			case I_SELECT_MERC:
+				break;
 			case LU_ENDUILOCK:
+				break;
+			case M_CHANGE_TO_ACTION:
+				break;
+			case M_CHANGE_TO_ADJPOS_MODE:
+				break;
+			case M_ON_TERRAIN: // The movement cursor is activated
+				break;
+			case OP_OPENDOORMENU:
+				break;
+			case PADJ_ADJUST_STANCE:
 				break;
 			default: // Other unimplemented event
 				SLOGI("uiNewEvent = {}", uiNewEvent);
-				break;
 			}
 		} else {
 			// Snap mouse back if it's that type
@@ -565,7 +588,15 @@ ScreenID HandleTacticalUI(void)
 	}
 
 	// HANDLE UI EVENT
-	ScreenID const ReturnVal = gEvents[uiNewEvent].HandleEvent(&gEvents[uiNewEvent]);
+	ScreenID ReturnVal = GAME_SCREEN;
+	switch (uiNewEvent) { // For clients omit local execution of the events that are handed over to the server
+	case C_MOVE_MERC:
+	case CA_MERC_SHOOT:
+		if (IS_CLIENT)
+			break;
+	default:
+		ReturnVal = gEvents[uiNewEvent].HandleEvent(&gEvents[uiNewEvent]);
+	}
 
 	if ( gfInOpenDoorMenu )
 	{
@@ -1665,11 +1696,11 @@ static ScreenID UIHandleCMoveMerc(UI_EVENT* pUIEvent)
 	LEVELNODE *pIntTile;
 	INT16 sIntTileGridNo;
 	BOOLEAN fOldFastMove;
-	BOOLEAN fRemote = ((gRPC_Events.empty() == FALSE) && gRPC_Exec) ? TRUE : FALSE;
 	RPC_DATA data;
+	BOOL fRPC = RPC_READY;
 
 	SOLDIERTYPE* sel;
-	if (fRemote) { // Check if there is a pending RPC from a client, and, if so, execute it (if permitted)
+	if (fRPC) {
 		data = gRPC_Events.front();
 		sel = ID2Soldier(data.id);
 		sel->fUIMovementFast = data.fUIMovementFast;
@@ -1683,7 +1714,7 @@ static ScreenID UIHandleCMoveMerc(UI_EVENT* pUIEvent)
 		fAllMove = gfUIAllMoveOn;
 		gfUIAllMoveOn = FALSE;
 
-		const GridNo usMapPos = fRemote ? data.usMapPos : guiCurrentCursorGridNo;
+		const GridNo usMapPos = fRPC ? data.usMapPos : guiCurrentCursorGridNo;
 		if (usMapPos == NOWHERE) return GAME_SCREEN;
 
 		// ERASE PATH
@@ -2321,17 +2352,28 @@ static void AttackRequesterCallback(MessageBoxReturnValue const bExitValue)
 
 static ScreenID UIHandleCAMercShoot(UI_EVENT* pUIEvent)
 {
-	SOLDIERTYPE* const sel = GetSelectedMan();
+	RPC_DATA data;
+	BOOL fRPC = RPC_READY;
+
+	SOLDIERTYPE* sel;
+	if (fRPC) {
+		data = gRPC_Events.front();
+		sel = ID2Soldier(data.id);
+	} else {
+		sel = GetSelectedMan();
+	}
+
 	if (sel == NULL) return GAME_SCREEN;
 	// preinit to prevent false ap costs; actions which dont charge turning ap
 	// are coming after this line and put the value to true
 	sel->fDontChargeTurningAPs = FALSE;
 
-	const GridNo usMapPos = guiCurrentCursorGridNo;
+	const GridNo usMapPos = fRPC ? data.usMapPos : guiCurrentCursorGridNo;
 	if (usMapPos == NOWHERE) return GAME_SCREEN;
 
-	SOLDIERTYPE* const tgt = gUIFullTarget;
-	if (tgt != NULL)
+	SOLDIERTYPE* const tgt = fRPC ? ID2Soldier(data.tgt_id) : gUIFullTarget;
+	// FIXME: The confirmation pop-up is disabled since it appears on the server
+	/*if (tgt != NULL)
 	{
 		// If this is one of our own guys.....pop up requiester...
 		if ((tgt->bTeam == OUR_TEAM || tgt->bTeam == MILITIA_TEAM) &&
@@ -2348,7 +2390,7 @@ static ScreenID UIHandleCAMercShoot(UI_EVENT* pUIEvent)
 			DoMessageBox(MSG_BOX_BASIC_STYLE, zStr, GAME_SCREEN, MSG_BOX_FLAG_YESNO, AttackRequesterCallback, NULL);
 			return GAME_SCREEN;
 		}
-	}
+	}*/
 
 	UIHandleMercAttack(sel, tgt, usMapPos);
 
@@ -2863,6 +2905,22 @@ static BOOLEAN SoldierCanAffordNewStance(SOLDIERTYPE* pSoldier, UINT8 ubDesiredS
 
 void UIHandleSoldierStanceChange(SOLDIERTYPE* s, INT8 bNewStance)
 {
+	if (IS_CLIENT) {
+		RPC_DATA data;
+		RakNet::BitStream bs;
+
+		data.id = Soldier2ID(s);
+		data.bNewStance = bNewStance;
+
+		bs.WriteCompressed(data);
+
+		gRPC.Signal("UIHandleSoldierStanceChangeRPC", &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, gNetworkOptions.peer->GetSystemAddressFromIndex(0), false, false);
+
+		// FIXME: Update the stance in the bottom menu of the client
+
+		return;
+	}
+
 	// Is this a valid stance for our position?
 	if (!IsValidStance(s, bNewStance))
 	{

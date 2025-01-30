@@ -272,7 +272,13 @@ void InitNewGame()
 
 		// Register RPC
 		gNetworkOptions.peer->AttachPlugin(&gRPC);
-		gRPC.RegisterSlot("HandleRPC", HandleRPC, 0);
+
+		gRPC.RegisterSlot("HandleEventRPC", HandleEventRPC, 0);
+
+		gRPC.RegisterSlot("BeginSoldierClimbFenceRPC", BeginSoldierClimbFenceRPC, 0);
+		gRPC.RegisterSlot("BeginSoldierClimbUpRoofRPC", BeginSoldierClimbUpRoofRPC, 0);
+		gRPC.RegisterSlot("BeginSoldierClimbDownRoofRPC", BeginSoldierClimbDownRoofRPC, 0);
+		gRPC.RegisterSlot("UIHandleSoldierStanceChangeRPC", UIHandleSoldierStanceChangeRPC, 0);
 
 		if (!(IS_CLIENT))
 		{

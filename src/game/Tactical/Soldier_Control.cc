@@ -5180,18 +5180,29 @@ static void InternalReceivingSoldierCancelServices(SOLDIERTYPE* pSoldier, BOOLEA
 
 void BeginSoldierClimbUpRoof(SOLDIERTYPE* const s)
 {
-	UINT8 direction;
-	if (!FindHigherLevel(s, &direction)) return;
+	if (IS_CLIENT) {
+		RPC_DATA data;
+		RakNet::BitStream bs;
 
-	if (!EnoughPoints(s, GetAPsToClimbRoof(s, FALSE), 0, TRUE)) return;
+		data.id = Soldier2ID(s);
 
-	if (s->bTeam == OUR_TEAM) SetUIBusy(s);
+		bs.WriteCompressed(data);
 
-	s->sTempNewGridNo     = NewGridNo(s->sGridNo, DirectionInc(direction));
-	s->ubPendingDirection = direction;
-	EVENT_InitNewSoldierAnim(s, CLIMBUPROOF, 0, FALSE);
-	InternalReceivingSoldierCancelServices(s, FALSE);
-	InternalGivingSoldierCancelServices(s, FALSE);
+		gRPC.Signal("BeginSoldierClimbUpRoofRPC", &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, gNetworkOptions.peer->GetSystemAddressFromIndex(0), false, false);
+	} else {
+		UINT8 direction;
+		if (!FindHigherLevel(s, &direction)) return;
+
+		if (!EnoughPoints(s, GetAPsToClimbRoof(s, FALSE), 0, TRUE)) return;
+
+		if (s->bTeam == OUR_TEAM) SetUIBusy(s);
+
+		s->sTempNewGridNo     = NewGridNo(s->sGridNo, DirectionInc(direction));
+		s->ubPendingDirection = direction;
+		EVENT_InitNewSoldierAnim(s, CLIMBUPROOF, 0, FALSE);
+		InternalReceivingSoldierCancelServices(s, FALSE);
+		InternalGivingSoldierCancelServices(s, FALSE);
+	}
 }
 
 
@@ -5212,16 +5223,27 @@ void BeginSoldierClimbWindow(SOLDIERTYPE* const s)
 
 void BeginSoldierClimbFence(SOLDIERTYPE* const s)
 {
-	UINT8 direction;
-	if (!FindFenceJumpDirection(s, &direction)) return;
+	if (IS_CLIENT) {
+		RPC_DATA data;
+		RakNet::BitStream bs;
 
-	s->sTempNewGridNo            = NewGridNo(s->sGridNo, DirectionInc(direction));
-	s->fDontChargeTurningAPs     = TRUE;
-	EVENT_SetSoldierDesiredDirectionForward(s, direction);
-	s->fTurningUntilDone         = TRUE;
-	// ATE: Reset flag to go back to prone
-	s->fTurningFromPronePosition = TURNING_FROM_PRONE_OFF;
-	s->usPendingAnimation        = HOPFENCE;
+		data.id = Soldier2ID(s);
+
+		bs.WriteCompressed(data);
+
+		gRPC.Signal("BeginSoldierClimbFenceRPC", &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, gNetworkOptions.peer->GetSystemAddressFromIndex(0), false, false);
+	} else {
+		UINT8 direction;
+		if (!FindFenceJumpDirection(s, &direction)) return;
+
+		s->sTempNewGridNo            = NewGridNo(s->sGridNo, DirectionInc(direction));
+		s->fDontChargeTurningAPs     = TRUE;
+		EVENT_SetSoldierDesiredDirectionForward(s, direction);
+		s->fTurningUntilDone         = TRUE;
+		// ATE: Reset flag to go back to prone
+		s->fTurningFromPronePosition = TURNING_FROM_PRONE_OFF;
+		s->usPendingAnimation        = HOPFENCE;
+	}
 }
 
 
@@ -6194,18 +6216,29 @@ BOOLEAN CheckSoldierHitRoof( SOLDIERTYPE *pSoldier )
 
 void BeginSoldierClimbDownRoof(SOLDIERTYPE* const s)
 {
-	UINT8 direction;
-	if (!FindLowerLevel(s, &direction)) return;
+	if (IS_CLIENT) {
+		RPC_DATA data;
+		RakNet::BitStream bs;
 
-	if (!EnoughPoints(s, GetAPsToClimbRoof(s, TRUE), 0, TRUE)) return;
+		data.id = Soldier2ID(s);
 
-	if (s->bTeam == OUR_TEAM) SetUIBusy(s);
+		bs.WriteCompressed(data);
 
-	s->sTempNewGridNo     = NewGridNo(s->sGridNo, DirectionInc(direction));
-	s->ubPendingDirection = TwoCDirection(direction);
-	EVENT_InitNewSoldierAnim(s, CLIMBDOWNROOF, 0, FALSE);
-	InternalReceivingSoldierCancelServices(s, FALSE);
-	InternalGivingSoldierCancelServices(s, FALSE);
+		gRPC.Signal("BeginSoldierClimbDownRoofRPC", &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, gNetworkOptions.peer->GetSystemAddressFromIndex(0), false, false);
+	} else {
+		UINT8 direction;
+		if (!FindLowerLevel(s, &direction)) return;
+
+		if (!EnoughPoints(s, GetAPsToClimbRoof(s, TRUE), 0, TRUE)) return;
+
+		if (s->bTeam == OUR_TEAM) SetUIBusy(s);
+
+		s->sTempNewGridNo     = NewGridNo(s->sGridNo, DirectionInc(direction));
+		s->ubPendingDirection = TwoCDirection(direction);
+		EVENT_InitNewSoldierAnim(s, CLIMBDOWNROOF, 0, FALSE);
+		InternalReceivingSoldierCancelServices(s, FALSE);
+		InternalGivingSoldierCancelServices(s, FALSE);
+	}
 }
 
 

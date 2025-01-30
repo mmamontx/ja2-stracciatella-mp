@@ -29,11 +29,19 @@ Basically, JA2 Stracciatella cooperative should be the same thing as the singlep
 ## Backlog
 
 - Regular priority:
-    - Implement remaining RPC actions from the client.
+    - Implement the remaining RPC actions from the client:
+        - Opening doors.
+        - Dropping and picking up items.
+        - Cutting fences.
+        - Etc.
     - Replicate ground items.
     - Propagate time (including time compressions) from the server to clients.
 - Low priority:
-    - Fix the occasional crash on the client connection to the lobby.
+    - When climbing to and back from roofs change the level only for the player that initiated it.
+    - For fun: It seems that originally developers considered enabling jumps over the windows and left the corresponding code in place. Try to extend climbing with this ability.
+    - Testing: manual and automated.
+    - Fix the bug when client mercs do not arrive in time and become inaccessible.
+    - Fix the sporadic client crashes when it connects to the lobby.
     - Replicate all SOLDIERTYPE pointers that it makes sense to. (Or wait until it will be resolved by itself.)
     - Assign every player to a separate squad (first - automatically give a single squad, then - introduce a control so that the server can do it manually and assign multiple squads to a single player). Only the server should be able to assign mercs to the squads. Prevent selecting and controlling mercs from squads of other players.
     - Reset the time compression button when a new player connects to the lobby.
@@ -61,6 +69,7 @@ Changes compared to the vanilla game (from the player perspective):
 - Starting screen is the strategic map (lobby) instead of the laptop.
 - The intro videos at the beginning of the game are disabled.
 - Helicopter drop-off animation is disabled (see the FIXME in Merc_Entering.cc) - it accelerates debugging, and it's overall questionable whether for multiplayer it makes sense to keep it enabled.
+- The additional table on the strategic map (re-consider later).
 
 For debugging purposes:
 
