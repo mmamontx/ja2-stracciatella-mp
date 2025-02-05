@@ -275,9 +275,13 @@ void InitNewGame()
 
 		gRPC.RegisterSlot("HandleEventRPC", HandleEventRPC, 0);
 
+		gRPC.RegisterSlot("BeginItemPointerRPC", BeginItemPointerRPC, 0);
+		gRPC.RegisterSlot("BeginSoldierClimbDownRoofRPC", BeginSoldierClimbDownRoofRPC, 0);
 		gRPC.RegisterSlot("BeginSoldierClimbFenceRPC", BeginSoldierClimbFenceRPC, 0);
 		gRPC.RegisterSlot("BeginSoldierClimbUpRoofRPC", BeginSoldierClimbUpRoofRPC, 0);
-		gRPC.RegisterSlot("BeginSoldierClimbDownRoofRPC", BeginSoldierClimbDownRoofRPC, 0);
+		gRPC.RegisterSlot("ChangeWeaponModeRPC", ChangeWeaponModeRPC, 0);
+		gRPC.RegisterSlot("HandleItemPointerClickRPC", HandleItemPointerClickRPC, 0);
+		gRPC.RegisterSlot("UIHandleItemPlacementRPC", UIHandleItemPlacementRPC, 0);
 		gRPC.RegisterSlot("UIHandleSoldierStanceChangeRPC", UIHandleSoldierStanceChangeRPC, 0);
 
 		if (!(IS_CLIENT))

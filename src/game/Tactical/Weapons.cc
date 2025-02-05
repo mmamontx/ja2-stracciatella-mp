@@ -3797,6 +3797,19 @@ void EnsureConsistentWeaponMode(SOLDIERTYPE* const s)
 // the cycle NORMAL ➔ BURST ➔ ATTACHED
 void ChangeWeaponMode(SOLDIERTYPE* const s)
 {
+	if (IS_CLIENT) {
+		RakNet::BitStream bs;
+		RPC_DATA data;
+
+		data.id = Soldier2ID(s);
+
+		bs.WriteCompressed(data);
+
+		gRPC.Signal("ChangeWeaponModeRPC", &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, gNetworkOptions.peer->GetSystemAddressFromIndex(0), false, false);
+
+		return;
+	}
+
 	// ATE: Don't do this if in a fire amimation.....
 	if (gAnimControl[s->usAnimState].uiFlags & ANIM_FIRE) return;
 

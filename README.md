@@ -31,12 +31,22 @@ Basically, JA2 Stracciatella cooperative should be the same thing as the singlep
 - Regular priority:
     - Implement the remaining RPC actions from the client:
         - Opening doors.
-        - Dropping and picking up items.
+        - Picking up items (after ground items are replicated - see below).
+        - Interacting with chests and taking/placing items there.
+        - Healing.
+        - Throwing grenades and knifes.
+        - Placing charges.
+        - Talking (so that the effects of talking propagate to the server).
+        - Propagate stealth mode.
         - Cutting fences.
         - Etc.
     - Replicate ground items.
     - Propagate time (including time compressions) from the server to clients.
 - Low priority:
+    - Make IsValidTalkableNPC() support RPCs.
+    - Implement respective item pointers for multiple clients.
+    - Moving and equipping items in the inventory between different mercs.
+    - Multi-selection actions.
     - When climbing to and back from roofs change the level only for the player that initiated it.
     - For fun: It seems that originally developers considered enabling jumps over the windows and left the corresponding code in place. Try to extend climbing with this ability.
     - Testing: manual and automated.

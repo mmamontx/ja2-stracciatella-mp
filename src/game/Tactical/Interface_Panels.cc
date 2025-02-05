@@ -1513,6 +1513,23 @@ BOOLEAN HandleNailsVestFetish(const SOLDIERTYPE* const s, const UINT32 uiHandPos
 
 static BOOLEAN UIHandleItemPlacement(UINT8 ubHandPos, UINT16 usOldItemIndex, UINT16 usNewItemIndex, BOOLEAN fDeductPoints)
 {
+	if (IS_CLIENT) {
+		RPC_DATA data;
+		RakNet::BitStream bs;
+
+		data.id = Soldier2ID(gpSMCurrentMerc);
+		data.ubHandPos = ubHandPos;
+		data.ubKeyDown = _KeyDown(CTRL);
+
+		bs.WriteCompressed(data);
+
+		gRPC.Signal("UIHandleItemPlacementRPC", &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, gNetworkOptions.peer->GetSystemAddressFromIndex(0), false, false);
+
+		EndItemPointer();
+
+		return(TRUE);
+	}
+
 	if ( _KeyDown(CTRL) )
 	{
 		CleanUpStack( &( gpSMCurrentMerc->inv[ ubHandPos ] ), gpItemPointer );

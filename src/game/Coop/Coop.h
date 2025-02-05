@@ -65,12 +65,16 @@ struct PLAYER {
 };
 
 struct RPC_DATA {
+	BOOLEAN inv; // There are two types of RPC events: 0 - regular, which are placed to the back of the list and executed one per frame via gRPC_Exec;
+	             //                                    1 - inventory, which are placed to the front of the list and executed right away.
 	UIEventKind puiNewEvent;
 	SoldierID id;
 	SoldierID tgt_id;
 	GridNo usMapPos;
 	BOOLEAN fUIMovementFast;
 	INT8 bNewStance;
+	UINT8 ubHandPos;
+	UINT8 ubKeyDown;
 };
 
 class SampleConnection : public Connection_RM3
@@ -107,11 +111,12 @@ extern BOOL gConnected;
 extern BOOL gEnemyEnabled;
 extern BOOL gNetworkCreated;
 extern BOOL gReady;
-extern BOOL gRPC_Exec; // So that remote events don't overwrite local events
+extern BOOL gRPC_Exec;
 extern BOOL gStarted;
 extern DataStructures::List<Replica3*> gReplicaList;
 extern NETWORK_OPTIONS gNetworkOptions;
 extern NetworkIDManager gNetworkIdManager;
+extern OBJECTTYPE* gpItemPointerRPC;
 extern ReplicaManager3Sample gReplicaManager;
 extern RPC4 gRPC;
 extern std::list<RPC_DATA> gRPC_Events;
@@ -121,11 +126,15 @@ extern DWORD WINAPI client_packet(LPVOID lpParam);
 extern DWORD WINAPI replicamgr(LPVOID lpParam);
 extern DWORD WINAPI server_packet(LPVOID lpParam);
 extern unsigned char SGetPacketIdentifier(Packet* p);
+extern void BeginItemPointerRPC(RakNet::BitStream* bitStream, RakNet::Packet* packet);
 extern void BeginSoldierClimbDownRoofRPC(RakNet::BitStream* bitStream, RakNet::Packet* packet);
 extern void BeginSoldierClimbFenceRPC(RakNet::BitStream* bitStream, RakNet::Packet* packet);
 extern void BeginSoldierClimbUpRoofRPC(RakNet::BitStream* bitStream, RakNet::Packet* packet);
+extern void ChangeWeaponModeRPC(RakNet::BitStream* bitStream, RakNet::Packet* packet);
 extern void HandleEventRPC(RakNet::BitStream* bitStream, RakNet::Packet* packet);
+extern void HandleItemPointerClickRPC(RakNet::BitStream* bitStream, RakNet::Packet* packet);
 extern void HireRandomMercs(unsigned int n);
+extern void UIHandleItemPlacementRPC(RakNet::BitStream* bitStream, RakNet::Packet* packet);
 extern void UIHandleSoldierStanceChangeRPC(RakNet::BitStream* bitStream, RakNet::Packet* packet);
 
 #endif

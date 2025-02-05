@@ -499,17 +499,24 @@ ScreenID HandleTacticalUI(void)
 			RPC_DATA data;
 
 			data.puiNewEvent = uiNewEvent;
+			data.inv = FALSE;
 
 			switch (uiNewEvent) {
 			case A_CHANGE_TO_CONFIM_ACTION:
+				//SLOGI("A_CHANGE_TO_CONFIM_ACTION");
 				break;
 			case A_CHANGE_TO_MOVE:
+				//SLOGI("A_CHANGE_TO_MOVE");
 				break;
 			case A_END_ACTION: // The crosshair cursor is de-activated
+				//SLOGI("A_END_ACTION");
 				break;
 			case A_ON_TERRAIN: // The crosshair cursor is activated
+				//SLOGI("A_ON_TERRAIN");
 				break;
 			case C_MOVE_MERC:
+				//SLOGI("C_MOVE_MERC");
+
 				sel = GetSelectedMan();
 
 				data.id = Soldier2ID(sel);
@@ -522,8 +529,11 @@ ScreenID HandleTacticalUI(void)
 
 				break;
 			case C_WAIT_FOR_CONFIRM:
+				//SLOGI("C_WAIT_FOR_CONFIRM");
 				break;
 			case CA_MERC_SHOOT:
+				//SLOGI("CA_MERC_SHOOT");
+
 				sel = GetSelectedMan();
 
 				data.id = Soldier2ID(sel);
@@ -536,20 +546,47 @@ ScreenID HandleTacticalUI(void)
 
 				break;
 			case HC_ON_TERRAIN: // The hand cursor is activated
+				//SLOGI("HC_ON_TERRAIN");
 				break;
 			case I_SELECT_MERC:
+				//SLOGI("I_SELECT_MERC");
+				break;
+			case LC_ON_TERRAIN:
+				//SLOGI("LC_ON_TERRAIN");
+				break;
+			case LC_CHANGE_TO_LOOK:
+				//SLOGI("LC_CHANGE_TO_LOOK");
+				break;
+			case LC_LOOK:
+				//SLOGI("LC_LOOK");
+
+				sel = GetSelectedMan();
+
+				data.id = Soldier2ID(sel);
+				data.usMapPos = guiCurrentCursorGridNo;
+
+				bs.WriteCompressed(data);
+
+				gRPC.Signal("HandleEventRPC", &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, gNetworkOptions.peer->GetSystemAddressFromIndex(0), false, false);
+
 				break;
 			case LU_ENDUILOCK:
+				//SLOGI("LU_ENDUILOCK");
 				break;
 			case M_CHANGE_TO_ACTION:
+				//SLOGI("M_CHANGE_TO_ACTION");
 				break;
 			case M_CHANGE_TO_ADJPOS_MODE:
+				//SLOGI("M_CHANGE_TO_ADJPOS_MODE");
 				break;
 			case M_ON_TERRAIN: // The movement cursor is activated
+				//SLOGI("M_ON_TERRAIN");
 				break;
 			case OP_OPENDOORMENU:
+				//SLOGI("OP_OPENDOORMENU");
 				break;
 			case PADJ_ADJUST_STANCE:
+				//SLOGI("PADJ_ADJUST_STANCE");
 				break;
 			default: // Other unimplemented event
 				SLOGI("uiNewEvent = {}", uiNewEvent);
@@ -592,6 +629,7 @@ ScreenID HandleTacticalUI(void)
 	switch (uiNewEvent) { // For clients omit local execution of the events that are handed over to the server
 	case C_MOVE_MERC:
 	case CA_MERC_SHOOT:
+	case LC_LOOK:
 		if (IS_CLIENT)
 			break;
 	default:
@@ -2359,6 +2397,7 @@ static ScreenID UIHandleCAMercShoot(UI_EVENT* pUIEvent)
 	if (fRPC) {
 		data = gRPC_Events.front();
 		sel = ID2Soldier(data.id);
+		gRPC_Events.pop_front();
 	} else {
 		sel = GetSelectedMan();
 	}
@@ -3967,7 +4006,15 @@ static BOOLEAN MakeSoldierTurn(SOLDIERTYPE* const pSoldier, const GridNo pos)
 
 static ScreenID UIHandleLCLook(UI_EVENT* pUIEvent)
 {
-	const GridNo pos = guiCurrentCursorGridNo;
+	RPC_DATA data;
+	BOOL fRPC = RPC_READY;
+
+	if (fRPC) {
+		data = gRPC_Events.front();
+		gRPC_Events.pop_front();
+	}
+
+	const GridNo pos = fRPC ? data.usMapPos : guiCurrentCursorGridNo;
 	if (pos == NOWHERE) return GAME_SCREEN;
 
 	if ( gTacticalStatus.fAtLeastOneGuyOnMultiSelect )
@@ -3983,7 +4030,11 @@ static ScreenID UIHandleLCLook(UI_EVENT* pUIEvent)
 	}
 	else
 	{
-		SOLDIERTYPE* const sel = GetSelectedMan();
+		SOLDIERTYPE* sel;
+		if (fRPC)
+			sel = ID2Soldier(data.id);
+		else
+			sel = GetSelectedMan();
 		if (sel == NULL) return GAME_SCREEN;
 
 		if (MakeSoldierTurn(sel, pos)) SetUIBusy(sel);

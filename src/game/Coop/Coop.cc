@@ -1,6 +1,9 @@
 #include "Animation_Control.h"
 #include "Faces.h"
 #include "Game_Clock.h"
+#include "Interface_Items.h"
+#include "Interface_Panels.h"
+#include "Items.h"
 #include "Map_Screen_Interface.h"
 #include "MapScreen.h"
 #include "Merc_Hiring.h"
@@ -13,6 +16,7 @@
 #include "Random.h"
 #include "Soldier_Profile.h"
 #include "Strategic.h"
+#include "Weapons.h"
 
 #include <Game_Event_Hook.h>
 
@@ -20,11 +24,12 @@ BOOL gConnected = FALSE;
 BOOL gEnemyEnabled = TRUE;
 BOOL gNetworkCreated = FALSE;
 BOOL gReady = FALSE;
-BOOL gRPC_Exec = TRUE;
+BOOL gRPC_Exec = TRUE; // Enables remote events so that they don't overlap with local events
 BOOL gStarted = FALSE;
 DataStructures::List<Replica3*> gReplicaList;
 NETWORK_OPTIONS gNetworkOptions;
 NetworkIDManager gNetworkIdManager;
+OBJECTTYPE* gpItemPointerRPC; // FIXME: Item dragged by the cursor - this single shared variable would cause conflicts for multiple clients
 ReplicaManager3Sample gReplicaManager;
 RPC4 gRPC;
 std::list<RPC_DATA> gRPC_Events;
@@ -376,6 +381,67 @@ void BeginSoldierClimbFenceRPC(RakNet::BitStream* bitStream, RakNet::Packet* pac
 	BeginSoldierClimbFence(ID2Soldier(data.id));
 }
 
+void ChangeWeaponModeRPC(RakNet::BitStream* bitStream, RakNet::Packet* packet)
+{
+	RPC_DATA data;
+	int offset = bitStream->GetReadOffset();
+	bool read = bitStream->ReadCompressed(data);
+	RakAssert(read);
+
+	ChangeWeaponMode(ID2Soldier(data.id));
+}
+
+void UIHandleItemPlacementRPC(RakNet::BitStream* bitStream, RakNet::Packet* packet)
+{
+	RPC_DATA data;
+	int offset = bitStream->GetReadOffset();
+	bool read = bitStream->ReadCompressed(data);
+	RakAssert(read);
+
+	BOOLEAN fDeductPoints = FALSE; // TODO: Find out if the item is being passed to another person
+
+	if (data.ubKeyDown)
+	{
+		CleanUpStack(&(ID2Soldier(data.id)->inv[data.ubHandPos]), gpItemPointerRPC);
+		return;
+	}
+
+	// Try to place here
+	if (PlaceObject(ID2Soldier(data.id), data.ubHandPos, gpItemPointerRPC))
+	{
+		// TODO
+		/*if (fDeductPoints)
+		{
+			// Deduct points
+			if (gpItemPointerSoldier->bLife >= CONSCIOUSNESS)
+			{
+				DeductPoints(gpItemPointerSoldier, 2, 0);
+			}
+			if (gpSMCurrentMerc->bLife >= CONSCIOUSNESS)
+			{
+				DeductPoints(gpSMCurrentMerc, 2, 0);
+			}
+		}*/
+
+		HandleTacticalEffectsOfEquipmentChange(ID2Soldier(data.id), data.ubHandPos, ID2Soldier(data.id)->inv[data.ubHandPos].usItem, gpItemPointerRPC->usItem);
+
+		// Dirty
+		fInterfacePanelDirty = DIRTYLEVEL2;
+
+		// TODO: Enable the check below (based on fDeductPoints?), propage the message to the client
+		/*if (gpItemPointerSoldier != gpSMCurrentMerc)
+		{
+			ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, st_format_printf(pMessageStrings[MSG_ITEM_PASSED_TO_MERC], GCM->getItem(usNewItemIndex)->getShortName(), gpSMCurrentMerc->name));
+		}*/
+
+		// TODO: Check if the call below is needed and, if so, enable it
+		/*if (gpItemPointer != NULL)
+		{
+			ReevaluateItemHatches(gpSMCurrentMerc, FALSE);
+		}*/
+	}
+}
+
 void UIHandleSoldierStanceChangeRPC(RakNet::BitStream* bitStream, RakNet::Packet* packet)
 {
 	RPC_DATA data;
@@ -384,6 +450,41 @@ void UIHandleSoldierStanceChangeRPC(RakNet::BitStream* bitStream, RakNet::Packet
 	RakAssert(read);
 
 	UIHandleSoldierStanceChange(ID2Soldier(data.id), data.bNewStance);
+}
+
+void HandleItemPointerClickRPC(RakNet::BitStream* bitStream, RakNet::Packet* packet)
+{
+	RPC_DATA data;
+	int offset = bitStream->GetReadOffset();
+	bool read = bitStream->ReadCompressed(data);
+	RakAssert(read);
+
+	gRPC_Events.push_front(data);
+
+	HandleItemPointerClick(data.usMapPos);
+}
+
+void BeginItemPointerRPC(RakNet::BitStream* bitStream, RakNet::Packet* packet)
+{
+	RPC_DATA data;
+	int offset = bitStream->GetReadOffset();
+	bool read = bitStream->ReadCompressed(data);
+	RakAssert(read);
+
+	SOLDIERTYPE* const pSoldier = ID2Soldier(data.id);
+
+	gpItemPointerRPC = new OBJECTTYPE{};
+
+	if (data.ubKeyDown) {
+		RemoveObjectFromSlot(pSoldier, data.ubHandPos, gpItemPointerRPC);
+	} else {
+		GetObjFrom(&(pSoldier->inv[data.ubHandPos]), 0, gpItemPointerRPC);
+	}
+
+	fInterfacePanelDirty = DIRTYLEVEL2; // Interface has to be redrawn for the server to show the released slot
+
+	// The call below is not a part of BeginItemPointer(), but comes right after it
+	HandleTacticalEffectsOfEquipmentChange(pSoldier, data.ubHandPos, pSoldier->inv[data.ubHandPos].usItem, NOTHING);
 }
 
 void HandleEventRPC(RakNet::BitStream* bitStream, RakNet::Packet* packet)
