@@ -1,10 +1,10 @@
-# JA2-Stracciatella Cooperative Multiplayer
+# JA2-Stracciatella Multiplayer
 
-This project is a fork of JA2 Stracciatella attempting to introduce cooperative multiplayer to Jagged Alliance 2. It is based on JA2 Stracciatella project and leverages JA2 1.13 experience. However, here the approach is different from 1.13: rather than introducing a separate multiplayer game mode - rewritten and limited to individual skirmishes - this particular implementation directly alters singleplayer campaign (code) to make it support cooperative play.
+This project is a fork of JA2 Stracciatella introducing multiplayer to Jagged Alliance 2. It is based on JA2 Stracciatella project and leverages JA2 1.13 multiplayer experience. However, here the approach is different from 1.13 MP: rather than introducing a separate multiplayer game mode - rewritten and limited to individual skirmishes - this particular implementation directly alters singleplayer campaign (code) to make it support cooperative play.
 
 ## Vision
 
-Basically, JA2 Stracciatella cooperative should be the same thing as the singleplayer, but enabling other players to observe everything from their PCs and use their own controls. It is just as if the players would play hotseat (like some of us did it as kids when we took turns to tell "our" merc what to do), but with 2+ PCs instead of a single one. Considering this the changes are not expected to be too complex and mostly should consist of minor alterations since the original code is not designed for multiplayer. However, there is one thing that does introduce complications: somehow all the game status should be synchronized between the players. JA2 1.13 handles this rather plainly by a number of callbacks that manually reflect parameters of individual objects to other players when various game events happen. Since the code is big, as the game session moves forward, the inability to track down everything causes discrepancies between what players observe and, eventually, crashes. Moreover, this approach would require too much effort to enable the campaign. Here, RakNet object replication mechanism is used to address this problem and handle it in a more natural fashion. The implementation approach is straightforward: start the regular game from the beginning and introduce multiplayer functionality where it is naturally expected. Fix crashes caused by changes; if necessary, add supporting code and structures; and move forward step by step.
+Basically, JA2 Stracciatella multiplayer is the same thing as the singleplayer, but enabling other players to observe everything from their PCs and use their own controls. It is just as if the players would play hotseat (like some of us did it as kids when we took turns to tell "our" merc what to do), but with 2+ PCs instead of a single one. Considering this the changes are not expected to be too complex and mostly would consist of minor alterations caused by the fact that the original code is not designed for multiplayer. At the same time it is rather "immersive", which makes it relatively easy to be adapted for handling MP logic. The cornerstone of this is that somehow all the game status has to be synchronized between the players. JA2 1.13 handles this rather plainly by a number of callbacks that manually reflect parameters of individual objects to other players when various game events happen. Since the code is big, as the game session moves forward, the inability to track down everything causes discrepancies between what players observe and, eventually, crashes. Moreover, this approach would probably require too much "manual" effort to enable the campaign. Here, RakNet object replication mechanism is used to address this problem and handle it in a more natural fashion. The implementation approach is straightforward: start the regular game from the beginning and introduce multiplayer functionality where it is naturally expected. Fix crashes caused by changes; if necessary, add supporting code and structures; and move forward step by step.
 
 ## Manifesto
 
@@ -15,15 +15,15 @@ Basically, JA2 Stracciatella cooperative should be the same thing as the singlep
 
 ## Roadmap (Milestones) - from the player perspective
 
-1. Multiplayer on the strategic screen. So that players can see squad members and chat messages of each other. (Basic functionality - for game beginning before the helicopter drop in Omerta - is done, need to introduce minor fixes.)
+1. Multiplayer on the strategic screen. So that players can see squad members and chat messages of each other. **Basic functionality - for game beginning before the helicopter drop in Omerta - is done, need to introduce "cosmetic" fixes and do some extra testing.**
 2. Multiplayer on the tactical screen:
-    1. In the real-time mode. So that players can observe actions of each other and interact. (The object replication concept works well, but now only server can affect object parameters - i.e. do any action that is reflected on other sides. Need to offload client actions to the server side so it can then be broadcasted to everyone.)
+    1. In the real-time mode. So that players can observe actions of each other and interact. **The object replication concept works well. Now offloading all the possible client (merc) actions to the server side so it can then be broadcasted to everyone - mostly done.**
     2. In the battle/turn-based mode.
 3. Moving to another sector:
     1. From the tactical screen.
     2. From the strategic screen.
 4. Saving and loading.
-5. Full demo - from the helicopter in Omerta to Drassen capture. Alpha demo.
+5. Alpha demo - from the helicopter in Omerta to Drassen capture.
 6. All the rest.
 
 ## Backlog
@@ -44,11 +44,11 @@ Basically, JA2 Stracciatella cooperative should be the same thing as the singlep
     - Propagate time (including time compressions) from the server to clients.
 - Low priority:
     - Make IsValidTalkableNPC() support RPCs.
-    - Implement respective item pointers for multiple clients.
+    - Implement respective item pointers for multiple clients: replace gpItemPointerRPC.
     - Moving and equipping items in the inventory between different mercs.
     - Multi-selection actions.
     - When climbing to and back from roofs change the level only for the player that initiated it.
-    - For fun: It seems that originally developers considered enabling jumps over the windows and left the corresponding code in place. Try to extend climbing with this ability.
+    - For fun: It seems that originally developers considered enabling jumps over the windows and left the corresponding code in place. Try to extend climbing with this ability (remove it or make it optional in the release).
     - Testing: manual and automated.
     - Fix the bug when client mercs do not arrive in time and become inaccessible.
     - Fix the sporadic client crashes when it connects to the lobby.
