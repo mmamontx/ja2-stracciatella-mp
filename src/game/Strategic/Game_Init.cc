@@ -279,6 +279,7 @@ void InitNewGame()
 		gRPC.RegisterSlot("BeginSoldierClimbDownRoofRPC", BeginSoldierClimbDownRoofRPC, 0);
 		gRPC.RegisterSlot("BeginSoldierClimbFenceRPC", BeginSoldierClimbFenceRPC, 0);
 		gRPC.RegisterSlot("BeginSoldierClimbUpRoofRPC", BeginSoldierClimbUpRoofRPC, 0);
+		gRPC.RegisterSlot("BtnStealthModeCallbackRPC", BtnStealthModeCallbackRPC, 0);
 		gRPC.RegisterSlot("ChangeWeaponModeRPC", ChangeWeaponModeRPC, 0);
 		gRPC.RegisterSlot("HandleItemPointerClickRPC", HandleItemPointerClickRPC, 0);
 		gRPC.RegisterSlot("UIHandleItemPlacementRPC", UIHandleItemPlacementRPC, 0);

@@ -381,6 +381,21 @@ void BeginSoldierClimbFenceRPC(RakNet::BitStream* bitStream, RakNet::Packet* pac
 	BeginSoldierClimbFence(ID2Soldier(data.id));
 }
 
+void BtnStealthModeCallbackRPC(RakNet::BitStream* bitStream, RakNet::Packet* packet)
+{
+	RPC_DATA data;
+	int offset = bitStream->GetReadOffset();
+	bool read = bitStream->ReadCompressed(data);
+	RakAssert(read);
+
+	SOLDIERTYPE* const s = ID2Soldier(data.id);
+
+	gpSMCurrentMerc->bStealthMode = !(s->bStealthMode);
+	gfUIStanceDifferent = TRUE;
+	gfPlotNewMovement = TRUE; // Not sure if it is needed, but let it be
+	fInterfacePanelDirty = DIRTYLEVEL2;
+}
+
 void ChangeWeaponModeRPC(RakNet::BitStream* bitStream, RakNet::Packet* packet)
 {
 	RPC_DATA data;

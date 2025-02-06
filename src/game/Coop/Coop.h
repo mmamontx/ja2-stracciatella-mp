@@ -134,6 +134,7 @@ extern void ChangeWeaponModeRPC(RakNet::BitStream* bitStream, RakNet::Packet* pa
 extern void HandleEventRPC(RakNet::BitStream* bitStream, RakNet::Packet* packet);
 extern void HandleItemPointerClickRPC(RakNet::BitStream* bitStream, RakNet::Packet* packet);
 extern void HireRandomMercs(unsigned int n);
+extern void BtnStealthModeCallbackRPC(RakNet::BitStream* bitStream, RakNet::Packet* packet);
 extern void UIHandleItemPlacementRPC(RakNet::BitStream* bitStream, RakNet::Packet* packet);
 extern void UIHandleSoldierStanceChangeRPC(RakNet::BitStream* bitStream, RakNet::Packet* packet);
 

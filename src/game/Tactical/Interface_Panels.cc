@@ -2112,10 +2112,24 @@ static void BtnStealthModeCallback(GUI_BUTTON* btn, UINT32 reason)
 {
 	if (reason & MSYS_CALLBACK_REASON_POINTER_UP)
 	{
+		// Changing the state locally ahead of the server seems wrong,
+		// however, since gfUIStanceDifferent redraws the interface based on
+		// bStealthMode, there seems to be no elegant way to do this
 		gpSMCurrentMerc->bStealthMode = !gpSMCurrentMerc->bStealthMode;
 		gfUIStanceDifferent = TRUE;
 		gfPlotNewMovement = TRUE;
 		fInterfacePanelDirty = DIRTYLEVEL2;
+
+		if (IS_CLIENT) {
+			RakNet::BitStream bs;
+			RPC_DATA data;
+
+			data.id = Soldier2ID(gpSMCurrentMerc);
+
+			bs.WriteCompressed(data);
+
+			gRPC.Signal("BtnStealthModeCallbackRPC", &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, gNetworkOptions.peer->GetSystemAddressFromIndex(0), false, false);
+		}
 	}
 }
 

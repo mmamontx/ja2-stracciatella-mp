@@ -28,6 +28,24 @@ Basically, JA2 Stracciatella multiplayer is the same thing as the singleplayer, 
 
 ## Backlog
 
+- Incomplete:
+    - Swapping items (putting one and taking another in cursor) in the inventory slot.
+    - Moving and equipping items in the inventory between different mercs.
+    - Make IsValidTalkableNPC() support RPCs.
+    - When climbing to and back from roofs change the level only for the player that initiated it.
+    - Implement respective item pointers on the server side for multiple clients: replace gpItemPointerRPC.
+    - Fix the initial game connection screen (place the new buttons more friendly and add captions). Grey out game preferences when the client mode checkbox is marked.
+    - Clear the written message in the box after it's sent to the chat (investigate and fix the issue). Make messages from client be broadcasted and received from the server before they appear in the chat on client side. Fix player name appearance in the chat on client side.
+    - Fix columns width and add borders for MP buttons on the strategic screen. Adapt for all resolutions (including the widescreens). Add player names and the respective ready statuses to the columns.
+    - Verify successful connection before changing gConnected on client side. Handle server disconnection on client side. Fix gPlayers struct on disconnections (on server side). Reset the time compression button when a new player connects to the lobby.
+    - Review and replicate all SOLDIERTYPE pointers that it makes sense to, and don't replicate the ones that are not supposed to be replicated.
+- Bugs:
+    - Some the original squares where mercs occur become unavailable for moving to (for the client).
+    - Fix the bug when client mercs do not arrive in time and become inaccessible.
+    - Fix the sporadic client crashes when it connects to the lobby.
+    - Fix "burst fatality" crash.
+    - Investigate (and fix if needed) AnimCache memset() crash.
+    - Root-cause: how come the animation is not loaded for the client (see in the bottom).
 - Regular priority:
     - Implement the remaining RPC actions from the client:
         - Opening doors.
@@ -37,37 +55,16 @@ Basically, JA2 Stracciatella multiplayer is the same thing as the singleplayer, 
         - Throwing grenades and knifes.
         - Placing charges.
         - Talking (so that the effects of talking propagate to the server).
-        - Propagate stealth mode.
         - Cutting fences.
         - Etc.
     - Replicate ground items.
+    - Multi-selection actions.
     - Propagate time (including time compressions) from the server to clients.
 - Low priority:
-    - Make IsValidTalkableNPC() support RPCs.
-    - Implement respective item pointers for multiple clients: replace gpItemPointerRPC.
-    - Moving and equipping items in the inventory between different mercs.
-    - Multi-selection actions.
-    - When climbing to and back from roofs change the level only for the player that initiated it.
-    - For fun: It seems that originally developers considered enabling jumps over the windows and left the corresponding code in place. Try to extend climbing with this ability (remove it or make it optional in the release).
-    - Testing: manual and automated.
-    - Fix the bug when client mercs do not arrive in time and become inaccessible.
-    - Fix the sporadic client crashes when it connects to the lobby.
-    - Replicate all SOLDIERTYPE pointers that it makes sense to. (Or wait until it will be resolved by itself.)
     - Assign every player to a separate squad (first - automatically give a single squad, then - introduce a control so that the server can do it manually and assign multiple squads to a single player). Only the server should be able to assign mercs to the squads. Prevent selecting and controlling mercs from squads of other players.
-    - Reset the time compression button when a new player connects to the lobby.
-    - Root-cause: how come the animation is not loaded for the client (see in the bottom).
-    - Clear the written message in the box after it's sent to the chat (investigate and fix the issue).
-    - Fix player name appearance in the chat on client side.
-    - Make messages from client be broadcasted and received from the server before they appear in the chat on client side.
-    - Fix the initial game connection screen (place the new buttons more friendly and add captions). Grey out game preferences when the client mode checkbox is marked.
-    - Verify successful connection before changing gConnected on client side.
-    - Handle server disconnection on client side.
-    - Fix "burst fatality" crash.
-    - Investigate (and fix if needed) AnimCache memset() crash.
-    - Fix columns width and add borders for MP buttons on the strategic screen. Adapt for all resolutions (including the widescreens).
-    - Add player names and the respective ready statuses to the columns.
     - Verify repetitive starts and connections/disconnections within a single run.
-    - Fix gPlayers struct on disconnections.
+    - Testing: manual and automated.
+    - For fun: It seems that originally developers considered enabling jumps over the windows and left the corresponding code in place. Try to extend climbing with this ability (remove it or make it optional in the release).
 
 Things worth mentioning and "dark knowledge":
 
