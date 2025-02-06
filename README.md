@@ -13,7 +13,7 @@ Basically, JA2 Stracciatella multiplayer is the same thing as the singleplayer, 
 - All the new weapons and extra features of 1.13 and other modifications on top of the vanilla JA2 (JA2 Stracciatella vanilla) are outside of the scope of this project.
 - The axioms of style from the original CONTRIBUTING.md of JA2S mostly remain valid (except for the rule about dead code - some of the original lines are commented out and remain for reference and convenient roll back). Assimilate with coding styles that surround introduced changes. Don't try to unify or refactor unless it's really necessary - it is outside of the scope as well.
 
-## Roadmap (Milestones) - from the player perspective
+## Roadmap
 
 1. Multiplayer on the strategic screen. So that players can see squad members and chat messages of each other. **Basic functionality - for game beginning before the helicopter drop in Omerta - is done, need to introduce "cosmetic" fixes and do some extra testing.**
 2. Multiplayer on the tactical screen:
@@ -46,20 +46,26 @@ Basically, JA2 Stracciatella multiplayer is the same thing as the singleplayer, 
     - Investigate (and fix if needed) AnimCache memset() crash.
     - Root-cause: how come the animation is not loaded for the client (see in the bottom).
 - Regular priority:
-    - Implement the remaining RPC actions from the client:
+    - Implement the following RPC actions from the client:
         - Opening doors.
         - Picking up items (after ground items are replicated - see below).
         - Interacting with chests and taking/placing items there.
         - Healing.
-        - Throwing grenades and knifes.
-        - Placing charges.
-        - Talking (so that the effects of talking propagate to the server).
-        - Cutting fences.
-        - Etc.
+        - Loading and unloading ammo.
     - Replicate ground items.
     - Multi-selection actions.
     - Propagate time (including time compressions) from the server to clients.
 - Low priority:
+    - Implement the following RPC actions from the client:
+        - Throwing grenades.
+        - Throwing knives.
+        - Placing charges.
+        - Talking (so that the effects of talking propagate to the server).
+        - Cutting fences.
+        - Attaching items.
+        - Merging items.
+        - Shopping.
+        - Etc.
     - Assign every player to a separate squad (first - automatically give a single squad, then - introduce a control so that the server can do it manually and assign multiple squads to a single player). Only the server should be able to assign mercs to the squads. Prevent selecting and controlling mercs from squads of other players.
     - Verify repetitive starts and connections/disconnections within a single run.
     - Testing: manual and automated.
