@@ -32,7 +32,6 @@ Basically, JA2 Stracciatella multiplayer is the same thing as the singleplayer, 
     - Swapping items (putting one and taking another in cursor) in the inventory slot.
     - Moving and equipping items in the inventory between different mercs.
     - Make IsValidTalkableNPC() support RPCs.
-    - When climbing to and back from roofs change the level only for the player that initiated it.
     - Implement respective item pointers on the server side for multiple clients: replace gpItemPointerRPC.
     - Fix the initial game connection screen (place the new buttons more friendly and add captions). Grey out game preferences when the client mode checkbox is marked.
     - Clear the written message in the box after it's sent to the chat (investigate and fix the issue). Make messages from client be broadcasted and received from the server before they appear in the chat on client side. Fix player name appearance in the chat on client side.
