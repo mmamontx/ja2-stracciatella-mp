@@ -29,7 +29,7 @@ using namespace RakNet;
 #define IS_CLIENT       (gGameOptions.fNetwork)
 #define IS_VALID_CLIENT ((gGameOptions.fNetwork) && (gConnected) && (gReplicaList.Size() != 0))
 
-#define RPC_READY ((gRPC_Events.empty() == FALSE) && gRPC_Exec)
+#define RPC_READY ((gRPC_Events.empty() == FALSE) && gRPC_Enable)
 
 struct NETWORK_OPTIONS {
 	ST::string name;
@@ -45,13 +45,13 @@ struct USER_PACKET_NAME {
 
 struct USER_PACKET_MESSAGE {
 	unsigned char id;
-	BOOL service; // Service message - don't show the name before the message in the chat
+	BOOLEAN service; // Service message - don't show the name before the message in the chat
 	char message[MAX_MESSAGE_LEN];
 };
 
 struct USER_PACKET_READY {
 	unsigned char id;
-	BOOL ready;
+	BOOLEAN ready;
 };
 
 struct USER_PACKET_START {
@@ -61,20 +61,21 @@ struct USER_PACKET_START {
 struct PLAYER {
 	RakNetGUID guid;
 	char name[MAX_NAME_LEN];
-	BOOL ready;
+	BOOLEAN ready;
 };
 
 struct RPC_DATA {
-	BOOLEAN inv; // There are two types of RPC events: 0 - regular, which are placed to the back of the list and executed one per frame via gRPC_Exec;
-	             //                                    1 - inventory, which are placed to the front of the list and executed right away.
 	UIEventKind puiNewEvent;
 	SoldierID id;
 	SoldierID tgt_id;
 	GridNo usMapPos;
-	BOOLEAN fUIMovementFast;
-	INT8 bNewStance;
+	BOOLEAN fUIMovementFast; // For moving
+	INT8 bNewStance; // For changing the stance
+	// For operating with items
 	UINT8 ubHandPos;
-	UINT8 ubKeyDown;
+	UINT8 ubCtrl;
+	UINT8 ubShift;
+	INT16 sCurrentActionPoints;
 };
 
 class SampleConnection : public Connection_RM3
@@ -107,17 +108,19 @@ class ReplicaManager3Sample : public ReplicaManager3
 	}
 };
 
-extern BOOL gConnected;
-extern BOOL gEnemyEnabled;
-extern BOOL gNetworkCreated;
-extern BOOL gReady;
-extern BOOL gRPC_Exec;
-extern BOOL gStarted;
+extern BOOLEAN gConnected;
+extern BOOLEAN gEnemyEnabled;
+extern BOOLEAN gNetworkCreated;
+extern BOOLEAN gReady;
+extern BOOLEAN gRPC_Enable;
+extern BOOLEAN gStarted;
 extern DataStructures::List<Replica3*> gReplicaList;
 extern NETWORK_OPTIONS gNetworkOptions;
 extern NetworkIDManager gNetworkIdManager;
 extern OBJECTTYPE* gpItemPointerRPC;
+extern SOLDIERTYPE* gpItemPointerSoldierRPC;
 extern ReplicaManager3Sample gReplicaManager;
+extern RPC_DATA* gRPC_Inv;
 extern RPC4 gRPC;
 extern std::list<RPC_DATA> gRPC_Events;
 extern std::list<struct PLAYER> gPlayers;
@@ -126,16 +129,15 @@ extern DWORD WINAPI client_packet(LPVOID lpParam);
 extern DWORD WINAPI replicamgr(LPVOID lpParam);
 extern DWORD WINAPI server_packet(LPVOID lpParam);
 extern unsigned char SGetPacketIdentifier(Packet* p);
-extern void BeginItemPointerRPC(RakNet::BitStream* bitStream, RakNet::Packet* packet);
 extern void BeginSoldierClimbDownRoofRPC(RakNet::BitStream* bitStream, RakNet::Packet* packet);
 extern void BeginSoldierClimbFenceRPC(RakNet::BitStream* bitStream, RakNet::Packet* packet);
 extern void BeginSoldierClimbUpRoofRPC(RakNet::BitStream* bitStream, RakNet::Packet* packet);
+extern void BtnStealthModeCallbackRPC(RakNet::BitStream* bitStream, RakNet::Packet* packet);
 extern void ChangeWeaponModeRPC(RakNet::BitStream* bitStream, RakNet::Packet* packet);
 extern void HandleEventRPC(RakNet::BitStream* bitStream, RakNet::Packet* packet);
 extern void HandleItemPointerClickRPC(RakNet::BitStream* bitStream, RakNet::Packet* packet);
 extern void HireRandomMercs(unsigned int n);
-extern void BtnStealthModeCallbackRPC(RakNet::BitStream* bitStream, RakNet::Packet* packet);
-extern void UIHandleItemPlacementRPC(RakNet::BitStream* bitStream, RakNet::Packet* packet);
+extern void SMInvClickCallbackPrimaryRPC(RakNet::BitStream* bitStream, RakNet::Packet* packet);
 extern void UIHandleSoldierStanceChangeRPC(RakNet::BitStream* bitStream, RakNet::Packet* packet);
 
 #endif

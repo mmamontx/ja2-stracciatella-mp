@@ -499,7 +499,6 @@ ScreenID HandleTacticalUI(void)
 			RPC_DATA data;
 
 			data.puiNewEvent = uiNewEvent;
-			data.inv = FALSE;
 
 			switch (uiNewEvent) {
 			case A_CHANGE_TO_CONFIM_ACTION:
@@ -600,13 +599,13 @@ ScreenID HandleTacticalUI(void)
 
 			ClearEvent(&gEvents[uiNewEvent]);
 
-			gRPC_Exec = FALSE;
+			gRPC_Enable = FALSE;
 		}
 	} else if (!(IS_CLIENT)) { // If there is no local event, a remote event can be executed (if there is one)
 		if (!(gRPC_Events.empty())) {
 			uiNewEvent = gRPC_Events.front().puiNewEvent;
 
-			gRPC_Exec = TRUE;
+			gRPC_Enable = TRUE;
 		}
 	}
 

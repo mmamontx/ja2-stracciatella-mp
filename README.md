@@ -29,9 +29,6 @@ Basically, JA2 Stracciatella multiplayer is the same thing as the singleplayer, 
 ## Backlog
 
 - Incomplete:
-    - Swapping items (putting one and taking another in cursor) in the inventory slot.
-    - Moving and equipping items in the inventory between different mercs.
-    - Make IsValidTalkableNPC() support RPCs.
     - Implement respective item pointers on the server side for multiple clients: replace gpItemPointerRPC.
     - Fix the initial game connection screen (place the new buttons more friendly and add captions). Grey out game preferences when the client mode checkbox is marked.
     - Clear the written message in the box after it's sent to the chat (investigate and fix the issue). Make messages from client be broadcasted and received from the server before they appear in the chat on client side. Fix player name appearance in the chat on client side.
@@ -39,9 +36,11 @@ Basically, JA2 Stracciatella multiplayer is the same thing as the singleplayer, 
     - Verify successful connection before changing gConnected on client side. Handle server disconnection on client side. Fix gPlayers struct on disconnections (on server side). Reset the time compression button when a new player connects to the lobby.
     - Review and replicate all SOLDIERTYPE pointers that it makes sense to, and don't replicate the ones that are not supposed to be replicated.
 - Bugs:
+    - For the server on the tactical screen the messages are shown 1 line above.
+    - Fix the bug occurring when the server hits ready before a client has connected (later resulting in the start without the client).
     - Some the original squares where mercs occur become unavailable for moving to (for the client).
     - Fix the bug when client mercs do not arrive in time and become inaccessible.
-    - Fix the sporadic client crashes when it connects to the lobby.
+    - Fix the sporadic client crashes when it connects to the lobby (now there is a workaround - see the FIXME in DrawFace() function).
     - Fix "burst fatality" crash.
     - Investigate (and fix if needed) AnimCache memset() crash.
     - Root-cause: how come the animation is not loaded for the client (see in the bottom).
@@ -51,7 +50,7 @@ Basically, JA2 Stracciatella multiplayer is the same thing as the singleplayer, 
         - Picking up items (after ground items are replicated - see below).
         - Interacting with chests and taking/placing items there.
         - Healing.
-        - Loading and unloading ammo.
+        - Unloading ammo.
     - Replicate ground items.
     - Multi-selection actions.
     - Propagate time (including time compressions) from the server to clients.
@@ -63,12 +62,13 @@ Basically, JA2 Stracciatella multiplayer is the same thing as the singleplayer, 
         - Talking (so that the effects of talking propagate to the server).
         - Cutting fences.
         - Attaching items.
-        - Merging items.
+        - Merging items (should work - verify).
         - Shopping.
         - Etc.
     - Assign every player to a separate squad (first - automatically give a single squad, then - introduce a control so that the server can do it manually and assign multiple squads to a single player). Only the server should be able to assign mercs to the squads. Prevent selecting and controlling mercs from squads of other players.
     - Verify repetitive starts and connections/disconnections within a single run.
     - Testing: manual and automated.
+    - Remove RakNet from source code and use it as a binary.
     - For fun: It seems that originally developers considered enabling jumps over the windows and left the corresponding code in place. Try to extend climbing with this ability (remove it or make it optional in the release).
 
 Things worth mentioning and "dark knowledge":

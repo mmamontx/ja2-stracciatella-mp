@@ -355,10 +355,11 @@ static INT8 GetUIApsToDisplay(SOLDIERTYPE const* s)
 
 void CheckForDisabledForGiveItem(void)
 {
-	const SOLDIERTYPE* const cur = gpSMCurrentMerc;
+	const SOLDIERTYPE* const cur = (gRPC_Inv ? ID2Soldier(gRPC_Inv->id) : gpSMCurrentMerc);
 	Assert(cur != NULL);
 	Assert(cur->sGridNo != NOWHERE);
 
+	// TODO: Enable shopping with RPCs
 	if (guiCurrentScreen == SHOPKEEPER_SCREEN)
 	{
 		gfSMDisableForItems = !CanMercInteractWithSelectedShopkeeper(cur);
@@ -833,7 +834,7 @@ void EnableSMPanelButtons(BOOLEAN fEnable, BOOLEAN fFromItemPickup)
 }
 
 
-static void SMInvClickCallbackPrimary(MOUSE_REGION* pRegion, UINT32 iReason);
+void SMInvClickCallbackPrimary(MOUSE_REGION* pRegion, UINT32 iReason);
 static void SMInvClickCallbackSecondary(MOUSE_REGION* pRegion, UINT32 iReason);
 static void SMInvClickCamoCallback(MOUSE_REGION* pRegion, UINT32 iReason);
 static void SMInvMoneyButtonCallback(MOUSE_REGION* pRegion, UINT32 iReason);
@@ -1513,27 +1514,10 @@ BOOLEAN HandleNailsVestFetish(const SOLDIERTYPE* const s, const UINT32 uiHandPos
 
 static BOOLEAN UIHandleItemPlacement(UINT8 ubHandPos, UINT16 usOldItemIndex, UINT16 usNewItemIndex, BOOLEAN fDeductPoints)
 {
-	if (IS_CLIENT) {
-		RPC_DATA data;
-		RakNet::BitStream bs;
-
-		data.id = Soldier2ID(gpSMCurrentMerc);
-		data.ubHandPos = ubHandPos;
-		data.ubKeyDown = _KeyDown(CTRL);
-
-		bs.WriteCompressed(data);
-
-		gRPC.Signal("UIHandleItemPlacementRPC", &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, gNetworkOptions.peer->GetSystemAddressFromIndex(0), false, false);
-
-		EndItemPointer();
-
-		return(TRUE);
-	}
-
-	if ( _KeyDown(CTRL) )
+	if ( (gRPC_Inv ? gRPC_Inv->ubCtrl : _KeyDown(CTRL)) )
 	{
-		CleanUpStack( &( gpSMCurrentMerc->inv[ ubHandPos ] ), gpItemPointer );
-		if ( gpItemPointer->ubNumberOfObjects == 0 )
+		CleanUpStack( &( (gRPC_Inv ? ID2Soldier(gRPC_Inv->id) : gpSMCurrentMerc)->inv[ ubHandPos ] ), (gRPC_Inv ? gpItemPointerRPC : gpItemPointer) );
+		if ( (gRPC_Inv ? gpItemPointerRPC : gpItemPointer)->ubNumberOfObjects == 0 )
 		{
 			EndItemPointer( );
 		}
@@ -1541,43 +1525,50 @@ static BOOLEAN UIHandleItemPlacement(UINT8 ubHandPos, UINT16 usOldItemIndex, UIN
 	}
 
 	// Try to place here
-	if ( PlaceObject( gpSMCurrentMerc, ubHandPos, gpItemPointer ) )
+	if ( PlaceObject( (gRPC_Inv ? ID2Soldier(gRPC_Inv->id) : gpSMCurrentMerc), ubHandPos, (gRPC_Inv ? gpItemPointerRPC : gpItemPointer) ) )
 	{
 		if ( fDeductPoints )
 		{
 			// Deduct points
-			if ( gpItemPointerSoldier->bLife >= CONSCIOUSNESS )
+			if ( (gRPC_Inv ? gpItemPointerSoldierRPC : gpItemPointerSoldier)->bLife >= CONSCIOUSNESS )
 			{
-				DeductPoints( gpItemPointerSoldier,  2, 0 );
+				DeductPoints( (gRPC_Inv ? gpItemPointerSoldierRPC : gpItemPointerSoldier),  2, 0 );
 			}
-			if ( gpSMCurrentMerc->bLife >= CONSCIOUSNESS )
+			if ( (gRPC_Inv ? ID2Soldier(gRPC_Inv->id) : gpSMCurrentMerc)->bLife >= CONSCIOUSNESS )
 			{
-				DeductPoints( gpSMCurrentMerc,  2, 0 );
+				DeductPoints( (gRPC_Inv ? ID2Soldier(gRPC_Inv->id) : gpSMCurrentMerc),  2, 0 );
 			}
 		}
 
-		HandleTacticalEffectsOfEquipmentChange( gpSMCurrentMerc, ubHandPos, usOldItemIndex, usNewItemIndex );
+		HandleTacticalEffectsOfEquipmentChange( (gRPC_Inv ? ID2Soldier(gRPC_Inv->id) : gpSMCurrentMerc), ubHandPos, usOldItemIndex, usNewItemIndex );
 
 		// Dirty
 		fInterfacePanelDirty = DIRTYLEVEL2;
 
 		// Check if cursor is empty now
-		if ( gpItemPointer->ubNumberOfObjects == 0 )
+		if ( (gRPC_Inv ? gpItemPointerRPC : gpItemPointer)->ubNumberOfObjects == 0 )
 		{
 			EndItemPointer( );
 		}
 
-		if ( gpItemPointerSoldier != gpSMCurrentMerc )
+		if ( (gRPC_Inv ? gpItemPointerSoldierRPC : gpItemPointerSoldier) != (gRPC_Inv ? ID2Soldier(gRPC_Inv->id) : gpSMCurrentMerc) )
 		{
-			ScreenMsg( FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, st_format_printf(pMessageStrings[ MSG_ITEM_PASSED_TO_MERC ], GCM->getItem(usNewItemIndex)->getShortName(), gpSMCurrentMerc->name) );
+			ScreenMsg( FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, st_format_printf(pMessageStrings[ MSG_ITEM_PASSED_TO_MERC ], GCM->getItem(usNewItemIndex)->getShortName(), (gRPC_Inv ? ID2Soldier(gRPC_Inv->id) : gpSMCurrentMerc)->name) );
 		}
 
 		// UPDATE ITEM POINTER.....
-		gpItemPointerSoldier = gpSMCurrentMerc;
-
-		if ( gpItemPointer != NULL )
+		if (gRPC_Inv)
 		{
-			ReevaluateItemHatches( gpSMCurrentMerc, FALSE );
+			gpItemPointerSoldierRPC = ID2Soldier(gRPC_Inv->id);
+		}
+		else
+		{
+			gpItemPointerSoldier = gpSMCurrentMerc;
+		}
+
+		if ( (gRPC_Inv ? gpItemPointerRPC : gpItemPointer) != NULL )
+		{
+			ReevaluateItemHatches( (gRPC_Inv ? ID2Soldier(gRPC_Inv->id) : gpSMCurrentMerc), FALSE );
 		}
 
 		// Set cursor back to normal mode...
@@ -1597,22 +1588,40 @@ static BOOLEAN UIHandleItemPlacement(UINT8 ubHandPos, UINT16 usOldItemIndex, UIN
 static void MergeMessageBoxCallBack(MessageBoxReturnValue);
 
 
-static void SMInvClickCallbackPrimary(MOUSE_REGION* pRegion, UINT32 iReason)
+void SMInvClickCallbackPrimary(MOUSE_REGION* pRegion, UINT32 iReason)
 {
 	// Copyies of values
 	UINT16 usOldItemIndex, usNewItemIndex;
 	UINT16 usItemPrevInItemPointer;
 	BOOLEAN fNewItem = FALSE;
+	SOLDIERTYPE* pSMCurrentMercRPC = gRPC_Inv ? ID2Soldier(gRPC_Inv->id) : NULL;
 
-	UINT32 uiHandPos = MSYS_GetRegionUserData( pRegion, 0 );
+	UINT32 uiHandPos = gRPC_Inv ? gRPC_Inv->ubHandPos : MSYS_GetRegionUserData( pRegion, 0 );
 
+	if (IS_CLIENT)
+	{
+		RPC_DATA data;
+		RakNet::BitStream bs;
+
+		data.id = Soldier2ID(gpSMCurrentMerc);
+		data.ubHandPos = uiHandPos;
+		data.ubCtrl = _KeyDown(CTRL);
+		data.ubShift = _KeyDown(SHIFT);
+
+		bs.WriteCompressed(data);
+
+		gRPC.Signal("SMInvClickCallbackPrimaryRPC", &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, gNetworkOptions.peer->GetSystemAddressFromIndex(0), false, false);
+	}
+
+	// FIXME: Propagate?
 	if (fInMapMode) return; // XXX necessary?
 
+	// FIXME: Handle shopping
 	//if we are in the shop keeper interface
 	if (guiCurrentScreen == SHOPKEEPER_SCREEN)
 	{
 		// and this inventory slot is hatched out
-		if( ShouldSoldierDisplayHatchOnItem( gpSMCurrentMerc->ubProfile, (INT16)uiHandPos ) )
+		if( ShouldSoldierDisplayHatchOnItem( (gRPC_Inv ? pSMCurrentMercRPC : gpSMCurrentMerc)->ubProfile, (INT16)(gRPC_Inv ? gRPC_Inv->ubHandPos : uiHandPos) ) )
 		{
 			// it means that item is a copy of one in the player's offer area, so we treat it as if the slot was empty (ignore)
 			// if the cursor has an item in it, we still ignore the click, because handling swaps in this situation would be
@@ -1622,44 +1631,46 @@ static void SMInvClickCallbackPrimary(MOUSE_REGION* pRegion, UINT32 iReason)
 	}
 
 	// If we do not have an item in hand, start moving it
-	if ( gpItemPointer == NULL )
+	if ( (gRPC_Inv ? gpItemPointerRPC : gpItemPointer) == NULL )
 	{
 
 		// Return if empty
-		if ( gpSMCurrentMerc->inv[ uiHandPos ].usItem == NOTHING )
+		if ( (gRPC_Inv ? pSMCurrentMercRPC : gpSMCurrentMerc)->inv[ (gRPC_Inv ? gRPC_Inv->ubHandPos : uiHandPos) ].usItem == NOTHING )
 			return;
 
-		SelectSoldier(gpSMCurrentMerc, SELSOLDIER_NONE);
+		if ( gRPC_Inv == NULL )
+			SelectSoldier(gpSMCurrentMerc, SELSOLDIER_NONE);
 
 		// OK, check if this is Nails, and we're in the vest position , don't allow it to come off....
-		if ( HandleNailsVestFetish( gpSMCurrentMerc, uiHandPos, NOTHING ) )
+		if ( HandleNailsVestFetish( (gRPC_Inv ? pSMCurrentMercRPC : gpSMCurrentMerc), (gRPC_Inv ? gRPC_Inv->ubHandPos : uiHandPos), NOTHING ) )
 		{
 			return;
 		}
 
-		if ( _KeyDown(CTRL) )
+		if ( (gRPC_Inv ? gRPC_Inv->ubCtrl : _KeyDown(CTRL)) )
 		{
-			CleanUpStack( &( gpSMCurrentMerc->inv[ uiHandPos ] ), NULL );
+			CleanUpStack( &( (gRPC_Inv ? pSMCurrentMercRPC : gpSMCurrentMerc)->inv[ (gRPC_Inv ? gRPC_Inv->ubHandPos : uiHandPos) ] ), NULL );
 			return;
 		}
 
 		// Turn off new item glow!
-		gpSMCurrentMerc->bNewItemCount[ uiHandPos ] = 0;
+		(gRPC_Inv ? pSMCurrentMercRPC : gpSMCurrentMerc)->bNewItemCount[ (gRPC_Inv ? gRPC_Inv->ubHandPos : uiHandPos) ] = 0;
 
-		usOldItemIndex = gpSMCurrentMerc->inv[ uiHandPos ].usItem;
+		usOldItemIndex = (gRPC_Inv ? pSMCurrentMercRPC : gpSMCurrentMerc)->inv[ (gRPC_Inv ? gRPC_Inv->ubHandPos : uiHandPos) ].usItem;
 
 		// move item into the mouse cursor
-		BeginItemPointer( gpSMCurrentMerc, (UINT8)uiHandPos );
+		BeginItemPointer( (gRPC_Inv ? pSMCurrentMercRPC : gpSMCurrentMerc), (UINT8)(gRPC_Inv ? gRPC_Inv->ubHandPos : uiHandPos) );
 
+		// TODO: Enable shopping with RPCs
 		//if we are in the shopkeeper interface
 		if (guiCurrentScreen == SHOPKEEPER_SCREEN)
 		{
 			// pick up item from regular inventory slot into cursor OR try to sell it
 			// ( unless CTRL is held down )
-			BeginSkiItemPointer(PLAYERS_INVENTORY, (INT8)uiHandPos, !_KeyDown(CTRL));
+			BeginSkiItemPointer(PLAYERS_INVENTORY, (INT8)(gRPC_Inv ? gRPC_Inv->ubHandPos : uiHandPos), (gRPC_Inv ? !(gRPC_Inv->ubCtrl) : !_KeyDown(CTRL)));
 		}
 
-		HandleTacticalEffectsOfEquipmentChange( gpSMCurrentMerc, uiHandPos, usOldItemIndex, NOTHING );
+		HandleTacticalEffectsOfEquipmentChange( (gRPC_Inv ? pSMCurrentMercRPC : gpSMCurrentMerc), (gRPC_Inv ? gRPC_Inv->ubHandPos : uiHandPos), usOldItemIndex, NOTHING );
 
 		// HandleCompatibleAmmoUI( gpSMCurrentMerc, (INT8)uiHandPos, FALSE );
 	}
@@ -1669,7 +1680,7 @@ static void SMInvClickCallbackPrimary(MOUSE_REGION* pRegion, UINT32 iReason)
 		BOOLEAN fDeductPoints = FALSE;
 
 		// ATE: OK, get source, dest guy if different... check for and then charge appropriate APs
-		if (gpSMCurrentMerc == gpItemPointerSoldier)
+		if ((gRPC_Inv ? pSMCurrentMercRPC : gpSMCurrentMerc) == (gRPC_Inv ? gpItemPointerSoldierRPC : gpItemPointerSoldier))
 		{
 			// We are doing this ourselve, continue
 			fOKToGo = TRUE;
@@ -1680,9 +1691,9 @@ static void SMInvClickCallbackPrimary(MOUSE_REGION* pRegion, UINT32 iReason)
 			fDeductPoints = TRUE;
 
 			// First check points for src guy
-			if ( gpItemPointerSoldier->bLife >= CONSCIOUSNESS )
+			if ( (gRPC_Inv ? gpItemPointerSoldierRPC : gpItemPointerSoldier)->bLife >= CONSCIOUSNESS )
 			{
-				if ( EnoughPoints( gpItemPointerSoldier, 3, 0, TRUE ) )
+				if ( EnoughPoints( (gRPC_Inv ? gpItemPointerSoldierRPC : gpItemPointerSoldier), 3, 0, TRUE ) )
 				{
 					fOKToGo = TRUE;
 				}
@@ -1695,9 +1706,9 @@ static void SMInvClickCallbackPrimary(MOUSE_REGION* pRegion, UINT32 iReason)
 			// Should we go on?
 			if ( fOKToGo )
 			{
-				if ( gpSMCurrentMerc->bLife >= CONSCIOUSNESS )
+				if ( (gRPC_Inv ? pSMCurrentMercRPC : gpSMCurrentMerc)->bLife >= CONSCIOUSNESS )
 				{
-					if ( EnoughPoints( gpSMCurrentMerc, 3, 0, TRUE ) )
+					if ( EnoughPoints( (gRPC_Inv ? pSMCurrentMercRPC : gpSMCurrentMerc), 3, 0, TRUE ) )
 					{
 						fOKToGo = TRUE;
 					}
@@ -1713,15 +1724,16 @@ static void SMInvClickCallbackPrimary(MOUSE_REGION* pRegion, UINT32 iReason)
 		{
 			// OK, check if this is Nails, and we're in the vest position , don't allow
 			// it to come off....
-			if ( HandleNailsVestFetish( gpSMCurrentMerc, uiHandPos, gpItemPointer->usItem ) )
+			if ( HandleNailsVestFetish( (gRPC_Inv ? pSMCurrentMercRPC : gpSMCurrentMerc), (gRPC_Inv ? gRPC_Inv->ubHandPos : uiHandPos), (gRPC_Inv ? gpItemPointerRPC : gpItemPointer)->usItem ) )
 			{
 				return;
 			}
 
-			usOldItemIndex = gpSMCurrentMerc->inv[ uiHandPos ].usItem;
-			usNewItemIndex = gpItemPointer->usItem;
+			usOldItemIndex = (gRPC_Inv ? pSMCurrentMercRPC : gpSMCurrentMerc)->inv[ (gRPC_Inv ? gRPC_Inv->ubHandPos : uiHandPos) ].usItem;
+			usNewItemIndex = (gRPC_Inv ? gpItemPointerRPC : gpItemPointer)->usItem;
 
-			if ( uiHandPos == HANDPOS || uiHandPos == SECONDHANDPOS || uiHandPos == HELMETPOS || uiHandPos == VESTPOS || uiHandPos == LEGPOS )
+			// FIXME: Do something with this hell line
+			if ( (gRPC_Inv ? gRPC_Inv->ubHandPos : uiHandPos) == HANDPOS || (gRPC_Inv ? gRPC_Inv->ubHandPos : uiHandPos) == SECONDHANDPOS || (gRPC_Inv ? gRPC_Inv->ubHandPos : uiHandPos) == HELMETPOS || (gRPC_Inv ? gRPC_Inv->ubHandPos : uiHandPos) == VESTPOS || (gRPC_Inv ? gRPC_Inv->ubHandPos : uiHandPos) == LEGPOS )
 			{
 				//if ( ValidAttachmentClass( usNewItemIndex, usOldItemIndex ) )
 				if ( ValidAttachment( usNewItemIndex, usOldItemIndex ) )
@@ -1729,18 +1741,19 @@ static void SMInvClickCallbackPrimary(MOUSE_REGION* pRegion, UINT32 iReason)
 					// it's an attempt to attach; bring up the inventory panel
 					if ( !InItemDescriptionBox( ) )
 					{
-						InitItemDescriptionBox( gpSMCurrentMerc, (UINT8)uiHandPos, SM_ITEMDESC_START_X, SM_ITEMDESC_START_Y, 0 );
+						InitItemDescriptionBox( (gRPC_Inv ? pSMCurrentMercRPC : gpSMCurrentMerc), (UINT8)(gRPC_Inv ? gRPC_Inv->ubHandPos : uiHandPos), SM_ITEMDESC_START_X, SM_ITEMDESC_START_Y, 0 );
 					}
 					return;
 				}
 				else if ( ValidMerge( usNewItemIndex, usOldItemIndex ) )
 				{
 					// bring up merge requestor
-					gubHandPos = (UINT8) uiHandPos;
+					gubHandPos = (UINT8) (gRPC_Inv ? gRPC_Inv->ubHandPos : uiHandPos);
 					gusOldItemIndex = usOldItemIndex;
 					gusNewItemIndex = usNewItemIndex;
 					gfDeductPoints = fDeductPoints;
 
+					// TODO: Enable shopping with RPCs
 					if (guiCurrentScreen == SHOPKEEPER_SCREEN)
 					{
 						//the only way to merge items is to pick them up.  In SKI when you pick up an item, the cursor is
@@ -1758,7 +1771,7 @@ static void SMInvClickCallbackPrimary(MOUSE_REGION* pRegion, UINT32 iReason)
 
 
 			// remember the item type currently in the item pointer
-			usItemPrevInItemPointer = gpItemPointer->usItem;
+			usItemPrevInItemPointer = (gRPC_Inv ? gpItemPointerRPC : gpItemPointer)->usItem;
 
 			if (guiCurrentScreen == SHOPKEEPER_SCREEN)
 			{
@@ -1767,15 +1780,16 @@ static void SMInvClickCallbackPrimary(MOUSE_REGION* pRegion, UINT32 iReason)
 			}
 
 			// try to place the item in the cursor into this inventory slot
-			if ( UIHandleItemPlacement( (UINT8) uiHandPos, usOldItemIndex, usNewItemIndex, fDeductPoints ) )
+			if ( UIHandleItemPlacement( (UINT8) (gRPC_Inv ? gRPC_Inv->ubHandPos : uiHandPos), usOldItemIndex, usNewItemIndex, fDeductPoints ) )
 			{
+				// TODO: Enable shopping with RPCs
 				// it worked!  if we're in the SKI...
 				if (guiCurrentScreen == SHOPKEEPER_SCREEN)
 				{
-					SetNewItem( gpSMCurrentMerc, ( UINT8 ) uiHandPos, fNewItem );
+					SetNewItem( (gRPC_Inv ? pSMCurrentMercRPC : gpSMCurrentMerc), ( UINT8 ) (gRPC_Inv ? gRPC_Inv->ubHandPos : uiHandPos), fNewItem );
 
 					// and the cursor is now empty
-					if( gpItemPointer == NULL )
+					if( (gRPC_Inv ? gpItemPointerRPC : gpItemPointer) == NULL )
 					{
 						// clean up
 						gMoveingItem = INVENTORY_IN_SLOT{};
@@ -1805,6 +1819,7 @@ static void SMInvClickCallbackPrimary(MOUSE_REGION* pRegion, UINT32 iReason)
 	}
 }
 
+// TODO: Find out when this one is called and handle RPC (if needed)
 static void SMInvClickCallbackSecondary(MOUSE_REGION* pRegion, UINT32 iReason)
 {
 	UINT32 uiHandPos = MSYS_GetRegionUserData( pRegion, 0 );
@@ -2120,7 +2135,8 @@ static void BtnStealthModeCallback(GUI_BUTTON* btn, UINT32 reason)
 		gfPlotNewMovement = TRUE;
 		fInterfacePanelDirty = DIRTYLEVEL2;
 
-		if (IS_CLIENT) {
+		if (IS_CLIENT)
+		{
 			RakNet::BitStream bs;
 			RPC_DATA data;
 
