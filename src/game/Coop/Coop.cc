@@ -129,6 +129,14 @@ DWORD WINAPI server_packet(LPVOID lpParam)
 				// Couldn't deliver a reliable packet - i.e. the other system was abnormally
 				// terminated
 				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_CONNECTION_LOST");
+
+				for (std::list<struct PLAYER>::iterator it = gPlayers.begin(); it != gPlayers.end(); it++)
+					if (it->guid == p->guid) {
+						ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, (ST::string)it->name + " got disconnected (connection lost).");
+						gPlayers.erase(it);
+						break;
+					}
+
 				break;
 			case ID_CONNECTION_REQUEST_ACCEPTED:
 				// This tells the client that it has connected
@@ -138,11 +146,11 @@ DWORD WINAPI server_packet(LPVOID lpParam)
 				// This tells the server that a client has connected
 				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_NEW_INCOMING_CONNECTION");
 				break;
-			case ID_USER_PACKET_NAME: // This message and below are custom messages of JA2S Coop
+			case ID_USER_PACKET_CONNECT: // This message and below are custom messages of JA2S Coop
 			{
-				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_USER_PACKET_NAME");
-				struct USER_PACKET_NAME* up;
-				up = (struct USER_PACKET_NAME*)p->data;
+				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_USER_PACKET_CONNECT");
+				struct USER_PACKET_CONNECT* up;
+				up = (struct USER_PACKET_CONNECT*)p->data;
 
 				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, (ST::string)up->name + " has connected.");
 
@@ -150,7 +158,7 @@ DWORD WINAPI server_packet(LPVOID lpParam)
 				struct PLAYER player;
 				player.guid = p->guid;
 				strcpy(player.name, up->name);
-				player.ready = FALSE;
+				player.ready = up->ready;
 				gPlayers.push_back(player);
 
 				break;
@@ -276,6 +284,7 @@ DWORD WINAPI client_packet(LPVOID lpParam)
 			case ID_CONNECTION_REQUEST_ACCEPTED:
 				// This tells the client that it has connected
 				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_CONNECTION_REQUEST_ACCEPTED");
+				gConnected = TRUE;
 				break;
 			case ID_NEW_INCOMING_CONNECTION:
 				// This tells the server that a client has connected

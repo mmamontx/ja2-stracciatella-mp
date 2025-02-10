@@ -33,11 +33,9 @@ Basically, JA2 Stracciatella multiplayer is the same thing as the singleplayer, 
     - Fix the initial game connection screen (place the new buttons more friendly and add captions). Grey out game preferences when the client mode checkbox is marked.
     - Clear the written message in the box after it's sent to the chat (investigate and fix the issue). Make messages from client be broadcasted and received from the server before they appear in the chat on client side. Fix player name appearance in the chat on client side.
     - Fix columns width and add borders for MP buttons on the strategic screen. Adapt for all resolutions (including the widescreens). Add player names and the respective ready statuses to the columns.
-    - Verify successful connection before changing gConnected on client side. Handle server disconnection on client side. Fix gPlayers struct on disconnections (on server side). Reset the time compression button when a new player connects to the lobby.
     - Review and replicate all SOLDIERTYPE pointers that it makes sense to, and don't replicate the ones that are not supposed to be replicated.
 - Bugs:
-    - For the server on the tactical screen the messages are shown 1 line above.
-    - Fix the bug occurring when the server hits ready before a client has connected (later resulting in the start without the client).
+    - The rectangle move cursor when it is hovered on the selected merc is shown on top instead of behind the soldier (for the client).
     - Some the original squares where mercs occur become unavailable for moving to (for the client).
     - Fix the bug when client mercs do not arrive in time and become inaccessible.
     - Fix the sporadic client crashes when it connects to the lobby (now there is a workaround - see the FIXME in DrawFace() function).
@@ -69,7 +67,9 @@ Basically, JA2 Stracciatella multiplayer is the same thing as the singleplayer, 
     - Verify repetitive starts and connections/disconnections within a single run.
     - Testing: manual and automated.
     - Remove RakNet from source code and use it as a binary.
+    - Handle connections/disconnections after the game gets started (after the first time compression button click).
     - For fun: It seems that originally developers considered enabling jumps over the windows and left the corresponding code in place. Try to extend climbing with this ability (remove it or make it optional in the release).
+    - Add binary release(s) and installation instructions.
 
 Things worth mentioning and "dark knowledge":
 

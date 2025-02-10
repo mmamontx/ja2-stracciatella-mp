@@ -1685,11 +1685,11 @@ ScreenID MapScreenHandle(void)
 				HireRandomMercs(2); // FIXME: For debugging purposes only - to be removed
 
 		if ((IS_CLIENT) && (!gConnected)) { // If we are client - send connection request to the server
-			struct USER_PACKET_NAME p;
-			p.id = ID_USER_PACKET_NAME;
+			struct USER_PACKET_CONNECT p;
+			p.id = ID_USER_PACKET_CONNECT;
+			p.ready = gReady;
 			strcpy(p.name, gNetworkOptions.name.c_str());
 			gNetworkOptions.peer->Send((char*)&p, sizeof(p), MEDIUM_PRIORITY, RELIABLE, 0, UNASSIGNED_RAKNET_GUID, true);
-			gConnected = TRUE; // FIXME: We don't verify that we have successfully connected
 		}
 
 		if (!gNetworkCreated) {

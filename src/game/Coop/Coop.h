@@ -14,7 +14,7 @@
 
 using namespace RakNet;
 
-#define ID_USER_PACKET_NAME    ID_USER_PACKET_ENUM
+#define ID_USER_PACKET_CONNECT ID_USER_PACKET_ENUM
 #define ID_USER_PACKET_MESSAGE (ID_USER_PACKET_ENUM + 1)
 #define ID_USER_PACKET_READY   (ID_USER_PACKET_ENUM + 2)
 #define ID_USER_PACKET_START   (ID_USER_PACKET_ENUM + 3)
@@ -38,9 +38,10 @@ struct NETWORK_OPTIONS {
 	RakPeerInterface *peer;
 };
 
-struct USER_PACKET_NAME {
+struct USER_PACKET_CONNECT {
 	unsigned char id;
 	char name[MAX_NAME_LEN];
+	BOOLEAN ready;
 };
 
 struct USER_PACKET_MESSAGE {
@@ -62,6 +63,8 @@ struct PLAYER {
 	RakNetGUID guid;
 	char name[MAX_NAME_LEN];
 	BOOLEAN ready;
+
+	bool operator == (const PLAYER& s) const { return guid == s.guid; }
 };
 
 struct RPC_DATA {
