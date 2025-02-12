@@ -604,15 +604,6 @@ void DrawFace(void)
 	// reset redraw of face
 	fReDrawFace = FALSE;
 
-	// FIXME: Sometimes client(s) get NULL in this pointer, which causes the crash in the lobby.
-	//        Maybe it is caused by the auto-hiring using HireRandomMercs() and will be fixed by
-	//        itself when it is not used anymore.
-	if (pSoldier->face == NULL)
-	{
-		SLOGI("pSoldier->face == NULL");
-		return;
-	}
-
 	// render their face
 	RenderSoldierFace(*pSoldier, SOLDIER_PIC_X, SOLDIER_PIC_Y);
 }

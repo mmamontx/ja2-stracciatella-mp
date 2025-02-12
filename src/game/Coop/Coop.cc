@@ -13,7 +13,6 @@
 #define GROUP GROUP_JA2
 #include "RakNet/RPC4Plugin.h"
 #undef GROUP
-#include "Random.h"
 #include "Soldier_Profile.h"
 #include "Strategic.h"
 #include "Weapons.h"
@@ -65,6 +64,8 @@ void HireRandomMercs(unsigned int n)
 		h.ubInsertionCode = INSERTION_CODE_ARRIVING_GAME;
 		h.iTotalContractLength = 1;
 		h.fCopyProfileItemsOver = true;
+		h.uiTimeTillMercArrives = GetMercArrivalTimeOfDay();
+		h.bWhatKindOfMerc = MERC_TYPE__AIM_MERC;
 
 		gMercProfiles[id_random].ubMiscFlags |= PROFILE_MISC_FLAG_ALREADY_USED_ITEMS;
 
@@ -314,10 +315,7 @@ DWORD WINAPI client_packet(LPVOID lpParam)
 
 				FOR_EACH_IN_TEAM(s, OUR_TEAM) { // Below are actions that were supposed to be done when hiring mercs through AIM
 					gfAtLeastOneMercWasHired = true; // Ugly, but should handle the case when the server doesn't have any characters yet on client connection
-					InitSoldierFace(*s); // 'face' has to be initialized locally since originally it points to the host memory and causes an exception
 					AddStrategicEvent(EVENT_DELAYED_HIRING_OF_MERC, (STARTING_TIME + FIRST_ARRIVAL_DELAY) / NUM_SEC_IN_MIN, s->ubID); // Place to the helicopter
-					EVENT_InitNewSoldierAnim(s, STANDING, Random(10), TRUE); // Initialize animation locally
-					CreateSoldierPalettes(*s); // Initialize palette locally
 				}
 
 				// Update merc list in the left panel to show replicated characters

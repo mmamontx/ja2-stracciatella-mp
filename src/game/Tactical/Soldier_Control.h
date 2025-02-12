@@ -7,10 +7,13 @@
 #define MAXPATROLGRIDS  10  // *** THIS IS A DUPLICATION - MUST BE MOVED !
 
 #include "Animation_Cache.h"
+#include "Animation_Control.h"
+#include "Faces.h"
 #include "GameSettings.h"
 #include "JA2Types.h"
 #include "Keys.h"
 #include "Overhead_Types.h"
+#include "Random.h"
 #define GROUP GROUP_JA2
 #include "ReplicaManager3.h"
 #undef GROUP
@@ -332,6 +335,13 @@ using SoldierID = UINT8;
 #define SOLDIERTYPE_NAME_LENGTH 10
 
 
+// The following declarations are required so that these functions can be used inside the class methods
+extern SoldierID Soldier2ID(const SOLDIERTYPE* const s);
+extern SOLDIERTYPE* ID2Soldier(const SoldierID id);
+
+extern void EVENT_InitNewSoldierAnim(SOLDIERTYPE*, UINT16 new_state, UINT16 starting_ani_code, BOOLEAN force);
+extern void CreateSoldierPalettes(SOLDIERTYPE&);
+
 struct SOLDIERTYPE : public Replica3
 {
 	SOLDIERTYPE()
@@ -344,7 +354,6 @@ struct SOLDIERTYPE : public Replica3
 
 		uiStatusFlags = 0;
 
-		memset(inv, 0, sizeof(inv));
 		pTempObject = NULL;
 		pKeyRing = NULL;
 
@@ -369,7 +378,6 @@ struct SOLDIERTYPE : public Replica3
 		ubAttackingHand = 0;
 
 		sWeightCarriedAtTurnStart = 0;
-		memset(&name, 0, sizeof(name));
 
 		bVisible = 0;
 
@@ -404,11 +412,6 @@ struct SOLDIERTYPE : public Replica3
 		fUIdeadMerc = 0;
 		fUICloseMerc = 0;
 
-		memset(&UpdateCounter, 0, sizeof(UpdateCounter));
-		memset(&DamageCounter, 0, sizeof(DamageCounter));
-		memset(&AICounter, 0, sizeof(AICounter));
-		memset(&FadeCounter, 0, sizeof(FadeCounter));
-
 		ubSkillTrait1 = 0;
 		ubSkillTrait2 = 0;
 
@@ -427,8 +430,7 @@ struct SOLDIERTYPE : public Replica3
 
 		fContinueMoveAfterStanceChange = 0;
 
-		// FIXME: memset() below being uncommented causes a crash on client side - TBD investigate
-		//memset(&AnimCache, 0, sizeof(AnimCache));
+		AnimCache_initialized = FALSE;
 
 		bLife = 0;
 		bSide = 0;
@@ -469,12 +471,9 @@ struct SOLDIERTYPE : public Replica3
 		bLifeMax = 0;
 
 		face = NULL;
+		face_initialized_once = FALSE;
 
-		memset(&HeadPal, 0, sizeof(HeadPal));
-		memset(&PantsPal, 0, sizeof(PantsPal));
-		memset(&VestPal, 0, sizeof(VestPal));
-		memset(&SkinPal, 0, sizeof(SkinPal));
-
+		// Nullifying SOLDIERTYPE pointers
 		memset(pShades, 0, sizeof(pShades));
 		memset(pGlowShades, 0, sizeof(pGlowShades));
 		bMedical = 0;
@@ -496,7 +495,7 @@ struct SOLDIERTYPE : public Replica3
 		sFinalDestination = 0;
 		bLevel = 0;
 
-		memset(ubPathingData, 0, sizeof(ubPathingData));
+		memset(ubPathingData, 0, sizeof(ubPathingData)); // Nullifying uints
 		ubPathDataSize = 0;
 		ubPathIndex = 0;
 		sBlackList = 0;
@@ -523,7 +522,7 @@ struct SOLDIERTYPE : public Replica3
 
 		uiTimeOfLastRandomAction = 0;
 
-		memset(bOppList, 0, sizeof(bOppList));
+		memset(bOppList, 0, sizeof(bOppList)); // Nullifying ints
 		bLastAction = 0;
 		bAction = 0;
 		usActionData = 0;
@@ -543,7 +542,7 @@ struct SOLDIERTYPE : public Replica3
 		bDominantDir = 0;
 		bPatrolCnt = 0;
 		bNextPatrolPnt = 0;
-		memset(usPatrolGrid, 0, sizeof(usPatrolGrid));
+		memset(usPatrolGrid, 0, sizeof(usPatrolGrid)); // Nullifying ints
 		sNoiseGridno = 0;
 		ubNoiseVolume = 0;
 		bLastAttackHit = 0;
@@ -597,8 +596,6 @@ struct SOLDIERTYPE : public Replica3
 		usUIMovementMode = 0;
 		fUIMovementFast = 0;
 
-		memset(&BlinkSelCounter, 0, sizeof(BlinkSelCounter));
-		memset(&PortraitFlashCounter, 0, sizeof(PortraitFlashCounter));
 		fDeadSoundPlayed = 0;
 		ubProfile = 0;
 		ubQuoteRecord = 0;
@@ -631,7 +628,7 @@ struct SOLDIERTYPE : public Replica3
 
 		effect_shade = NULL;
 
-		memset(sSpreadLocations, 0, sizeof(sSpreadLocations));
+		memset(sSpreadLocations, 0, sizeof(sSpreadLocations)); // Nullifying ints
 		fDoSpread = 0;
 		sStartGridNo = 0;
 		sEndGridNo = 0;
@@ -679,6 +676,7 @@ struct SOLDIERTYPE : public Replica3
 		uiUniqueSoldierIdValue = 0;
 		bBeingAttackedCount = 0;
 
+		// Nullifying ints
 		memset(bNewItemCount, 0, sizeof(bNewItemCount));
 		memset(bNewItemCycleCount, 0, sizeof(bNewItemCycleCount));
 		fCheckForNewlyAddedItems = 0;
@@ -686,12 +684,11 @@ struct SOLDIERTYPE : public Replica3
 
 		ubScheduleID = 0;
 		sEndDoorOpenCodeData = 0;
-		memset(&NextTileCounter, 0, sizeof(NextTileCounter));
 		fBlockedByAnotherMerc = 0;
 		bBlockedByAnotherMercDirection = 0;
 		usAttackingWeapon = 0;
 		target = NULL;
-		memset(&bWeaponMode, 0, sizeof(bWeaponMode));
+		bWeaponMode = WM_NORMAL;
 		bAIScheduleProgress = 0;
 		sOffWorldGridNo = 0;
 		pAniTile = NULL;
@@ -710,7 +707,7 @@ struct SOLDIERTYPE : public Replica3
 		sBoundingBoxOffsetX = 0;
 		sBoundingBoxOffsetY = 0;
 		uiTimeSameBattleSndDone = 0;
-		memset(&bOldBattleSnd, 0, sizeof(bOldBattleSnd));
+		bOldBattleSnd = BATTLE_SOUND_OK1; // Random valid value: it is expected to be modified before use
 		fContractPriceHasIncreased = 0;
 		uiBurstSoundID = 0;
 		fFixingSAMSite = 0;
@@ -726,6 +723,7 @@ struct SOLDIERTYPE : public Replica3
 		bSleepDrugCounter = 0;
 		ubMilitiaKills = 0;
 
+		// Nullifying ints
 		memset(bFutureDrugEffect, 0, sizeof(bFutureDrugEffect));
 		memset(bDrugEffectRate, 0, sizeof(bDrugEffectRate));
 		memset(bDrugEffect, 0, sizeof(bDrugEffect));
@@ -764,8 +762,6 @@ struct SOLDIERTYPE : public Replica3
 		fMuzzleFlash = 0;
 		CTGTTarget = NULL;
 
-		memset(&PanelAnimateCounter, 0, sizeof(PanelAnimateCounter));
-
 		bCurrentCivQuote = 0;
 		bCurrentCivQuoteDelta = 0;
 		ubMiscSoldierFlags = 0;
@@ -803,12 +799,8 @@ struct SOLDIERTYPE : public Replica3
 		uiTuringSoundID = 0;
 		ubLastDamageReason = 0;
 		fComplainedThatTired = 0;
-		memset(sLastTwoLocations, 0, sizeof(sLastTwoLocations));
+		memset(sLastTwoLocations, 0, sizeof(sLastTwoLocations)); // Nullifying ints
 		uiTimeSinceLastBleedGrunt = 0;
-	}
-
-	~SOLDIERTYPE() // FIXME: Remove?
-	{
 	}
 
 	SOLDIERTYPE& SOLDIERTYPE::operator =(const SOLDIERTYPE& other)
@@ -1338,9 +1330,12 @@ struct SOLDIERTYPE : public Replica3
 	{
 	}
 
+	// Pass everything except for pointers and strings (they are handlded in PreSerialize() and PostDeserialize() calls)
 	virtual RM3SerializationResult Serialize(RakNet::SerializeParameters* serializeParameters) {
 		if (gGameOptions.fNetwork) // If we are client we don't serialize objects back to server
 			return RM3SR_DO_NOT_SERIALIZE;
+		else
+			PreSerialize();
 
 		serializeParameters->outputBitstream[0].Write(ubID);
 
@@ -1351,7 +1346,6 @@ struct SOLDIERTYPE : public Replica3
 		serializeParameters->outputBitstream[0].Write(uiStatusFlags);
 
 		serializeParameters->outputBitstream[0].Write(inv);
-		// Pointers are not supposed to be synchronized
 		//serializeParameters->outputBitstream[0].Write(pTempObject);
 		//serializeParameters->outputBitstream[0].Write(pKeyRing);
 
@@ -1372,11 +1366,12 @@ struct SOLDIERTYPE : public Replica3
 		serializeParameters->outputBitstream[0].Write(ubInsertionDirection);
 
 		//serializeParameters->outputBitstream[0].Write(opponent);
+		serializeParameters->outputBitstream[0].Write(opponent_id);
 		serializeParameters->outputBitstream[0].Write(bLastRenderVisibleValue);
 		serializeParameters->outputBitstream[0].Write(ubAttackingHand);
 
 		serializeParameters->outputBitstream[0].Write(sWeightCarriedAtTurnStart);
-		rname = name.c_str(); // Using RakString as intermediate entity
+		//serializeParameters->outputBitstream[0].Write(name);
 		serializeParameters->outputBitstream[0].Write(rname);
 
 		serializeParameters->outputBitstream[0].Write(bVisible);
@@ -1425,6 +1420,9 @@ struct SOLDIERTYPE : public Replica3
 		//serializeParameters->outputBitstream[0].Write(attacker);
 		//serializeParameters->outputBitstream[0].Write(previous_attacker);
 		//serializeParameters->outputBitstream[0].Write(next_to_previous_attacker);
+		serializeParameters->outputBitstream[0].Write(attacker_id);
+		serializeParameters->outputBitstream[0].Write(previous_attacker_id);
+		serializeParameters->outputBitstream[0].Write(next_to_previous_attacker_id);
 		serializeParameters->outputBitstream[0].Write(fTurnInProgress);
 
 		serializeParameters->outputBitstream[0].Write(fIntendedTarget);
@@ -1477,11 +1475,10 @@ struct SOLDIERTYPE : public Replica3
 
 		//serializeParameters->outputBitstream[0].Write(face);
 
-		// Using RakString as intermediate entity
-		rHeadPal = HeadPal.c_str();
-		rPantsPal = PantsPal.c_str();
-		rVestPal = VestPal.c_str();
-		rSkinPal = SkinPal.c_str();
+		/*serializeParameters->outputBitstream[0].Write(HeadPal);
+		serializeParameters->outputBitstream[0].Write(PantsPal);
+		serializeParameters->outputBitstream[0].Write(VestPal);
+		serializeParameters->outputBitstream[0].Write(SkinPal);*/
 		serializeParameters->outputBitstream[0].Write(rHeadPal);
 		serializeParameters->outputBitstream[0].Write(rPantsPal);
 		serializeParameters->outputBitstream[0].Write(rVestPal);
@@ -1494,6 +1491,7 @@ struct SOLDIERTYPE : public Replica3
 		serializeParameters->outputBitstream[0].Write(ubFadeLevel);
 		serializeParameters->outputBitstream[0].Write(ubServiceCount);
 		//serializeParameters->outputBitstream[0].Write(service_partner);
+		serializeParameters->outputBitstream[0].Write(service_partner_id);
 		serializeParameters->outputBitstream[0].Write(bMarksmanship);
 		serializeParameters->outputBitstream[0].Write(bExplosive);
 		//serializeParameters->outputBitstream[0].Write(pThrowParams);
@@ -1820,6 +1818,8 @@ struct SOLDIERTYPE : public Replica3
 
 		return RM3SR_BROADCAST_IDENTICALLY;
 	}
+
+	// Here the number and sequence of Read() calls on de-serialized objects must correspond 1:1 to respective Write() calls in Serialize() above
 	virtual void Deserialize(RakNet::DeserializeParameters* deserializeParameters) {
 		deserializeParameters->serializationBitstream[0].Read(ubID);
 
@@ -1830,7 +1830,6 @@ struct SOLDIERTYPE : public Replica3
 		deserializeParameters->serializationBitstream[0].Read(uiStatusFlags);
 
 		deserializeParameters->serializationBitstream[0].Read(inv);
-		// Pointers are not supposed to be synchronized
 		//deserializeParameters->serializationBitstream[0].Read(pTempObject);
 		//deserializeParameters->serializationBitstream[0].Read(pKeyRing);
 
@@ -1851,12 +1850,13 @@ struct SOLDIERTYPE : public Replica3
 		deserializeParameters->serializationBitstream[0].Read(ubInsertionDirection);
 
 		//deserializeParameters->serializationBitstream[0].Read(opponent);
+		deserializeParameters->serializationBitstream[0].Read(opponent_id);
 		deserializeParameters->serializationBitstream[0].Read(bLastRenderVisibleValue);
 		deserializeParameters->serializationBitstream[0].Read(ubAttackingHand);
 
 		deserializeParameters->serializationBitstream[0].Read(sWeightCarriedAtTurnStart);
-		deserializeParameters->serializationBitstream[0].Read(rname); // Using RakString as intermediate entity
-		name = rname;
+		//deserializeParameters->serializationBitstream[0].Read(name);
+		deserializeParameters->serializationBitstream[0].Read(rname);
 
 		deserializeParameters->serializationBitstream[0].Read(bVisible);
 
@@ -1905,6 +1905,9 @@ struct SOLDIERTYPE : public Replica3
 		//deserializeParameters->serializationBitstream[0].Read(attacker);
 		//deserializeParameters->serializationBitstream[0].Read(previous_attacker);
 		//deserializeParameters->serializationBitstream[0].Read(next_to_previous_attacker);
+		deserializeParameters->serializationBitstream[0].Read(attacker_id);
+		deserializeParameters->serializationBitstream[0].Read(previous_attacker_id);
+		deserializeParameters->serializationBitstream[0].Read(next_to_previous_attacker_id);
 		deserializeParameters->serializationBitstream[0].Read(fTurnInProgress);
 
 		deserializeParameters->serializationBitstream[0].Read(fIntendedTarget);
@@ -1957,15 +1960,14 @@ struct SOLDIERTYPE : public Replica3
 
 		//deserializeParameters->serializationBitstream[0].Read(face);
 
-		// Using RakString as intermediate entity
+		/*deserializeParameters->serializationBitstream[0].Read(HeadPal);
+		deserializeParameters->serializationBitstream[0].Read(PantsPal);
+		deserializeParameters->serializationBitstream[0].Read(VestPal);
+		deserializeParameters->serializationBitstream[0].Read(SkinPal);*/
 		deserializeParameters->serializationBitstream[0].Read(rHeadPal);
 		deserializeParameters->serializationBitstream[0].Read(rPantsPal);
 		deserializeParameters->serializationBitstream[0].Read(rVestPal);
 		deserializeParameters->serializationBitstream[0].Read(rSkinPal);
-		HeadPal = rHeadPal;
-		PantsPal = rPantsPal;
-		VestPal = rVestPal;
-		SkinPal = rSkinPal;
 
 		//deserializeParameters->serializationBitstream[0].Read(pShades);
 		//deserializeParameters->serializationBitstream[0].Read(pGlowShades);
@@ -1974,6 +1976,7 @@ struct SOLDIERTYPE : public Replica3
 		deserializeParameters->serializationBitstream[0].Read(ubFadeLevel);
 		deserializeParameters->serializationBitstream[0].Read(ubServiceCount);
 		//deserializeParameters->serializationBitstream[0].Read(service_partner);
+		deserializeParameters->serializationBitstream[0].Read(service_partner_id);
 		deserializeParameters->serializationBitstream[0].Read(bMarksmanship);
 		deserializeParameters->serializationBitstream[0].Read(bExplosive);
 		//deserializeParameters->serializationBitstream[0].Read(pThrowParams);
@@ -2079,7 +2082,6 @@ struct SOLDIERTYPE : public Replica3
 
 		deserializeParameters->serializationBitstream[0].Read(fForceShade);
 		//deserializeParameters->serializationBitstream[0].Read(pForcedShade);
-		pForcedShade = White16BPPPalette; // NOTE: Hardcoding to the local resource copy (it seems that the pointer always points there anyway)
 
 		deserializeParameters->serializationBitstream[0].Read(bDisplayDamageCount);
 		deserializeParameters->serializationBitstream[0].Read(fDisplayDamage);
@@ -2298,6 +2300,105 @@ struct SOLDIERTYPE : public Replica3
 		deserializeParameters->serializationBitstream[0].Read(fComplainedThatTired);
 		deserializeParameters->serializationBitstream[0].Read(sLastTwoLocations);
 		deserializeParameters->serializationBitstream[0].Read(uiTimeSinceLastBleedGrunt);
+
+		PostDeserialize();
+	}
+
+	void PreSerialize() {
+		// Using RakString as intermediate entity
+		rname = name.c_str();
+
+		rHeadPal = HeadPal.c_str();
+		rPantsPal = PantsPal.c_str();
+		rVestPal = VestPal.c_str();
+		rSkinPal = SkinPal.c_str();
+
+		// Passing soldier pointers through IDs
+		opponent_id = Soldier2ID(opponent);
+		attacker_id = Soldier2ID(attacker);
+		previous_attacker_id = Soldier2ID(previous_attacker);
+		next_to_previous_attacker_id = Soldier2ID(next_to_previous_attacker);
+		service_partner_id = Soldier2ID(service_partner);
+	}
+
+	/*
+	 * This method sets local versions/copies of complicated remote variables:
+	 *
+	 * Pointers:
+	 *
+	 * OBJECTTYPE* pTempObject - skip;
+	 * KEY_ON_RING* pKeyRing - done;
+	 * SOLDIERTYPE* opponent - done;
+	 * SOLDIERTYPE* attacker - done;
+	 * SOLDIERTYPE* previous_attacker - done;
+	 * SOLDIERTYPE* next_to_previous_attacker - done;
+	 * FACETYPE* face - done;
+	 * UINT16* pShades[NUM_SOLDIER_SHADES];
+	 * UINT16* pGlowShades[20];
+	 * SOLDIERTYPE* service_partner - done;
+	 * THROW_PARAMS* pThrowParams;
+	 * LEVELNODE* pLevelNode;
+	 * LIGHT_SPRITE* light;
+	 * LIGHT_SPRITE* muzzle_flash;
+	 * SOLDIERTYPE* xrayed_by;
+	 * UINT16* pForcedShade - done;
+	 * UINT16* effect_shade;
+	 * PathSt* pMercPath;
+	 * SOLDIERTYPE* suppressor;
+	 * SOLDIERTYPE* target;
+	 * ANITILE* pAniTile;
+	 * SOLDIERTYPE* auto_bandaging_medic;
+	 * SOLDIERTYPE* robot_remote_holder;
+	 * const SOLDIERTYPE* CTGTTarget;
+	 *
+	 * Strings:
+	 *
+	 * ST::string name - done;
+	 * ST::string HeadPal - done;
+	 * ST::string PantsPal - done;
+	 * ST::string VestPal - done;
+	 * ST::string SkinPal - done;
+	 *
+	 * Etc:
+	 *
+	 * AnimationSurfaceCacheType AnimCache;
+	 */
+	void PostDeserialize() {
+		// Using RakString as intermediate entity
+		name = rname;
+
+		HeadPal = rHeadPal;
+		PantsPal = rPantsPal;
+		VestPal = rVestPal;
+		SkinPal = rSkinPal;
+
+		// Passing soldier pointers through IDs
+		opponent = ID2Soldier(opponent_id);
+		attacker = ID2Soldier(attacker_id);
+		previous_attacker = ID2Soldier(previous_attacker_id);
+		next_to_previous_attacker = ID2Soldier(next_to_previous_attacker_id);
+		service_partner = ID2Soldier(service_partner_id);
+
+		// Other pointers
+		pForcedShade = White16BPPPalette; // Hardcoding to the local resource copy (it seems that the pointer always points there anyway)
+
+		if ((pKeyRing == NULL) && bActive && (bTeam == OUR_TEAM))
+			pKeyRing = new KEY_ON_RING[NUM_KEYS]{};
+
+		if ((face == NULL) && bActive && (bTeam == OUR_TEAM) && !face_initialized_once) {
+			InitSoldierFace(*this);
+			face_initialized_once = TRUE;
+		}
+
+		if (bActive && !AnimCache_initialized) {
+			AnimCache.init(ubID);
+
+			// These two calls go together with AnimCache.init() when soldiers get created
+			EVENT_InitNewSoldierAnim(this, usAnimState, usAnimState == STANDING ? Random(10) : 0, TRUE); // Initialize animation locally
+			CreateSoldierPalettes(*this); // Initialize palette locally
+
+			AnimCache_initialized = TRUE;
+		}
 	}
 
 	virtual void SerializeConstructionRequestAccepted(RakNet::BitStream* serializationBitstream, RakNet::Connection_RM3* requestingConnection) {
@@ -2364,6 +2465,7 @@ struct SOLDIERTYPE : public Replica3
 	INT8 ubInsertionDirection;
 	// skills
 	SOLDIERTYPE* opponent;
+	UINT8 opponent_id;
 	INT8 bLastRenderVisibleValue;
 	UINT8 ubAttackingHand;
 	// traits
@@ -2422,6 +2524,9 @@ struct SOLDIERTYPE : public Replica3
 	SOLDIERTYPE* attacker;
 	SOLDIERTYPE* previous_attacker;
 	SOLDIERTYPE* next_to_previous_attacker;
+	UINT8 attacker_id;
+	UINT8 previous_attacker_id;
+	UINT8 next_to_previous_attacker_id;
 	BOOLEAN fTurnInProgress;
 
 	BOOLEAN fIntendedTarget; // intentionally shot?
@@ -2433,6 +2538,7 @@ struct SOLDIERTYPE : public Replica3
 	BOOLEAN fContinueMoveAfterStanceChange;
 
 	AnimationSurfaceCacheType AnimCache;
+	BOOLEAN AnimCache_initialized;
 
 	INT8 bLife; // current life (hit points or health)
 	UINT8 bSide;
@@ -2475,6 +2581,7 @@ struct SOLDIERTYPE : public Replica3
 	INT8 bLifeMax; // maximum life for this merc
 
 	FACETYPE* face;
+	BOOLEAN face_initialized_once;
 
 
 	// PALETTE MANAGEMENT STUFF
@@ -2495,6 +2602,7 @@ struct SOLDIERTYPE : public Replica3
 	UINT8 ubFadeLevel;
 	UINT8 ubServiceCount;
 	SOLDIERTYPE* service_partner;
+	UINT8 service_partner_id;
 	INT8 bMarksmanship;
 	INT8 bExplosive;
 	THROW_PARAMS *pThrowParams;

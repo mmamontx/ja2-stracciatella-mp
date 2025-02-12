@@ -136,19 +136,22 @@ extern const char* const gzActionStr[];
 // Soldier List used for all soldier overhead interaction
 extern SOLDIERTYPE Menptr[TOTAL_SOLDIERS];
 
-static inline SOLDIERTYPE& GetMan(UINT const idx)
+//static inline SOLDIERTYPE& GetMan(UINT const idx)
+inline SOLDIERTYPE& GetMan(UINT const idx)
 {
 	Assert(idx < lengthof(Menptr));
 	if (IS_VALID_CLIENT) return *((SOLDIERTYPE*)gReplicaList[idx]);
 	return Menptr[idx];
 }
 
-static inline SoldierID Soldier2ID(const SOLDIERTYPE* const s)
+//static inline SoldierID Soldier2ID(const SOLDIERTYPE* const s)
+inline SoldierID Soldier2ID(const SOLDIERTYPE* const s)
 {
 	return s != NULL ? s->ubID : NOBODY;
 }
 
-static inline SOLDIERTYPE* ID2Soldier(const SoldierID id)
+//static inline SOLDIERTYPE* ID2Soldier(const SoldierID id)
+inline SOLDIERTYPE* ID2Soldier(const SoldierID id)
 {
 	return id != NOBODY ? &GetMan(id) : 0;
 }

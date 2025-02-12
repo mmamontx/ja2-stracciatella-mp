@@ -1734,7 +1734,7 @@ static ScreenID UIHandleCMoveMerc(UI_EVENT* pUIEvent)
 	INT16 sIntTileGridNo;
 	BOOLEAN fOldFastMove;
 	RPC_DATA data;
-	BOOL fRPC = RPC_READY;
+	bool fRPC = RPC_READY;
 
 	SOLDIERTYPE* sel;
 	if (fRPC) {
@@ -2390,7 +2390,7 @@ static void AttackRequesterCallback(MessageBoxReturnValue const bExitValue)
 static ScreenID UIHandleCAMercShoot(UI_EVENT* pUIEvent)
 {
 	RPC_DATA data;
-	BOOL fRPC = RPC_READY;
+	bool fRPC = RPC_READY;
 
 	SOLDIERTYPE* sel;
 	if (fRPC) {
@@ -4006,7 +4006,7 @@ static BOOLEAN MakeSoldierTurn(SOLDIERTYPE* const pSoldier, const GridNo pos)
 static ScreenID UIHandleLCLook(UI_EVENT* pUIEvent)
 {
 	RPC_DATA data;
-	BOOL fRPC = RPC_READY;
+	bool fRPC = RPC_READY;
 
 	if (fRPC) {
 		data = gRPC_Events.front();

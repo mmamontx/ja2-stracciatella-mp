@@ -35,13 +35,13 @@ Basically, JA2 Stracciatella multiplayer is the same thing as the singleplayer, 
     - Fix columns width and add borders for MP buttons on the strategic screen. Adapt for all resolutions (including the widescreens). Add player names and the respective ready statuses to the columns.
     - Review and replicate all SOLDIERTYPE pointers that it makes sense to, and don't replicate the ones that are not supposed to be replicated.
 - Bugs:
+    - Sometimes in the lobby it looks like the client gets duplicated into 5 clones that send ready messages to the server.
+    - Sometimes items that were intended to be passed on client side get dropped on server side (probably there is something wrong with handling mouse position or the target variable).
     - The rectangle move cursor when it is hovered on the selected merc is shown on top instead of behind the soldier (for the client).
     - Some the original squares where mercs occur become unavailable for moving to (for the client).
     - Fix the bug when client mercs do not arrive in time and become inaccessible.
-    - Fix the sporadic client crashes when it connects to the lobby (now there is a workaround - see the FIXME in DrawFace() function).
     - Fix "burst fatality" crash.
-    - Investigate (and fix if needed) AnimCache memset() crash.
-    - Root-cause: how come the animation is not loaded for the client (see in the bottom).
+    - Root-cause: how come the animation is not loaded for the client. For some reason the client doesn't have animations in place when the tactical screen is loading. By default it causes failure, so there is a workaround introduced that skips the failure and loads the missing animation instead (see the FIXME in Animation_Control.cc).
 - Regular priority:
     - Implement the following RPC actions from the client:
         - Opening doors.
@@ -68,13 +68,16 @@ Basically, JA2 Stracciatella multiplayer is the same thing as the singleplayer, 
     - Testing: manual and automated.
     - Remove RakNet from source code and use it as a binary.
     - Handle connections/disconnections after the game gets started (after the first time compression button click).
-    - For fun: It seems that originally developers considered enabling jumps over the windows and left the corresponding code in place. Try to extend climbing with this ability (remove it or make it optional in the release).
     - Add binary release(s) and installation instructions.
+    - Pass merc top left corner speech to the client.
+    - Investigate how come ST::string direct assignment (see Overhead.h) causes crashes at random locations (buffer overflow?).
+For fun (remove it from the release or make it optional):
+    - It seems that originally developers considered enabling jumps over the windows and left the corresponding code in place. Try to extend climbing with this ability.
+    - Remove the lines that disable women enemies below elite level (see Soldier_Create.cc).
 
 Things worth mentioning and "dark knowledge":
 
 - The modification requires images of buttons from 1.13 MP. They are located under the following path: Data/Interface/MPGOLDPIECEBUTTONS.sti
-- For some reason the client doesn't have animations in place when the tactical screen is loading. By default it causes failure, so there is a workaround introduced that skips the failure and loads the missing animation instead.
 
 Changes compared to the vanilla game (from the player perspective):
 
