@@ -41,7 +41,6 @@ Basically, JA2 Stracciatella multiplayer is the same thing as the singleplayer, 
     - Some the original squares where mercs occur become unavailable for moving to (for the client).
     - Fix the bug when client mercs do not arrive in time and become inaccessible.
     - Fix "burst fatality" crash.
-    - Root-cause: how come the animation is not loaded for the client. For some reason the client doesn't have animations in place when the tactical screen is loading. By default it causes failure, so there is a workaround introduced that skips the failure and loads the missing animation instead (see the FIXME in Animation_Control.cc).
 - Regular priority:
     - Implement the following RPC actions from the client:
         - Opening doors.
@@ -65,13 +64,13 @@ Basically, JA2 Stracciatella multiplayer is the same thing as the singleplayer, 
         - Etc.
     - Assign every player to a separate squad (first - automatically give a single squad, then - introduce a control so that the server can do it manually and assign multiple squads to a single player). Only the server should be able to assign mercs to the squads. Prevent selecting and controlling mercs from squads of other players.
     - Verify repetitive starts and connections/disconnections within a single run.
-    - Testing: manual and automated.
+    - Testing: manual and automated. Enable GitHub CI.
     - Remove RakNet from source code and use it as a binary.
     - Handle connections/disconnections after the game gets started (after the first time compression button click).
     - Add binary release(s) and installation instructions.
     - Pass merc top left corner speech to the client.
     - Investigate how come ST::string direct assignment (see Overhead.h) causes crashes at random locations (buffer overflow?).
-For fun (remove it from the release or make it optional):
+- For fun (remove it from the release or make it optional):
     - It seems that originally developers considered enabling jumps over the windows and left the corresponding code in place. Try to extend climbing with this ability.
     - Remove the lines that disable women enemies below elite level (see Soldier_Create.cc).
 

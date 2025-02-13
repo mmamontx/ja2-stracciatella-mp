@@ -8,6 +8,7 @@
 
 #include "Animation_Cache.h"
 #include "Animation_Control.h"
+#include "Animation_Data.h"
 #include "Faces.h"
 #include "GameSettings.h"
 #include "JA2Types.h"
@@ -1558,6 +1559,7 @@ struct SOLDIERTYPE : public Replica3
 		serializeParameters->outputBitstream[0].Write(ubNoiseVolume);
 		serializeParameters->outputBitstream[0].Write(bLastAttackHit);
 		//serializeParameters->outputBitstream[0].Write(xrayed_by);
+		serializeParameters->outputBitstream[0].Write(xrayed_by_id);
 		serializeParameters->outputBitstream[0].Write(dHeightAdjustment);
 		serializeParameters->outputBitstream[0].Write(bMorale);
 		serializeParameters->outputBitstream[0].Write(bTeamMoraleMod);
@@ -1671,6 +1673,7 @@ struct SOLDIERTYPE : public Replica3
 		serializeParameters->outputBitstream[0].Write(ubAPsLostToSuppression);
 		serializeParameters->outputBitstream[0].Write(fChangingStanceDueToSuppression);
 		//serializeParameters->outputBitstream[0].Write(suppressor);
+		serializeParameters->outputBitstream[0].Write(suppressor_id);
 
 		serializeParameters->outputBitstream[0].Write(ubCivilianGroup);
 
@@ -1701,6 +1704,7 @@ struct SOLDIERTYPE : public Replica3
 		serializeParameters->outputBitstream[0].Write(bBlockedByAnotherMercDirection);
 		serializeParameters->outputBitstream[0].Write(usAttackingWeapon);
 		//serializeParameters->outputBitstream[0].Write(target);
+		serializeParameters->outputBitstream[0].Write(target_id);
 		serializeParameters->outputBitstream[0].Write(bWeaponMode);
 		serializeParameters->outputBitstream[0].Write(bAIScheduleProgress);
 		serializeParameters->outputBitstream[0].Write(sOffWorldGridNo);
@@ -1730,6 +1734,8 @@ struct SOLDIERTYPE : public Replica3
 		serializeParameters->outputBitstream[0].Write(fDontChargeTurningAPs);
 		//serializeParameters->outputBitstream[0].Write(auto_bandaging_medic);
 		//serializeParameters->outputBitstream[0].Write(robot_remote_holder);
+		serializeParameters->outputBitstream[0].Write(auto_bandaging_medic_id);
+		serializeParameters->outputBitstream[0].Write(robot_remote_holder_id);
 		serializeParameters->outputBitstream[0].Write(uiTimeOfLastContractUpdate);
 		serializeParameters->outputBitstream[0].Write(bTypeOfLastContract);
 		serializeParameters->outputBitstream[0].Write(bTurnsCollapsed);
@@ -1773,6 +1779,7 @@ struct SOLDIERTYPE : public Replica3
 		serializeParameters->outputBitstream[0].Write(ubDelayedMovementFlags);
 		serializeParameters->outputBitstream[0].Write(fMuzzleFlash);
 		//serializeParameters->outputBitstream[0].Write(CTGTTarget);
+		serializeParameters->outputBitstream[0].Write(CTGTTarget_id);
 
 		serializeParameters->outputBitstream[0].Write(PanelAnimateCounter);
 
@@ -2043,6 +2050,7 @@ struct SOLDIERTYPE : public Replica3
 		deserializeParameters->serializationBitstream[0].Read(ubNoiseVolume);
 		deserializeParameters->serializationBitstream[0].Read(bLastAttackHit);
 		//deserializeParameters->serializationBitstream[0].Read(xrayed_by);
+		deserializeParameters->serializationBitstream[0].Read(xrayed_by_id);
 		deserializeParameters->serializationBitstream[0].Read(dHeightAdjustment);
 		deserializeParameters->serializationBitstream[0].Read(bMorale);
 		deserializeParameters->serializationBitstream[0].Read(bTeamMoraleMod);
@@ -2156,6 +2164,7 @@ struct SOLDIERTYPE : public Replica3
 		deserializeParameters->serializationBitstream[0].Read(ubAPsLostToSuppression);
 		deserializeParameters->serializationBitstream[0].Read(fChangingStanceDueToSuppression);
 		//deserializeParameters->serializationBitstream[0].Read(suppressor);
+		deserializeParameters->serializationBitstream[0].Read(suppressor_id);
 
 		deserializeParameters->serializationBitstream[0].Read(ubCivilianGroup);
 
@@ -2186,6 +2195,7 @@ struct SOLDIERTYPE : public Replica3
 		deserializeParameters->serializationBitstream[0].Read(bBlockedByAnotherMercDirection);
 		deserializeParameters->serializationBitstream[0].Read(usAttackingWeapon);
 		//deserializeParameters->serializationBitstream[0].Read(target);
+		deserializeParameters->serializationBitstream[0].Read(target_id);
 		deserializeParameters->serializationBitstream[0].Read(bWeaponMode);
 		deserializeParameters->serializationBitstream[0].Read(bAIScheduleProgress);
 		deserializeParameters->serializationBitstream[0].Read(sOffWorldGridNo);
@@ -2215,6 +2225,8 @@ struct SOLDIERTYPE : public Replica3
 		deserializeParameters->serializationBitstream[0].Read(fDontChargeTurningAPs);
 		//deserializeParameters->serializationBitstream[0].Read(auto_bandaging_medic);
 		//deserializeParameters->serializationBitstream[0].Read(robot_remote_holder);
+		deserializeParameters->serializationBitstream[0].Read(auto_bandaging_medic_id);
+		deserializeParameters->serializationBitstream[0].Read(robot_remote_holder_id);
 		deserializeParameters->serializationBitstream[0].Read(uiTimeOfLastContractUpdate);
 		deserializeParameters->serializationBitstream[0].Read(bTypeOfLastContract);
 		deserializeParameters->serializationBitstream[0].Read(bTurnsCollapsed);
@@ -2258,6 +2270,7 @@ struct SOLDIERTYPE : public Replica3
 		deserializeParameters->serializationBitstream[0].Read(ubDelayedMovementFlags);
 		deserializeParameters->serializationBitstream[0].Read(fMuzzleFlash);
 		//deserializeParameters->serializationBitstream[0].Read(CTGTTarget);
+		deserializeParameters->serializationBitstream[0].Read(CTGTTarget_id);
 
 		deserializeParameters->serializationBitstream[0].Read(PanelAnimateCounter);
 
@@ -2319,6 +2332,12 @@ struct SOLDIERTYPE : public Replica3
 		previous_attacker_id = Soldier2ID(previous_attacker);
 		next_to_previous_attacker_id = Soldier2ID(next_to_previous_attacker);
 		service_partner_id = Soldier2ID(service_partner);
+		xrayed_by_id = Soldier2ID(xrayed_by);
+		suppressor_id = Soldier2ID(suppressor);
+		target_id = Soldier2ID(target);
+		auto_bandaging_medic_id = Soldier2ID(auto_bandaging_medic);
+		robot_remote_holder_id = Soldier2ID(robot_remote_holder);
+		CTGTTarget_id = Soldier2ID(CTGTTarget);
 	}
 
 	/*
@@ -2340,16 +2359,16 @@ struct SOLDIERTYPE : public Replica3
 	 * LEVELNODE* pLevelNode;
 	 * LIGHT_SPRITE* light;
 	 * LIGHT_SPRITE* muzzle_flash;
-	 * SOLDIERTYPE* xrayed_by;
+	 * SOLDIERTYPE* xrayed_by - done;
 	 * UINT16* pForcedShade - done;
 	 * UINT16* effect_shade;
 	 * PathSt* pMercPath;
-	 * SOLDIERTYPE* suppressor;
-	 * SOLDIERTYPE* target;
+	 * SOLDIERTYPE* suppressor - done;
+	 * SOLDIERTYPE* target - done;
 	 * ANITILE* pAniTile;
-	 * SOLDIERTYPE* auto_bandaging_medic;
-	 * SOLDIERTYPE* robot_remote_holder;
-	 * const SOLDIERTYPE* CTGTTarget;
+	 * SOLDIERTYPE* auto_bandaging_medic - done;
+	 * SOLDIERTYPE* robot_remote_holder - done;
+	 * const SOLDIERTYPE* CTGTTarget - done;
 	 *
 	 * Strings:
 	 *
@@ -2362,9 +2381,11 @@ struct SOLDIERTYPE : public Replica3
 	 * Etc:
 	 *
 	 * AnimationSurfaceCacheType AnimCache;
+	 *
+	 * + Loading the correspoding animation surfaces for the pair of usAnimSurface and usAnimState.
 	 */
 	void PostDeserialize() {
-		// Using RakString as intermediate entity
+		// Using RakString as intermediate entity - in the order from Serialize() and Deserialize() calls
 		name = rname;
 
 		HeadPal = rHeadPal;
@@ -2372,23 +2393,22 @@ struct SOLDIERTYPE : public Replica3
 		VestPal = rVestPal;
 		SkinPal = rSkinPal;
 
-		// Passing soldier pointers through IDs
+		// Passing soldier pointers through IDs - in the order from Serialize() and Deserialize() calls
 		opponent = ID2Soldier(opponent_id);
 		attacker = ID2Soldier(attacker_id);
 		previous_attacker = ID2Soldier(previous_attacker_id);
 		next_to_previous_attacker = ID2Soldier(next_to_previous_attacker_id);
 		service_partner = ID2Soldier(service_partner_id);
+		xrayed_by = ID2Soldier(xrayed_by_id);
+		suppressor = ID2Soldier(suppressor_id);
+		target = ID2Soldier(target_id);
+		auto_bandaging_medic = ID2Soldier(auto_bandaging_medic_id);
+		robot_remote_holder = ID2Soldier(robot_remote_holder_id);
+		CTGTTarget = ID2Soldier(CTGTTarget_id);
 
-		// Other pointers
-		pForcedShade = White16BPPPalette; // Hardcoding to the local resource copy (it seems that the pointer always points there anyway)
-
+		// Other pointers - in the order from Serialize() and Deserialize() calls
 		if ((pKeyRing == NULL) && bActive && (bTeam == OUR_TEAM))
 			pKeyRing = new KEY_ON_RING[NUM_KEYS]{};
-
-		if ((face == NULL) && bActive && (bTeam == OUR_TEAM) && !face_initialized_once) {
-			InitSoldierFace(*this);
-			face_initialized_once = TRUE;
-		}
 
 		if (bActive && !AnimCache_initialized) {
 			AnimCache.init(ubID);
@@ -2399,6 +2419,17 @@ struct SOLDIERTYPE : public Replica3
 
 			AnimCache_initialized = TRUE;
 		}
+
+		if ((face == NULL) && bActive && (bTeam == OUR_TEAM) && !face_initialized_once) {
+			InitSoldierFace(*this);
+			face_initialized_once = TRUE;
+		}
+
+		// The corresponding hVideoObject for the pair of usAnimState and usAnimSurface must be initialized locally, otherwise it would trigger an error in GetSoldierAnimationSurface()
+		if (bActive && (gAnimSurfaceDatabase[usAnimSurface].hVideoObject == NULL))
+			LoadAnimationSurface(ubID, usAnimSurface, usAnimState);
+
+		pForcedShade = White16BPPPalette; // Hardcoding to the local resource copy (it seems that the pointer always points there anyway)
 	}
 
 	virtual void SerializeConstructionRequestAccepted(RakNet::BitStream* serializationBitstream, RakNet::Connection_RM3* requestingConnection) {
@@ -2673,6 +2704,7 @@ struct SOLDIERTYPE : public Replica3
 	UINT8 ubNoiseVolume;
 	INT8 bLastAttackHit;
 	SOLDIERTYPE* xrayed_by;
+	UINT8 xrayed_by_id;
 	FLOAT dHeightAdjustment;
 	INT8 bMorale;
 	INT8 bTeamMoraleMod;
@@ -2787,6 +2819,7 @@ struct SOLDIERTYPE : public Replica3
 	UINT8 ubAPsLostToSuppression;
 	BOOLEAN fChangingStanceDueToSuppression;
 	SOLDIERTYPE* suppressor;
+	UINT8 suppressor_id;
 
 	UINT8 ubCivilianGroup;
 
@@ -2818,6 +2851,7 @@ struct SOLDIERTYPE : public Replica3
 	INT8 bBlockedByAnotherMercDirection;
 	UINT16 usAttackingWeapon;
 	SOLDIERTYPE* target;
+	UINT8 target_id;
 	WeaponModes bWeaponMode;
 	INT8 bAIScheduleProgress;
 	INT16 sOffWorldGridNo;
@@ -2847,6 +2881,8 @@ struct SOLDIERTYPE : public Replica3
 	BOOLEAN fDontChargeTurningAPs;
 	SOLDIERTYPE* auto_bandaging_medic;
 	SOLDIERTYPE* robot_remote_holder;
+	UINT8 auto_bandaging_medic_id;
+	UINT8 robot_remote_holder_id;
 	UINT32 uiTimeOfLastContractUpdate;
 	INT8 bTypeOfLastContract;
 	INT8 bTurnsCollapsed;
@@ -2890,6 +2926,7 @@ struct SOLDIERTYPE : public Replica3
 	UINT8 ubDelayedMovementFlags;
 	BOOLEAN fMuzzleFlash;
 	const SOLDIERTYPE* CTGTTarget;
+	UINT8 CTGTTarget_id;
 
 	TIMECOUNTER PanelAnimateCounter;
 
