@@ -474,7 +474,7 @@ struct SOLDIERTYPE : public Replica3
 		face = NULL;
 		face_initialized_once = FALSE;
 
-		// Nullifying SOLDIERTYPE pointers
+		// Nullifying uint pointers
 		memset(pShades, 0, sizeof(pShades));
 		memset(pGlowShades, 0, sizeof(pGlowShades));
 		bMedical = 0;
@@ -2345,27 +2345,27 @@ struct SOLDIERTYPE : public Replica3
 	 *
 	 * Pointers:
 	 *
-	 * OBJECTTYPE* pTempObject - skip;
+	 * OBJECTTYPE* pTempObject - skip (created locally when interacting with inventory items);
 	 * KEY_ON_RING* pKeyRing - done;
 	 * SOLDIERTYPE* opponent - done;
 	 * SOLDIERTYPE* attacker - done;
 	 * SOLDIERTYPE* previous_attacker - done;
 	 * SOLDIERTYPE* next_to_previous_attacker - done;
 	 * FACETYPE* face - done;
-	 * UINT16* pShades[NUM_SOLDIER_SHADES];
-	 * UINT16* pGlowShades[20];
+	 * UINT16* pShades[NUM_SOLDIER_SHADES] - skip (created locally in CreateSoldierPalettes() function);
+	 * UINT16* pGlowShades[20] - skip (created locally in CreateSoldierPalettes() function);
 	 * SOLDIERTYPE* service_partner - done;
-	 * THROW_PARAMS* pThrowParams;
-	 * LEVELNODE* pLevelNode;
-	 * LIGHT_SPRITE* light;
-	 * LIGHT_SPRITE* muzzle_flash;
+	 * THROW_PARAMS* pThrowParams - skip (created locally);
+	 * LEVELNODE* pLevelNode - skip (created locally in AddMercToHead() function), but might require replication;
+	 * LIGHT_SPRITE* light - skip (created locally by LightSpriteCreate() in CreateSoldierLight() function);
+	 * LIGHT_SPRITE* muzzle_flash - skip (created locally by LightSpriteCreate() in AdjustToNextAnimationFrame() function);
 	 * SOLDIERTYPE* xrayed_by - done;
 	 * UINT16* pForcedShade - done;
-	 * UINT16* effect_shade;
-	 * PathSt* pMercPath;
+	 * UINT16* effect_shade - skip (created locally in CreateSoldierPalettes() function);
+	 * PathSt* pMercPath - skip (seems to be created locally by BuildAStrategicPath() in PlotPathForCharacter() function - TODO: Verify in the strategic screen movement);
 	 * SOLDIERTYPE* suppressor - done;
 	 * SOLDIERTYPE* target - done;
-	 * ANITILE* pAniTile;
+	 * ANITILE* pAniTile - skip (seems to be created locally by CreateAnimationTile() in HandleCrowShadowNewGridNo() function - TODO: Verify after the battle by getting back to the sector with dead bodies);
 	 * SOLDIERTYPE* auto_bandaging_medic - done;
 	 * SOLDIERTYPE* robot_remote_holder - done;
 	 * const SOLDIERTYPE* CTGTTarget - done;

@@ -4,7 +4,7 @@ This project is a fork of JA2 Stracciatella introducing multiplayer to Jagged Al
 
 ## Vision
 
-Basically, JA2 Stracciatella multiplayer is the same thing as the singleplayer, but enabling other players to observe everything from their PCs and use their own controls. It is just as if the players would play hotseat (like some of us did it as kids when we took turns to tell "our" merc what to do), but with 2+ PCs instead of a single one. Considering this the changes are not expected to be too complex and mostly would consist of minor alterations caused by the fact that the original code is not designed for multiplayer. At the same time it is rather "immersive", which makes it relatively easy to be adapted for handling MP logic. The cornerstone of this is that somehow all the game status has to be synchronized between the players. JA2 1.13 handles this rather plainly by a number of callbacks that manually reflect parameters of individual objects to other players when various game events happen. Since the code is big, as the game session moves forward, the inability to track down everything causes discrepancies between what players observe and, eventually, crashes. Moreover, this approach would probably require too much "manual" effort to enable the campaign. Here, RakNet object replication mechanism is used to address this problem and handle it in a more natural fashion. The implementation approach is straightforward: start the regular game from the beginning and introduce multiplayer functionality where it is naturally expected. Fix crashes caused by changes; if necessary, add supporting code and structures; and move forward step by step.
+Basically, JA2 Stracciatella multiplayer is the same thing as the singleplayer, but enabling other players to observe everything from their PCs and use their own controls. It is just as if the players would play hotseat (like some of us did it as kids when we took turns to tell "our" merc what to do), but with 2+ PCs instead of a single one. Considering this the changes are not expected to be too complex and mostly would consist of minor alterations caused by the fact that the original code is not designed for multiplayer. At the same time the code is rather "immersive", which makes it relatively easy to be adapted for handling MP logic. The cornerstone of this is that somehow all the game status has to be synchronized between the players. JA2 1.13 handles this rather plainly by a number of callbacks that manually reflect parameters of individual objects to other players when various game events happen. Since the code is big, as the game session moves forward, the inability to track down everything causes discrepancies between what players observe and, eventually, crashes. Moreover, this approach would probably require too much "manual" effort to enable the campaign. Here, RakNet object replication mechanism is used to address this problem and handle it in a more natural fashion. The implementation approach is straightforward: start the regular game from the beginning and introduce multiplayer functionality where it is naturally expected. Fix crashes caused by changes; if necessary, add supporting code and structures; and move forward step by step.
 
 ## Manifesto
 
@@ -33,7 +33,6 @@ Basically, JA2 Stracciatella multiplayer is the same thing as the singleplayer, 
     - Fix the initial game connection screen (place the new buttons more friendly and add captions). Grey out game preferences when the client mode checkbox is marked.
     - Clear the written message in the box after it's sent to the chat (investigate and fix the issue). Make messages from client be broadcasted and received from the server before they appear in the chat on client side. Fix player name appearance in the chat on client side.
     - Fix columns width and add borders for MP buttons on the strategic screen. Adapt for all resolutions (including the widescreens). Add player names and the respective ready statuses to the columns.
-    - Review and replicate all SOLDIERTYPE pointers that it makes sense to, and don't replicate the ones that are not supposed to be replicated.
 - Bugs:
     - Sometimes in the lobby it looks like the client gets duplicated into 5 clones that send ready messages to the server.
     - Sometimes items that were intended to be passed on client side get dropped on server side (probably there is something wrong with handling mouse position or the target variable).
@@ -48,13 +47,12 @@ Basically, JA2 Stracciatella multiplayer is the same thing as the singleplayer, 
         - Interacting with chests and taking/placing items there.
         - Healing.
         - Unloading ammo.
-    - Replicate ground items.
+    - Replicate ground items - from the server to client and from the client to server (replicate LEVELNODEs with pItemPool?).
     - Multi-selection actions.
     - Propagate time (including time compressions) from the server to clients.
 - Low priority:
     - Implement the following RPC actions from the client:
         - Throwing grenades.
-        - Throwing knives.
         - Placing charges.
         - Talking (so that the effects of talking propagate to the server).
         - Cutting fences.
@@ -62,21 +60,21 @@ Basically, JA2 Stracciatella multiplayer is the same thing as the singleplayer, 
         - Merging items (should work - verify).
         - Shopping.
         - Etc.
-    - Assign every player to a separate squad (first - automatically give a single squad, then - introduce a control so that the server can do it manually and assign multiple squads to a single player). Only the server should be able to assign mercs to the squads. Prevent selecting and controlling mercs from squads of other players.
+    - Keep players in separate squads. Let players create squads, but first ensure that they aren't already used by others. Prevent selecting and controlling mercs from squads of other players.
     - Verify repetitive starts and connections/disconnections within a single run.
     - Testing: manual and automated. Enable GitHub CI.
     - Remove RakNet from source code and use it as a binary.
     - Handle connections/disconnections after the game gets started (after the first time compression button click).
     - Add binary release(s) and installation instructions.
     - Pass merc top left corner speech to the client.
-    - Investigate how come ST::string direct assignment (see Overhead.h) causes crashes at random locations (buffer overflow?).
+    - Investigate how come ST::string direct assignment (see Soldier_Control.h) causes crashes at random locations (buffer overflow?).
 - For fun (remove it from the release or make it optional):
     - It seems that originally developers considered enabling jumps over the windows and left the corresponding code in place. Try to extend climbing with this ability.
     - Remove the lines that disable women enemies below elite level (see Soldier_Create.cc).
 
 Things worth mentioning and "dark knowledge":
 
-- The modification requires images of buttons from 1.13 MP. They are located under the following path: Data/Interface/MPGOLDPIECEBUTTONS.sti
+- The modification requires images of buttons from 1.13 MP. They are located under the following path in 1.13: Data/Interface/MPGOLDPIECEBUTTONS.sti
 
 Changes compared to the vanilla game (from the player perspective):
 
