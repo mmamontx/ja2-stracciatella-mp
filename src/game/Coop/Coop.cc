@@ -28,7 +28,7 @@ BOOLEAN gStarted = FALSE;
 DataStructures::List<Replica3*> gReplicaList;
 NETWORK_OPTIONS gNetworkOptions;
 NetworkIDManager gNetworkIdManager;
-OBJECTTYPE* gpItemPointerRPC = NULL; // FIXME: Item dragged by the cursor - this single shared variable would cause conflicts for multiple clients
+OBJECTTYPE* gpItemPointerRPC = NULL; // If RPCs can be executed in parallel (to be checked) a single shared variable would cause conflicts
 SOLDIERTYPE* gpItemPointerSoldierRPC = NULL;
 ReplicaManager3Sample gReplicaManager;
 RPC_DATA* gRPC_Inv = NULL; // Currently executed inventory RPC
@@ -145,34 +145,51 @@ DWORD WINAPI server_packet(LPVOID lpParam)
 				break;
 			case ID_NEW_INCOMING_CONNECTION:
 				// This tells the server that a client has connected
-				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_NEW_INCOMING_CONNECTION");
+				//ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_NEW_INCOMING_CONNECTION");
 				break;
 			case ID_USER_PACKET_CONNECT: // This message and below are custom messages of JA2S Coop
 			{
-				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_USER_PACKET_CONNECT");
+				//ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_USER_PACKET_CONNECT");
 				struct USER_PACKET_CONNECT* up;
 				up = (struct USER_PACKET_CONNECT*)p->data;
-
-				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, (ST::string)up->name + " has connected.");
 
 				// Registering the new player in the global struct
 				struct PLAYER player;
 				player.guid = p->guid;
 				strcpy(player.name, up->name);
 				player.ready = up->ready;
-				gPlayers.push_back(player);
+
+				bool present = false;
+				for (std::list<struct PLAYER>::iterator it = gPlayers.begin(); it != gPlayers.end(); it++)
+					if (it->guid == p->guid) {
+						present = true;
+						break;
+					}
+
+				if (!present) {
+					gPlayers.push_back(player);
+
+					ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, (ST::string)up->name + " has connected.");
+				} // Otherwise ignore
 
 				break;
 			}
 			case ID_USER_PACKET_MESSAGE:
 			{
-				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_USER_PACKET_MESSAGE");
+				//ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_USER_PACKET_MESSAGE");
 				struct USER_PACKET_MESSAGE* up;
+				struct USER_PACKET_MESSAGE up_broadcast;
 				up = (struct USER_PACKET_MESSAGE*)p->data;
 
 				for (std::list<struct PLAYER>::iterator it = gPlayers.begin(); it != gPlayers.end(); it++)
 					if (it->guid == p->guid) {
-						ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, up->service ? ((ST::string)up->message) : ((ST::string)it->name + "> " + (ST::string)up->message));
+						ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, (ST::string)it->name + "> " + (ST::string)up->message);
+
+						// Broadcasting the message to the clients including the one that has sent this message
+						up_broadcast.id = ID_USER_PACKET_MESSAGE;
+						strcpy(up_broadcast.message, ((ST::string)it->name + "> " + (ST::string)up->message).c_str());
+						gNetworkOptions.peer->Send((char*)&up_broadcast, sizeof(up_broadcast), MEDIUM_PRIORITY, RELIABLE, 0, UNASSIGNED_RAKNET_GUID, true);
+
 						break;
 					}
 
@@ -180,7 +197,7 @@ DWORD WINAPI server_packet(LPVOID lpParam)
 			}
 			case ID_USER_PACKET_READY:
 			{
-				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_USER_PACKET_READY");
+				//ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_USER_PACKET_READY");
 				struct USER_PACKET_READY* up;
 				struct USER_PACKET_MESSAGE up_broadcast;
 				char str[256];
@@ -194,7 +211,6 @@ DWORD WINAPI server_packet(LPVOID lpParam)
 						// Broadcasting the name of the person that is ready
 						sprintf(str, "%s is %s.", it->name, it->ready ? "ready" : "not ready");
 						up_broadcast.id = ID_USER_PACKET_MESSAGE;
-						up_broadcast.service = TRUE;
 						strcpy(up_broadcast.message, str);
 						gNetworkOptions.peer->Send((char*)&up_broadcast, sizeof(up_broadcast), MEDIUM_PRIORITY, RELIABLE, 0, UNASSIGNED_RAKNET_GUID, true);
 
@@ -206,9 +222,8 @@ DWORD WINAPI server_packet(LPVOID lpParam)
 				}
 
 				// Broadcasting the cumulative ready status
-				sprintf(str, "Ready: %d/%d", total_ready, (int)(gPlayers.size()) + 1); // 1 more for the server
+				sprintf(str, "Total ready: %d/%d", total_ready, (int)(gPlayers.size()) + 1); // 1 more for the server
 				up_broadcast.id = ID_USER_PACKET_MESSAGE;
-				up_broadcast.service = TRUE;
 				strcpy(up_broadcast.message, str);
 				gNetworkOptions.peer->Send((char*)&up_broadcast, sizeof(up_broadcast), MEDIUM_PRIORITY, RELIABLE, 0, UNASSIGNED_RAKNET_GUID, true);
 
@@ -218,7 +233,7 @@ DWORD WINAPI server_packet(LPVOID lpParam)
 			}
 			case ID_REPLICA_MANAGER_SCOPE_CHANGE:
 				// Changed scope of an object
-				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_REPLICA_MANAGER_SCOPE_CHANGE");
+				//ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_REPLICA_MANAGER_SCOPE_CHANGE");
 				break;
 			case ID_RPC_PLUGIN:
 				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_RPC_PLUGIN");
@@ -284,7 +299,10 @@ DWORD WINAPI client_packet(LPVOID lpParam)
 				break;
 			case ID_CONNECTION_REQUEST_ACCEPTED:
 				// This tells the client that it has connected
-				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_CONNECTION_REQUEST_ACCEPTED");
+				//ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_CONNECTION_REQUEST_ACCEPTED");
+
+				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"Connected to the server.");
+
 				gConnected = TRUE;
 				break;
 			case ID_NEW_INCOMING_CONNECTION:
@@ -293,11 +311,11 @@ DWORD WINAPI client_packet(LPVOID lpParam)
 				break;
 			case ID_REPLICA_MANAGER_CONSTRUCTION:
 				// Create an object
-				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_REPLICA_MANAGER_CONSTRUCTION");
+				//ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_REPLICA_MANAGER_CONSTRUCTION");
 				break;
 			case ID_REPLICA_MANAGER_SCOPE_CHANGE: // Not sure what does this one mean
 				// Changed scope of an object
-				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_REPLICA_MANAGER_SCOPE_CHANGE");
+				//ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_REPLICA_MANAGER_SCOPE_CHANGE");
 				break;
 			case ID_REPLICA_MANAGER_SERIALIZE:
 				// Serialized data of an object
@@ -305,11 +323,13 @@ DWORD WINAPI client_packet(LPVOID lpParam)
 				break;
 			case ID_REPLICA_MANAGER_DOWNLOAD_STARTED:
 				// New connection, about to send all world objects
-				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_REPLICA_MANAGER_DOWNLOAD_STARTED");
+				//ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_REPLICA_MANAGER_DOWNLOAD_STARTED");
 				break;
 			case ID_REPLICA_MANAGER_DOWNLOAD_COMPLETE:
 				// Finished downloading all serialized objects
-				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_REPLICA_MANAGER_DOWNLOAD_COMPLETE");
+				//ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_REPLICA_MANAGER_DOWNLOAD_COMPLETE");
+
+				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"Replication is completed.");
 
 				gReplicaManager.GetReferencedReplicaList(gReplicaList);
 
@@ -326,11 +346,11 @@ DWORD WINAPI client_packet(LPVOID lpParam)
 				break;
 			case ID_USER_PACKET_MESSAGE:
 			{
-				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_USER_PACKET_MESSAGE");
+				//ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_USER_PACKET_MESSAGE");
 				struct USER_PACKET_MESSAGE* up;
 				up = (struct USER_PACKET_MESSAGE*)p->data;
 
-				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, up->service ? ((ST::string)up->message) : ("?> " + (ST::string)up->message)); // FIXME: As there is no gPlayers list the name is unknown and replaced with '?'
+				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, (ST::string)up->message);
 
 				break;
 			}

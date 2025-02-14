@@ -333,14 +333,22 @@ void SetInputFieldString(UINT8 ubField, const ST::string& str)
 		curr->numCodepoints = str.to_utf32().size();
 		Assert(curr->numCodepoints <= curr->maxCodepoints);
 	}
-	else if (!curr->fUserField)
+	//else if (!curr->fUserField)
+	else
 	{
 		curr->str.clear();
 		curr->numCodepoints = 0;
 	}
-	else
+	/*else
 	{
 		SLOGA("Attempting to illegally set text into user field {}", curr->ubID);
+	}*/
+
+	// If the field is active then move the cursor to the new position
+	if (GetActiveFieldID() == ubField)
+	{
+		gubStartHilite = curr->numCodepoints;
+		gubCursorPos = curr->numCodepoints;
 	}
 }
 

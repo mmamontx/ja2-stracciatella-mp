@@ -29,13 +29,11 @@ Basically, JA2 Stracciatella multiplayer is the same thing as the singleplayer, 
 ## Backlog
 
 - Incomplete:
-    - Implement respective item pointers on the server side for multiple clients: replace gpItemPointerRPC.
     - Fix the initial game connection screen (place the new buttons more friendly and add captions). Grey out game preferences when the client mode checkbox is marked.
-    - Clear the written message in the box after it's sent to the chat (investigate and fix the issue). Make messages from client be broadcasted and received from the server before they appear in the chat on client side. Fix player name appearance in the chat on client side.
     - Fix columns width and add borders for MP buttons on the strategic screen. Adapt for all resolutions (including the widescreens). Add player names and the respective ready statuses to the columns.
-- Bugs:
-    - Sometimes in the lobby it looks like the client gets duplicated into 5 clones that send ready messages to the server.
     - Sometimes items that were intended to be passed on client side get dropped on server side (probably there is something wrong with handling mouse position or the target variable).
+    - Shooting from the roof initiated by the client makes the server shoot above the target head (level above).
+- Bugs:
     - The rectangle move cursor when it is hovered on the selected merc is shown on top instead of behind the soldier (for the client).
     - Some the original squares where mercs occur become unavailable for moving to (for the client).
     - Fix the bug when client mercs do not arrive in time and become inaccessible.
@@ -68,6 +66,7 @@ Basically, JA2 Stracciatella multiplayer is the same thing as the singleplayer, 
     - Add binary release(s) and installation instructions.
     - Pass merc top left corner speech to the client.
     - Investigate how come ST::string direct assignment (see Soldier_Control.h) causes crashes at random locations (buffer overflow?).
+    - Check if the same RPC call from multiple clients gets executed in parallel. If so, find a way to disable it, or implement respective item pointers on the server side for multiple clients: replace gpItemPointerRPC.
 - For fun (remove it from the release or make it optional):
     - It seems that originally developers considered enabling jumps over the windows and left the corresponding code in place. Try to extend climbing with this ability.
     - Remove the lines that disable women enemies below elite level (see Soldier_Create.cc).

@@ -46,7 +46,6 @@ struct USER_PACKET_CONNECT {
 
 struct USER_PACKET_MESSAGE {
 	unsigned char id;
-	BOOLEAN service; // Service message - don't show the name before the message in the chat
 	char message[MAX_MESSAGE_LEN];
 };
 

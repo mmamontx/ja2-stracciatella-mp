@@ -1465,11 +1465,10 @@ ScreenID MapScreenHandle(void)
 		SetTextInputHilitedColors(2, FONT_WHITE, FONT_WHITE);
 		SetCursorColor(Get16BPPColor(FROMRGB(255, 255, 255)));
 
-		//  FIXME: Place outgoing chat message textbox more accurate
-		AddTextInputField(0, // Left
-			460, // Top
-			120, // Width
-			17, // Height
+		AddTextInputField(CHAT_INPUT_FIELD_X,
+			CHAT_INPUT_FIELD_Y,
+			CHAT_INPUT_FIELD_WIDTH,
+			CHAT_INPUT_FIELD_HEIGHT,
 			MSYS_PRIORITY_HIGH,
 			"",
 			MAX_MESSAGE_LEN,
@@ -3071,16 +3070,16 @@ static void GetMapKeyboardInput()
 			if (InputEvent.usParam == KEY_RETURN) {
 				ST::string str = GetStringFromField(0);
 
-				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, gNetworkOptions.name + "> " + str); // FIXME: Make messages broadcasted from the server instead of 'hardshowing' this message
+				if (!(IS_CLIENT)) // If we are server show it for ourselves
+					ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, gNetworkOptions.name + "> " + str);
 
 				// Sending the message to others
 				struct USER_PACKET_MESSAGE up;
 				up.id = ID_USER_PACKET_MESSAGE;
-				up.service = FALSE;
-				strcpy(up.message, str.c_str());
+				strcpy(up.message, IS_CLIENT ? str.c_str() : (gNetworkOptions.name + "> " + str).c_str());
 				gNetworkOptions.peer->Send((char*)&up, sizeof(up), MEDIUM_PRIORITY, RELIABLE, 0, UNASSIGNED_RAKNET_GUID, true);
 
-				//SetInputFieldString(0, {}); // FIXME: Find a way to clear the text field without errors
+				SetInputFieldString(0, "");
 			}
 
 			// if game is paused because of player, unpause with any key
@@ -6439,7 +6438,6 @@ void MPReadyButtonCallback(GUI_BUTTON* btn, INT32 reason)
 				// Broadcasting that the server (name) is ready (or not ready)
 				sprintf(str, "%s is %s.", gNetworkOptions.name.c_str(), gReady ? "ready" : "not ready");
 				up_broadcast.id = ID_USER_PACKET_MESSAGE;
-				up_broadcast.service = TRUE;
 				strcpy(up_broadcast.message, str);
 				gNetworkOptions.peer->Send((char*)&up_broadcast, sizeof(up_broadcast), MEDIUM_PRIORITY, RELIABLE, 0, UNASSIGNED_RAKNET_GUID, true);
 
@@ -6452,7 +6450,7 @@ void MPReadyButtonCallback(GUI_BUTTON* btn, INT32 reason)
 						total_ready++;
 
 				// Broadcasting the cumulative ready status
-				sprintf(str, "Ready: %d/%d", total_ready, (int)(gPlayers.size()) + 1); // 1 more for the server
+				sprintf(str, "Total ready: %d/%d", total_ready, (int)(gPlayers.size()) + 1); // 1 more for the server
 				strcpy(up_broadcast.message, str);
 				gNetworkOptions.peer->Send((char*)&up_broadcast, sizeof(up_broadcast), MEDIUM_PRIORITY, RELIABLE, 0, UNASSIGNED_RAKNET_GUID, true);
 

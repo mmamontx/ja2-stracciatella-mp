@@ -146,4 +146,9 @@ void SetMapCursorItem();
 #define TRASH_CAN_WIDTH       193 - 165
 #define TRASH_CAN_HEIGHT      239 - 217
 
+#define CHAT_INPUT_FIELD_X      14
+#define CHAT_INPUT_FIELD_Y      465
+#define CHAT_INPUT_FIELD_WIDTH  308
+#define CHAT_INPUT_FIELD_HEIGHT 15
+
 #endif
