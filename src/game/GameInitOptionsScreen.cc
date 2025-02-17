@@ -76,6 +76,25 @@
 #define GIO_IRON_MAN_SETTING_Y		GIO_GAME_SETTINGS_Y
 #define GIO_IRON_MAN_SETTING_WIDTH	GIO_DIF_SETTINGS_WIDTH
 
+#define GIO_NETWORK_SETTINGS_X			GIO_DIF_SETTINGS_X
+#define GIO_NETWORK_SETTINGS_Y			(STD_SCREEN_Y + 42)
+#define GIO_NETWORK_SETTINGS_WIDTH		GIO_DIF_SETTINGS_WIDTH
+
+#define GIO_FIELD_NETWORK_NAME_X		(GIO_GAME_SETTINGS_X + 20)
+#define GIO_FIELD_NETWORK_NAME_Y		(GIO_NETWORK_SETTINGS_Y + 20)
+#define GIO_FIELD_NETWORK_NAME_WIDTH	100
+#define GIO_FIELD_NETWORK_NAME_HEIGHT	16
+
+#define GIO_FIELD_NETWORK_IP_X			GIO_FIELD_NETWORK_NAME_X
+#define GIO_FIELD_NETWORK_IP_Y			(GIO_FIELD_NETWORK_NAME_Y + GIO_GAP_BN_SETTINGS)
+#define GIO_FIELD_NETWORK_IP_WIDTH		GIO_FIELD_NETWORK_NAME_WIDTH
+#define GIO_FIELD_NETWORK_IP_HEIGHT		GIO_FIELD_NETWORK_NAME_HEIGHT
+
+#define GIO_FIELD_NETWORK_PORT_X		(GIO_FIELD_NETWORK_IP_X + GIO_FIELD_NETWORK_IP_WIDTH + 2)
+#define GIO_FIELD_NETWORK_PORT_Y		GIO_FIELD_NETWORK_IP_Y
+#define GIO_FIELD_NETWORK_PORT_WIDTH	round(GIO_FIELD_NETWORK_IP_WIDTH / 1.618) // "Golden ratio"
+#define GIO_FIELD_NETWORK_PORT_HEIGHT	GIO_FIELD_NETWORK_IP_HEIGHT
+
 // Game Settings options
 enum
 {
@@ -200,6 +219,7 @@ static BOOLEAN DisplayMessageToUserAboutIronManMode(void);
 static void ConfirmGioIronManMessageBoxCallBack(MessageBoxReturnValue);
 static void ConfirmGioDeadIsDeadMessageBoxCallBack(MessageBoxReturnValue);
 static void ConfirmGioDeadIsDeadGoToSaveMessageBoxCallBack(MessageBoxReturnValue);
+static UINT8 GetCurrentNetworkButtonSetting(void);
 
 
 template<> ScreenID HandleScreen<GAME_INIT_OPTIONS_SCREEN>()
@@ -321,8 +341,8 @@ static void EnterGIOScreen()
 	}
 
 	{ // Check box to toggle Network options
-		INT16  const x = 0; // FIXME: Define a constant and set a proper position
-		INT16  const y = 75; // FIXME: Define a constant and set a proper position
+		INT16  const x = GIO_NETWORK_SETTINGS_X + GIO_OFFSET_TO_TOGGLE_BOX;
+		INT16  const y = GIO_NETWORK_SETTINGS_Y + GIO_OFFSET_TO_TOGGLE_BOX_Y;
 		size_t const def = IS_CLIENT ? GIO_CLIENT : GIO_SERVER;
 		MakeCheckBoxes(guiNetworkOptionToggles, lengthof(guiNetworkOptionToggles), x, y, BtnNetworkOptionsTogglesCallback, def);
 	}
@@ -337,28 +357,28 @@ static void EnterGIOScreen()
 	SetTextInputHilitedColors(2, FONT_WHITE, FONT_WHITE);
 	SetCursorColor(Get16BPPColor(FROMRGB(255, 255, 255)));
 
-	AddTextInputField(0, // Left
-		0, // Top
-		120, // Width
-		17, // Height
+	AddTextInputField(GIO_FIELD_NETWORK_NAME_X, // Left
+		GIO_FIELD_NETWORK_NAME_Y, // Top
+		GIO_FIELD_NETWORK_NAME_WIDTH, // Width
+		GIO_FIELD_NETWORK_NAME_HEIGHT, // Height
 		MSYS_PRIORITY_HIGH,
 		"Player Name",
 		MAX_NAME_LEN,
 		INPUTTYPE_DOSFILENAME); // Alphanumeric
 
-	AddTextInputField(0, // Left
-		25, // Top
-		120, // Width
-		17, // Height
+	AddTextInputField(GIO_FIELD_NETWORK_IP_X, // Left
+		GIO_FIELD_NETWORK_IP_Y, // Top
+		GIO_FIELD_NETWORK_IP_WIDTH, // Width
+		GIO_FIELD_NETWORK_IP_HEIGHT, // Height
 		MSYS_PRIORITY_HIGH,
 		"127.0.0.1",
 		15, // 4 numbers up to 3 digits each + 3 points between them
 		INPUTTYPE_FULL_TEXT); // TODO: Verify that it matches IP address format
 
-	AddTextInputField(0, // Left
-		50, // Top
-		120, // Width
-		17, // Height
+	AddTextInputField(GIO_FIELD_NETWORK_PORT_X, // Left
+		GIO_FIELD_NETWORK_PORT_Y, // Top
+		GIO_FIELD_NETWORK_PORT_WIDTH, // Width
+		GIO_FIELD_NETWORK_PORT_HEIGHT, // Height
 		MSYS_PRIORITY_HIGH,
 		"60005",
 		5, // Max digits in IPv4 port number
@@ -471,6 +491,34 @@ static void HandleGIOScreen(void)
 		gubGameOptionScreenHandler = GIO_NOTHING;
 	}
 
+	static BOOLEAN client_selected_old = 0;
+	BOOLEAN client_selected = GetCurrentNetworkButtonSetting();
+
+	int i;
+	if (client_selected != client_selected_old) {
+		if (client_selected) {
+			for (i = 0; i < lengthof(guiDifficultySettingsToggles); i++)
+				DisableButton(guiDifficultySettingsToggles[i]);
+			for (i = 0; i < lengthof(guiGameStyleToggles); i++)
+				DisableButton(guiGameStyleToggles[i]);
+			for (i = 0; i < lengthof(guiGunOptionToggles); i++)
+				DisableButton(guiGunOptionToggles[i]);
+			for (i = 0; i < lengthof(guiGameSaveToggles); i++)
+				DisableButton(guiGameSaveToggles[i]);
+		} else {
+			for (i = 0; i < lengthof(guiDifficultySettingsToggles); i++)
+				EnableButton(guiDifficultySettingsToggles[i]);
+			for (i = 0; i < lengthof(guiGameStyleToggles); i++)
+				EnableButton(guiGameStyleToggles[i]);
+			for (i = 0; i < lengthof(guiGunOptionToggles); i++)
+				EnableButton(guiGunOptionToggles[i]);
+			for (i = 0; i < lengthof(guiGameSaveToggles); i++)
+				EnableButton(guiGameSaveToggles[i]);
+		}
+	}
+
+	client_selected_old = client_selected;
+
 	if (gfReRenderGIOScreen)
 	{
 		RenderGIOScreen();
@@ -492,7 +540,7 @@ static void RenderGIOScreen(void)
 
 
 	//Display the title
-	DrawTextToScreen(gzGIOScreenText[GIO_INITIAL_GAME_SETTINGS], GIO_MAIN_TITLE_X, GIO_MAIN_TITLE_Y, GIO_MAIN_TITLE_WIDTH, GIO_TITLE_FONT, GIO_TITLE_COLOR, FONT_MCOLOR_BLACK, CENTER_JUSTIFIED);
+	//DrawTextToScreen(gzGIOScreenText[GIO_INITIAL_GAME_SETTINGS], GIO_MAIN_TITLE_X, GIO_MAIN_TITLE_Y, GIO_MAIN_TITLE_WIDTH, GIO_TITLE_FONT, GIO_TITLE_COLOR, FONT_MCOLOR_BLACK, CENTER_JUSTIFIED);
 
 
 	//Display the Dif Settings Title Text
@@ -555,6 +603,13 @@ static void RenderGIOScreen(void)
 
 	DisplayWrappedString(GIO_IRON_MAN_SETTING_X + GIO_OFFSET_TO_TEXT, usPosY, GIO_DIF_SETTINGS_WIDTH, 2, GIO_TOGGLE_TEXT_FONT, GIO_TOGGLE_TEXT_COLOR, gzGIOScreenText[GIO_DEAD_IS_DEAD_TEXT], FONT_MCOLOR_BLACK, LEFT_JUSTIFIED);
 	DisplayWrappedString(GIO_IRON_MAN_SETTING_X + GIO_OFFSET_TO_TEXT, usPosY+20, 220, 2, FONT12ARIAL, GIO_TOGGLE_TEXT_COLOR, zNewTacticalMessages[TCTL_MSG__CANNOT_LOAD_PREVIOUS_SAVE], FONT_MCOLOR_BLACK, LEFT_JUSTIFIED);
+
+	//Display the Network Settings Text
+	usPosY = GIO_NETWORK_SETTINGS_Y + 20;
+	DisplayWrappedString(GIO_NETWORK_SETTINGS_X + GIO_OFFSET_TO_TEXT, usPosY, GIO_NETWORK_SETTINGS_WIDTH, 2, GIO_TOGGLE_TEXT_FONT, GIO_TOGGLE_TEXT_COLOR, "Server", FONT_MCOLOR_BLACK, LEFT_JUSTIFIED);
+
+	usPosY += GIO_GAP_BN_SETTINGS;
+	DisplayWrappedString(GIO_NETWORK_SETTINGS_X + GIO_OFFSET_TO_TEXT, usPosY, GIO_NETWORK_SETTINGS_WIDTH, 2, GIO_TOGGLE_TEXT_FONT, GIO_TOGGLE_TEXT_COLOR, "Client", FONT_MCOLOR_BLACK, LEFT_JUSTIFIED);
 }
 
 
@@ -779,10 +834,10 @@ static void RestoreGIOButtonBackGrounds(void)
 	}
 
 	// Check box to toggle Network options
-	usPosY = 75; // FIXME: Define a constant and set a proper position
+	usPosY = GIO_NETWORK_SETTINGS_Y + GIO_OFFSET_TO_TOGGLE_BOX_Y;
 	for (cnt = 0; cnt < NUM_NETWORK_OPTIONS; cnt++)
 	{
-		RestoreExternBackgroundRect(0, usPosY, 34, 29); // FIXME: Define a constant and set a proper position (1st arg)
+		RestoreExternBackgroundRect(GIO_NETWORK_SETTINGS_X + GIO_OFFSET_TO_TOGGLE_BOX, usPosY, 34, 29);
 		usPosY += GIO_GAP_BN_SETTINGS;
 	}
 

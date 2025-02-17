@@ -29,8 +29,7 @@ Basically, JA2 Stracciatella multiplayer is the same thing as the singleplayer, 
 ## Backlog
 
 - Incomplete:
-    - Fix the initial game connection screen (place the new buttons more friendly and add captions). Grey out game preferences when the client mode checkbox is marked.
-    - Fix columns width and add borders for MP buttons on the strategic screen. Adapt for all resolutions (including the widescreens). Add player names and the respective ready statuses to the columns.
+    - Fix columns width and add borders for MP buttons on the strategic screen. Add player names and the respective ready statuses to the columns.
     - Sometimes items that were intended to be passed on client side get dropped on server side (probably there is something wrong with handling mouse position or the target variable).
     - Shooting from the roof initiated by the client makes the server shoot above the target head (level above).
 - Bugs:
@@ -67,6 +66,9 @@ Basically, JA2 Stracciatella multiplayer is the same thing as the singleplayer, 
     - Pass merc top left corner speech to the client.
     - Investigate how come ST::string direct assignment (see Soldier_Control.h) causes crashes at random locations (buffer overflow?).
     - Check if the same RPC call from multiple clients gets executed in parallel. If so, find a way to disable it, or implement respective item pointers on the server side for multiple clients: replace gpItemPointerRPC.
+    - Ensure that the buttons selected in the game init options screen won't affect client experience - obtain and use these values from the server.
+    - Adapt for all resolutions (including the widescreens).
+    - Verify correctness of the IP address stored in the corresponding field of the game init option screen - and don't let the player to the strategic map screen until it is fixed.
 - For fun (remove it from the release or make it optional):
     - It seems that originally developers considered enabling jumps over the windows and left the corresponding code in place. Try to extend climbing with this ability.
     - Remove the lines that disable women enemies below elite level (see Soldier_Create.cc).
@@ -74,6 +76,7 @@ Basically, JA2 Stracciatella multiplayer is the same thing as the singleplayer, 
 Things worth mentioning and "dark knowledge":
 
 - The modification requires images of buttons from 1.13 MP. They are located under the following path in 1.13: Data/Interface/MPGOLDPIECEBUTTONS.sti
+- So far didn't verify or adapt for resolutions other than 640x480 - recommend using it for now.
 
 Changes compared to the vanilla game (from the player perspective):
 
