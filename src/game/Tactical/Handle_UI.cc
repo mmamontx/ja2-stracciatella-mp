@@ -547,6 +547,9 @@ ScreenID HandleTacticalUI(void)
 			case HC_ON_TERRAIN: // The hand cursor is activated
 				//SLOGI("HC_ON_TERRAIN");
 				break;
+			case I_CHANGE_TO_IDLE:
+				//SLOGI("I_CHANGE_TO_IDLE");
+				break;
 			case I_SELECT_MERC:
 				//SLOGI("I_SELECT_MERC");
 				break;

@@ -15,7 +15,7 @@ Basically, JA2 Stracciatella multiplayer is the same thing as the singleplayer, 
 
 ## Roadmap
 
-1. Multiplayer on the strategic screen. So that players can see squad members and chat messages of each other. **Basic functionality - for game beginning before the helicopter drop in Omerta - is done, need to introduce "cosmetic" fixes and do some extra testing.**
+1. Multiplayer on the strategic screen. So that players can see squad members and chat messages of each other. **Basic functionality - for the game beginning before the helicopter drop in Omerta - is done.**
 2. Multiplayer on the tactical screen:
     1. In the real-time mode. So that players can observe actions of each other and interact. **The object replication concept works well. Now offloading all the possible client (merc) actions to the server side so it can then be broadcasted to everyone - mostly done.**
     2. In the battle/turn-based mode.
@@ -29,7 +29,6 @@ Basically, JA2 Stracciatella multiplayer is the same thing as the singleplayer, 
 ## Backlog
 
 - Incomplete:
-    - Fix columns width and add borders for MP buttons on the strategic screen. Add player names and the respective ready statuses to the columns.
     - Sometimes items that were intended to be passed on client side get dropped on server side (probably there is something wrong with handling mouse position or the target variable).
     - Shooting from the roof initiated by the client makes the server shoot above the target head (level above).
 - Bugs:
@@ -37,6 +36,8 @@ Basically, JA2 Stracciatella multiplayer is the same thing as the singleplayer, 
     - Some the original squares where mercs occur become unavailable for moving to (for the client).
     - Fix the bug when client mercs do not arrive in time and become inaccessible.
     - Fix "burst fatality" crash.
+    - Sometimes a just connected client doesn't see himself in the player list until he clicks 'ready'.
+    - Still, animation surfaces are not loaded for the client (it doesn't cause any crash).
 - Regular priority:
     - Implement the following RPC actions from the client:
         - Opening doors.
@@ -47,6 +48,7 @@ Basically, JA2 Stracciatella multiplayer is the same thing as the singleplayer, 
     - Replicate ground items - from the server to client and from the client to server (replicate LEVELNODEs with pItemPool?).
     - Multi-selection actions.
     - Propagate time (including time compressions) from the server to clients.
+    - Hiring by clients.
 - Low priority:
     - Implement the following RPC actions from the client:
         - Throwing grenades.
@@ -69,6 +71,7 @@ Basically, JA2 Stracciatella multiplayer is the same thing as the singleplayer, 
     - Ensure that the buttons selected in the game init options screen won't affect client experience - obtain and use these values from the server.
     - Adapt for all resolutions (including the widescreens).
     - Verify correctness of the IP address stored in the corresponding field of the game init option screen - and don't let the player to the strategic map screen until it is fixed.
+    - Prevent players from having identical names (don't allow to connect or modify the name).
 - For fun (remove it from the release or make it optional):
     - It seems that originally developers considered enabling jumps over the windows and left the corresponding code in place. Try to extend climbing with this ability.
     - Remove the lines that disable women enemies below elite level (see Soldier_Create.cc).

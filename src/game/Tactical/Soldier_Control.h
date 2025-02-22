@@ -1296,6 +1296,7 @@ struct SOLDIERTYPE : public Replica3
 	virtual void WriteAllocationID(RakNet::Connection_RM3* destinationConnection, RakNet::BitStream* allocationIdBitstream) const {
 		allocationIdBitstream->Write(GetName());
 	}
+
 	void PrintStringInBitstream(RakNet::BitStream* bs)
 	{
 		if (bs->GetNumberOfBitsUsed() == 0)
@@ -1309,19 +1310,23 @@ struct SOLDIERTYPE : public Replica3
 
 		constructionBitstream->Write(GetName() + RakNet::RakString(" SerializeConstruction"));
 	}
+
 	virtual bool DeserializeConstruction(RakNet::BitStream* constructionBitstream, RakNet::Connection_RM3* sourceConnection) {
 		PrintStringInBitstream(constructionBitstream);
 		return true;
 	}
+
 	virtual void SerializeDestruction(RakNet::BitStream* destructionBitstream, RakNet::Connection_RM3* destinationConnection) {
 
 		destructionBitstream->Write(GetName() + RakNet::RakString(" SerializeDestruction"));
 
 	}
+
 	virtual bool DeserializeDestruction(RakNet::BitStream* destructionBitstream, RakNet::Connection_RM3* sourceConnection) {
 		PrintStringInBitstream(destructionBitstream);
 		return true;
 	}
+
 	virtual void DeallocReplica(RakNet::Connection_RM3* sourceConnection) {
 		delete this;
 	}
@@ -2435,12 +2440,15 @@ struct SOLDIERTYPE : public Replica3
 	virtual void SerializeConstructionRequestAccepted(RakNet::BitStream* serializationBitstream, RakNet::Connection_RM3* requestingConnection) {
 		serializationBitstream->Write(GetName() + RakNet::RakString(" SerializeConstructionRequestAccepted"));
 	}
+
 	virtual void DeserializeConstructionRequestAccepted(RakNet::BitStream* serializationBitstream, RakNet::Connection_RM3* acceptingConnection) {
 		PrintStringInBitstream(serializationBitstream);
 	}
+
 	virtual void SerializeConstructionRequestRejected(RakNet::BitStream* serializationBitstream, RakNet::Connection_RM3* requestingConnection) {
 		serializationBitstream->Write(GetName() + RakNet::RakString(" SerializeConstructionRequestRejected"));
 	}
+
 	virtual void DeserializeConstructionRequestRejected(RakNet::BitStream* serializationBitstream, RakNet::Connection_RM3* rejectingConnection) {
 		PrintStringInBitstream(serializationBitstream);
 	}
@@ -2448,6 +2456,7 @@ struct SOLDIERTYPE : public Replica3
 	virtual void OnPoppedConnection(RakNet::Connection_RM3* droppedConnection)
 	{
 	}
+
 	void NotifyReplicaOfMessageDeliveryStatus(RakNetGUID guid, uint32_t receiptId, bool messageArrived)
 	{
 	}
@@ -2455,12 +2464,15 @@ struct SOLDIERTYPE : public Replica3
 	virtual RM3ConstructionState QueryConstruction(RakNet::Connection_RM3* destinationConnection, ReplicaManager3* replicaManager3) {
 		return QueryConstruction_ServerConstruction(destinationConnection, gGameOptions.fNetwork != TRUE);
 	}
+
 	virtual bool QueryRemoteConstruction(RakNet::Connection_RM3* sourceConnection) {
 		return QueryRemoteConstruction_ServerConstruction(sourceConnection, gGameOptions.fNetwork != TRUE);
 	}
+
 	virtual RM3QuerySerializationResult QuerySerialization(RakNet::Connection_RM3* destinationConnection) {
 		return QuerySerialization_ServerSerializable(destinationConnection, gGameOptions.fNetwork != TRUE);
 	}
+
 	virtual RM3ActionOnPopConnection QueryActionOnPopConnection(RakNet::Connection_RM3* droppedConnection) const {
 		return QueryActionOnPopConnection_Server(droppedConnection);
 	}

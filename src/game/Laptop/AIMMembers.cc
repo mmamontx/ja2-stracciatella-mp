@@ -1,3 +1,4 @@
+#include "Coop.h"
 #include "Cursors.h"
 #include "Directories.h"
 #include "EDT.h"
@@ -1149,6 +1150,14 @@ static void BtnAuthorizeButtonCallback(GUI_BUTTON *btn, UINT32 reason)
 
 					giBuyEquipmentButton[0]->SpecifyDisabledStyle(GUI_BUTTON::DISABLED_STYLE_NONE);
 					giBuyEquipmentButton[1]->SpecifyDisabledStyle(GUI_BUTTON::DISABLED_STYLE_NONE);
+
+					// FIXME: Find a more "universal" place where this packet can be sent (to handle both AIM and MERC cases)
+					if (!(IS_CLIENT)) // We are server
+					{
+						struct USER_PACKET_MESSAGE up_broadcast;
+						up_broadcast.id = ID_USER_PACKET_TEAM_PANEL_DIRTY;
+						gNetworkOptions.peer->Send((char*)&up_broadcast, sizeof(up_broadcast), MEDIUM_PRIORITY, RELIABLE, 0, UNASSIGNED_RAKNET_GUID, true);
+					}
 				}
 			}
 #if 0 // XXX was commented out

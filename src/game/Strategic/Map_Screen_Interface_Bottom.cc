@@ -776,10 +776,10 @@ BOOLEAN AllowedToTimeCompress( void )
 		else
 			return FALSE;
 	} else { // We are server
-		for (std::list<struct PLAYER>::iterator it = gPlayers.begin(); it != gPlayers.end(); it++)
-			if (!(it->ready))
+		FOR_EACH_PLAYER(i)
+			if ((gPlayers[i].guid != UNASSIGNED_RAKNET_GUID) && !(gPlayers[i].ready))
 				return FALSE;
-		return gReady; // If every player (client) is ready then we check if the server is ready and, if so, enable time compression
+		return gReady && gfAtLeastOneMercWasHired; // If every player (client) is ready then we check if the server is ready and there is at least one merc hired and, if so, enable time compression
 	}
 
 	// if already leaving, disallow any other attempts to exit

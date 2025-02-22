@@ -34,13 +34,20 @@ ReplicaManager3Sample gReplicaManager;
 RPC_DATA* gRPC_Inv = NULL; // Currently executed inventory RPC
 RPC4 gRPC;
 std::list<RPC_DATA> gRPC_Events;
-std::list<struct PLAYER> gPlayers;
+struct PLAYER gPlayers[MAX_NUM_PLAYERS];
 
 DWORD WINAPI replicamgr(LPVOID lpParam)
 {
 	while (1)
 		Sleep(1000); // NOTE: It doesn't affect object replication sync delay, but it may have some other effect - keep this in mind
 	return 0;
+}
+
+void UpdateTeamPanel()
+{
+	fDrawCharacterList = true;
+	fTeamPanelDirty = true;
+	ReBuildCharactersList();
 }
 
 // For debugging purposes (so we don't have to hire mercs manually everytime)
@@ -131,12 +138,19 @@ DWORD WINAPI server_packet(LPVOID lpParam)
 				// terminated
 				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_CONNECTION_LOST");
 
-				for (std::list<struct PLAYER>::iterator it = gPlayers.begin(); it != gPlayers.end(); it++)
-					if (it->guid == p->guid) {
-						ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, (ST::string)it->name + " got disconnected (connection lost).");
-						gPlayers.erase(it);
+				FOR_EACH_CLIENT(i)
+					if (gPlayers[i].guid == p->guid) {
+						ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, (ST::string)(gPlayers[i].name) + " got disconnected (connection lost).");
+						gPlayers[i].guid = UNASSIGNED_RAKNET_GUID;
 						break;
 					}
+
+				UpdateTeamPanel(); // Without the disconnected player
+
+				// Tell others
+				struct USER_PACKET_MESSAGE up_broadcast;
+				up_broadcast.id = ID_USER_PACKET_TEAM_PANEL_DIRTY;
+				gNetworkOptions.peer->Send((char*)&up_broadcast, sizeof(up_broadcast), MEDIUM_PRIORITY, RELIABLE, 0, UNASSIGNED_RAKNET_GUID, true);
 
 				break;
 			case ID_CONNECTION_REQUEST_ACCEPTED:
@@ -154,23 +168,30 @@ DWORD WINAPI server_packet(LPVOID lpParam)
 				up = (struct USER_PACKET_CONNECT*)p->data;
 
 				// Registering the new player in the global struct
-				struct PLAYER player;
-				player.guid = p->guid;
-				strcpy(player.name, up->name);
-				player.ready = up->ready;
-
 				bool present = false;
-				for (std::list<struct PLAYER>::iterator it = gPlayers.begin(); it != gPlayers.end(); it++)
-					if (it->guid == p->guid) {
+				INT8 first_free = -1;
+				FOR_EACH_CLIENT(i)
+					if (gPlayers[i].guid == p->guid) {
 						present = true;
 						break;
+					} else if (first_free == -1) {
+						first_free = i;
 					}
 
-				if (!present) {
-					gPlayers.push_back(player);
+				if ((!present) && (first_free != -1)) {
+					gPlayers[first_free].guid = p->guid;
+					gPlayers[first_free].name = up->name;
+					gPlayers[first_free].ready = up->ready;
 
 					ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, (ST::string)up->name + " has connected.");
-				} // Otherwise ignore
+
+					UpdateTeamPanel(); // With the connected player
+
+					// Tell others
+					struct USER_PACKET_MESSAGE up_broadcast;
+					up_broadcast.id = ID_USER_PACKET_TEAM_PANEL_DIRTY;
+					gNetworkOptions.peer->Send((char*)&up_broadcast, sizeof(up_broadcast), MEDIUM_PRIORITY, RELIABLE, 0, UNASSIGNED_RAKNET_GUID, true);
+				} // Otherwise ignore the duplicated connection request
 
 				break;
 			}
@@ -181,13 +202,13 @@ DWORD WINAPI server_packet(LPVOID lpParam)
 				struct USER_PACKET_MESSAGE up_broadcast;
 				up = (struct USER_PACKET_MESSAGE*)p->data;
 
-				for (std::list<struct PLAYER>::iterator it = gPlayers.begin(); it != gPlayers.end(); it++)
-					if (it->guid == p->guid) {
-						ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, (ST::string)it->name + "> " + (ST::string)up->message);
+				FOR_EACH_CLIENT(i)
+					if (gPlayers[i].guid == p->guid) {
+						ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, (ST::string)(gPlayers[i].name) + "> " + (ST::string)up->message);
 
 						// Broadcasting the message to the clients including the one that has sent this message
 						up_broadcast.id = ID_USER_PACKET_MESSAGE;
-						strcpy(up_broadcast.message, ((ST::string)it->name + "> " + (ST::string)up->message).c_str());
+						strcpy(up_broadcast.message, ((ST::string)(gPlayers[i].name) + "> " + (ST::string)up->message).c_str());
 						gNetworkOptions.peer->Send((char*)&up_broadcast, sizeof(up_broadcast), MEDIUM_PRIORITY, RELIABLE, 0, UNASSIGNED_RAKNET_GUID, true);
 
 						break;
@@ -201,33 +222,22 @@ DWORD WINAPI server_packet(LPVOID lpParam)
 				struct USER_PACKET_READY* up;
 				struct USER_PACKET_MESSAGE up_broadcast;
 				char str[256];
-				int total_ready = gReady ? 1 : 0; // 1 more if the server is ready
 				up = (struct USER_PACKET_READY*)p->data;
 
-				for (std::list<struct PLAYER>::iterator it = gPlayers.begin(); it != gPlayers.end(); it++) {
-					if (it->guid == p->guid) {
-						it->ready = up->ready;
+				FOR_EACH_PLAYER(i)
+					if (gPlayers[i].guid == p->guid) {
+						gPlayers[i].ready = up->ready;
 
 						// Broadcasting the name of the person that is ready
-						sprintf(str, "%s is %s.", it->name, it->ready ? "ready" : "not ready");
+						sprintf(str, "%s is %s.", gPlayers[i].name.C_String(), gPlayers[i].ready ? "ready" : "not ready");
 						up_broadcast.id = ID_USER_PACKET_MESSAGE;
 						strcpy(up_broadcast.message, str);
 						gNetworkOptions.peer->Send((char*)&up_broadcast, sizeof(up_broadcast), MEDIUM_PRIORITY, RELIABLE, 0, UNASSIGNED_RAKNET_GUID, true);
 
 						ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, str); // Duplicating to the server chat
+
+						break;
 					}
-
-					if (it->ready)
-						total_ready++;
-				}
-
-				// Broadcasting the cumulative ready status
-				sprintf(str, "Total ready: %d/%d", total_ready, (int)(gPlayers.size()) + 1); // 1 more for the server
-				up_broadcast.id = ID_USER_PACKET_MESSAGE;
-				strcpy(up_broadcast.message, str);
-				gNetworkOptions.peer->Send((char*)&up_broadcast, sizeof(up_broadcast), MEDIUM_PRIORITY, RELIABLE, 0, UNASSIGNED_RAKNET_GUID, true);
-
-				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, str); // Duplicating to the server chat
 
 				break;
 			}
@@ -333,15 +343,13 @@ DWORD WINAPI client_packet(LPVOID lpParam)
 
 				gReplicaManager.GetReferencedReplicaList(gReplicaList);
 
-				FOR_EACH_IN_TEAM(s, OUR_TEAM) { // Below are actions that were supposed to be done when hiring mercs through AIM
+				FOR_EACH_IN_TEAM(s, OUR_TEAM) { // FIXME: Below are actions that were supposed to be done when hiring mercs through AIM - this should only go in pair with HireRandomMercs()
 					gfAtLeastOneMercWasHired = true; // Ugly, but should handle the case when the server doesn't have any characters yet on client connection
 					AddStrategicEvent(EVENT_DELAYED_HIRING_OF_MERC, (STARTING_TIME + FIRST_ARRIVAL_DELAY) / NUM_SEC_IN_MIN, s->ubID); // Place to the helicopter
 				}
 
 				// Update merc list in the left panel to show replicated characters
-				fDrawCharacterList = true;
-				fTeamPanelDirty = true;
-				ReBuildCharactersList();
+				UpdateTeamPanel();
 
 				break;
 			case ID_USER_PACKET_MESSAGE:
@@ -359,6 +367,14 @@ DWORD WINAPI client_packet(LPVOID lpParam)
 				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_USER_PACKET_START");
 
 				gStarted = TRUE;
+
+				break;
+			}
+			case ID_USER_PACKET_TEAM_PANEL_DIRTY:
+			{
+				//ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"ID_USER_PACKET_TEAM_PANEL_DIRTY");
+
+				UpdateTeamPanel();
 
 				break;
 			}

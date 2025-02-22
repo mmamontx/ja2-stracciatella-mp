@@ -290,13 +290,23 @@ void InitNewGame()
 
 			CreateThread(NULL, 0, replicamgr, NULL, 0, NULL);
 
-			gNetworkOptions.peer->Startup(MAX_NUM_CLIENTS, &SocketDescriptor(gNetworkOptions.port, 0), 1);
+			gNetworkOptions.peer->Startup(MAX_NUM_PLAYERS - 1, &SocketDescriptor(gNetworkOptions.port, 0), 1);
 			gNetworkOptions.peer->AttachPlugin(&gReplicaManager);
 			gReplicaManager.SetNetworkIDManager(&gNetworkIdManager);
-			gNetworkOptions.peer->SetMaximumIncomingConnections(MAX_NUM_CLIENTS);
+			gNetworkOptions.peer->SetMaximumIncomingConnections(MAX_NUM_PLAYERS - 1);
+
+			gPlayers[0].guid = gNetworkOptions.peer->GetMyGUID();
+			gPlayers[0].name = gNetworkOptions.name.c_str();
+			gPlayers[0].ready = gReady;
+
+			for (int i = 1; i < MAX_NUM_PLAYERS; i++)
+				gPlayers[i].guid = UNASSIGNED_RAKNET_GUID;
 
 			for (int i = 0; i < TOTAL_SOLDIERS; i++)
 				gReplicaManager.Reference(&(Menptr[i]));
+
+			for (int i = 0; i < MAX_NUM_PLAYERS; i++)
+				gReplicaManager.Reference(&(gPlayers[i]));
 		}
 		else
 		{

@@ -86,13 +86,18 @@
 using namespace RakNet;
 
 #define NUM_MP_BUTTONS 2
-#define MP_BTN_Y (162 + 106)
 
-#define PLAYER_X 12
-#define READY_X  124
+#define MP_BTN_Y            (162 + 106 - 2)
+#define MP_TEXT_Y           (MP_BTN_Y + 18)
+
+#define MP_BTN_PLAYER_X     12
+#define MP_BTN_READY_X      93
+
+#define MP_BTN_PLAYER_WIDTH 75
+#define MP_BTN_READY_WIDTH  89
 
 BUTTON_PICS *giMapMPButtonImage[NUM_MP_BUTTONS];
-INT gMapMPButtonsX[NUM_MP_BUTTONS] = {PLAYER_X, READY_X};
+INT gMapMPButtonsX[NUM_MP_BUTTONS] = {MP_BTN_PLAYER_X, MP_BTN_READY_X};
 GUIButtonRef giMapMPButton[NUM_MP_BUTTONS];
 
 #define MAX_SORT_METHODS					6
@@ -1227,6 +1232,46 @@ static void LoadCharacters(void)
 
 static void EnableDisableTeamListRegionsAndHelpText(void);
 
+static void DisplayPlayerList()
+{
+	int i;
+	static BOOLEAN prev_ready[MAX_NUM_PLAYERS] = { 0 };
+
+	if ((IS_CLIENT) && (!IS_VALID_CLIENT)) // If we are client and not yet connected - skip this to prevent messing with uninitialized gReplicaList
+		return;
+
+	// Redraw ready text if it has been updated (fixes background artifacts)
+	FOR_EACH_PLAYER(i)
+		if (prev_ready[i] != (IS_VALID_CLIENT ? ((PLAYER*)gReplicaList[TOTAL_SOLDIERS + i])->ready : gPlayers[i].ready)) {
+			UpdateTeamPanel();
+			break;
+		}
+
+	SetFontDestBuffer(guiSAVEBUFFER);
+
+	SetFont(MAP_SCREEN_FONT);
+	SetFontBackground(FONT_BLACK);
+
+	UINT16 x = NAME_X + 1;
+
+	UINT8 line = 0;
+	FOR_EACH_PLAYER(i) {
+		prev_ready[i] = IS_VALID_CLIENT ? ((PLAYER*)gReplicaList[REPLICA_PLAYER_INDEX + i])->ready : gPlayers[i].ready;
+
+		if ((IS_VALID_CLIENT ? ((PLAYER*)gReplicaList[REPLICA_PLAYER_INDEX + i])->guid : gPlayers[i].guid) == UNASSIGNED_RAKNET_GUID)
+			continue;
+
+		SetFontForeground(FONT_YELLOW);
+		DrawStringCentered((IS_VALID_CLIENT ? ((PLAYER*)gReplicaList[REPLICA_PLAYER_INDEX + i])->name.C_String() : gPlayers[i].name.C_String()), x, MP_TEXT_Y + line * (Y_SIZE + Y_OFFSET), MP_BTN_PLAYER_WIDTH, Y_SIZE, MAP_SCREEN_FONT);
+		SetFontForeground((IS_VALID_CLIENT ? ((PLAYER*)gReplicaList[REPLICA_PLAYER_INDEX + i])->ready : gPlayers[i].ready) ? FONT_GREEN : FONT_RED);
+		DrawStringCentered((IS_VALID_CLIENT ? ((PLAYER*)gReplicaList[REPLICA_PLAYER_INDEX + i])->ready : gPlayers[i].ready) ? "READY" : "NOT READY", x + MP_BTN_PLAYER_WIDTH + 6, MP_TEXT_Y + line * (Y_SIZE + Y_OFFSET), MP_BTN_READY_WIDTH, Y_SIZE, MAP_SCREEN_FONT);
+
+		line++;
+	}
+
+	SetFontDestBuffer(FRAME_BUFFER);
+}
+
 
 static void DisplayCharacterList(void)
 {
@@ -1835,6 +1880,8 @@ ScreenID MapScreenHandle(void)
 
 			fDrawCharacterList = FALSE;
 		}
+
+		DisplayPlayerList();
 	}
 
 
@@ -5045,6 +5092,7 @@ static void RenderTeamRegionBackground()
 		BltVideoObject(guiSAVEBUFFER, guiCHARLIST, 0, PLAYER_INFO_X, PLAYER_INFO_Y);
 		HandleHighLightingOfLinesInTeamPanel();
 		DisplayCharacterList();
+		DisplayPlayerList();
 		DisplayIconsForMercsAsleep();
 	}
 	else
@@ -6151,7 +6199,8 @@ void HandlePreloadOfMapGraphics(void)
 {
 	guiSleepIcon                = AddVideoObjectFromFile(INTERFACEDIR "/sleepicon.sti");
 	guiCHARINFO                 = AddVideoObjectFromFile(INTERFACEDIR "/charinfo.sti");
-	guiCHARLIST                 = AddVideoObjectFromFile(INTERFACEDIR "/newgoldpiece3.sti");
+	//guiCHARLIST                 = AddVideoObjectFromFile(INTERFACEDIR "/newgoldpiece3.sti");
+	guiCHARLIST                 = AddVideoObjectFromFile(INTERFACEDIR "/newgoldpiece3mp.sti"); // A custom panel that includes the list of players
 
 	guiMAPINV                   = AddVideoObjectFromFile(INTERFACEDIR "/mapinv.sti");
 
@@ -6435,22 +6484,11 @@ void MPReadyButtonCallback(GUI_BUTTON* btn, INT32 reason)
 				struct USER_PACKET_MESSAGE up_broadcast;
 				char str[256];
 
+				gPlayers[0].ready = gReady;
+
 				// Broadcasting that the server (name) is ready (or not ready)
 				sprintf(str, "%s is %s.", gNetworkOptions.name.c_str(), gReady ? "ready" : "not ready");
 				up_broadcast.id = ID_USER_PACKET_MESSAGE;
-				strcpy(up_broadcast.message, str);
-				gNetworkOptions.peer->Send((char*)&up_broadcast, sizeof(up_broadcast), MEDIUM_PRIORITY, RELIABLE, 0, UNASSIGNED_RAKNET_GUID, true);
-
-				ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, str); // Duplicating to the server chat
-
-				int total_ready = gReady ? 1 : 0; // 1 more if the server is ready
-
-				for (std::list<struct PLAYER>::iterator it = gPlayers.begin(); it != gPlayers.end(); it++)
-					if (it->ready)
-						total_ready++;
-
-				// Broadcasting the cumulative ready status
-				sprintf(str, "Total ready: %d/%d", total_ready, (int)(gPlayers.size()) + 1); // 1 more for the server
 				strcpy(up_broadcast.message, str);
 				gNetworkOptions.peer->Send((char*)&up_broadcast, sizeof(up_broadcast), MEDIUM_PRIORITY, RELIABLE, 0, UNASSIGNED_RAKNET_GUID, true);
 
