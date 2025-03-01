@@ -81,7 +81,7 @@ Basically, JA2 Stracciatella multiplayer is the same thing as the singleplayer, 
 1. Get the original JA2 and install it. I would suggest to also install the latest patch, however probably this is not required (it is only the data files that JA2 Stracciatella uses - not sure if they are affected by the patches).
 2. Get the custom images and put them into the original game directory (see the details below).
 3. So far there are no releases, so one has to build it on his own to generate the binaries. Clone this repo and build it according to the original JA2S COMPILATION.md file (I use Visual Studio).
-4. First run the original JA2 Laucher to setup the directories pointing to the original game.
+4. First run the original JA2 Stacciatella Laucher to setup the directories pointing to the original game (it somehow creates a local config or setups environment that would also be automatically used by "our" JA2S).
 5. Now you can run your binary directly. I would suggest using windowed mode so you can observe and handle the server and the client at the same time.
 
 ## Etc.
