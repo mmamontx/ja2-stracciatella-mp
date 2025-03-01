@@ -64,7 +64,7 @@ Basically, JA2 Stracciatella multiplayer is the same thing as the singleplayer, 
     - Testing: manual and automated. Enable GitHub CI.
     - Remove RakNet from source code and use it as a binary.
     - Handle connections/disconnections after the game gets started (after the first time compression button click).
-    - Add binary release(s) and installation instructions.
+    - Add binary release(s).
     - Pass merc top left corner speech to the client.
     - Investigate how come ST::string direct assignment (see Soldier_Control.h) causes crashes at random locations (buffer overflow?).
     - Check if the same RPC call from multiple clients gets executed in parallel. If so, find a way to disable it, or implement respective item pointers on the server side for multiple clients: replace gpItemPointerRPC.
@@ -76,10 +76,22 @@ Basically, JA2 Stracciatella multiplayer is the same thing as the singleplayer, 
     - It seems that originally developers considered enabling jumps over the windows and left the corresponding code in place. Try to extend climbing with this ability.
     - Remove the lines that disable women enemies below elite level (see Soldier_Create.cc).
 
+## Compiling
+
+1. Get the original JA2 and install it. I would suggest to also install the latest patch, however probably this is not required (it is only the data files that JA2 Stracciatella uses - not sure if they are affected by the patches).
+2. Get the custom images and put them into the original game directory (see the details below).
+3. So far there are no releases, so one has to build it on his own to generate the binaries. Clone this repo and build it according to the original JA2S COMPILATION.md file (I use Visual Studio).
+4. First run the original JA2 Laucher to setup the directories pointing to the original game.
+5. Now you can run your binary directly. I would suggest using windowed mode so you can observe and handle the server and the client at the same time.
+
+## Etc.
+
 Things worth mentioning and "dark knowledge":
 
-- The modification requires images of buttons from 1.13 MP. They are located under the following path in 1.13: Data/Interface/MPGOLDPIECEBUTTONS.sti
-- So far didn't verify or adapt for resolutions other than 640x480 - recommend using it for now.
+- Custom images to be put inside Data/Interface of the base JA2 directory:
+    - The modification requires images of buttons from 1.13 MP. They are located under the following path in 1.13: https://github.com/1dot13/gamedir/blob/master/Data/Interface/MPGOLDPIECEBUTTONS.sti
+    - It also requires a custom image for the left panel on the strategic screen. For now it can be obtained from here: https://drive.google.com/file/d/1o886bf7AbPi2BnRnvrCQnACXLWaQl19d
+- So far didn't verify or adapt for resolutions other than 640x480 - recommend using it for now. Changing it would probably affect the game init options, and strategic map screens.
 
 Changes compared to the vanilla game (from the player perspective):
 
